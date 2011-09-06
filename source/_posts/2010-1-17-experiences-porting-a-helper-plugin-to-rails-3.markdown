@@ -9,12 +9,6 @@ Today I spent a few minutes porting [truncate_html](http://github.com/hgimenez/t
 
 One of the promises of Rails 3 is that there is an [API for plugin developers](http://www.engineyard.com/blog/2010/rails-and-merb-merge-plugin-api-part-3-of-6/) that will allow you to hook into the right parts of Rails to add the functionality that your plugin provides. This means that you should not be mixing in or monkeypatching Rails core willy-nilly. In fact, it is now expected for you as a plugin developer to figure out how to hook into the right parts of Rails using the new API, as opposed to doing something like the following:
 
-{% codeblock lang:ruby %}
-ActionView::Base.class_eval do
-  include TruncateHtmlHelper
-end
-{% endcodeblock %}
-
 At this stage, there isn't much documentation around what the API actually is. But this shouldn't stop you from investigating and finding out. In this case, cloning the rails repo and using ack pointed me towards [actionpack/lib/action_controller/metal/helpers.rb](http://github.com/rails/rails/blob/master/actionpack/lib/action_controller/metal/helpers.rb#L6-39), where I found all the info I needed to remove the now outdated meta-programmed mixin technique of the dark Rails 2 days. From the docs:
 
 <blockquote><pre>
