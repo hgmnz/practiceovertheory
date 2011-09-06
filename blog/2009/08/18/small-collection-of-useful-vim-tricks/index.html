@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Small collection of useful vim tricks - Practice Above Theory</title>
+  <meta name="author" content="Harold Giménez">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Practice Above Theory" type="application/atom+xml"/>
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">Practice Above Theory</a></h1>
+  
+    <h2>Try until you break it</h2>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:practiceabovetheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry">
+  
+  <header>
+    
+      <h1 class="entry-title">Small Collection of Useful Vim Tricks</h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-18T16:44:42-04:00" pubdate  data-updated="true" >Aug 18<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I&#8217;ve been using vim for the past couple of years. Vim is a cross-platform programmer&#8217;s editor that is highly customizable and has a ton of well known and not-so well known features. As time goes by, I always come across new or better ways of doing things that increase productivity. What&#8217;s most important is to force yourself to start using them so that they become part of your workflow, becoming muscle memory.</p>
+
+<p>Here&#8217;s a small collection of tips that I&#8217;ve picked up along the way:</p>
+
+<h3>Moving around files</h3>
+
+<ul>
+<li><p>I never bought into NERDTree or any of the other explorer plugins. I usually jump around using gf, using Rails.vim&#8217;s <code>:R</code>, <code>:A</code>, etc, or you can open up vim&#8217;s built in explorer using <code>:Ex</code>. <code>:Sex</code> opens it up in a split window.</p></li>
+<li><p>Use vim marks to jump around any number of files. Here&#8217;s a quick <a href="http://www.linux.com/archive/feature/54159">reference</a></p></li>
+<li><p><code>gf</code> will open the filename under the cursor. <code>Rails.vim</code> extends this by being smart about view partials. You can also use <code><C-W>gf</code> to open the file in a new tab.</p></li>
+<li><p>Use ctags. <code>C-]</code> on any method name or attribute to jump to the declaration point (or <code><C-W>-]</code> to open on a new window. Use <code><C-T></code> to come back. The tag stack is maintained. Then, <code>:ta</code> to jump to the tag. I use F5 to rebuild my ctags database:
+<code>map <silent> <F5>:!ctags -R --exclude=.svn --exclude=.git --exclude=log *<CR></code></p></li>
+<li><p>Learn how to use windows and tabs: it can really improve your work flow. I usually have multiple tabs open with different areas of the project. On each tab, I may have up to four windows open. I use tabs when it&#8217;s a different context, for example, a CSS and a view file on one tab, and a controller, cucumber feature and step definitions on another tab, each on its own windows. When working with many windows, it&#8217;s useful to quickly resize them: <code><C-W>_</code> maximizes the viewing area of the active window (for vertical windows, <code><C-W>|</code> does the same). You can come back to equally sized windows with <code><C-W>=</code>. The easiest way for me to move around tabs is using <code>gt</code> and <code>gT</code>. To move around windows, I typically use <code><C-W></code> along with one of h, j, k, l.</p></li>
+</ul>
+
+
+<h3>More efficient editing</h3>
+
+<ul>
+<li><p>Automate simple tasks with macros. <code>q{reg}<your-macro>q</code>. Then invoke it <em>n</em> times with <code>n@{reg}</code>. Learn about <a href="http://vim.wikia.com/wiki/Record_a_recursive_macro">recursive macros</a> to run it until EOF.</p></li>
+<li><p>Use your registers. Yanking (and putting) and recording macros to different registers is most useful. Use <code>:reg</code> to view contents of your registers.</p></li>
+<li><p>Quickly change text surrounded by <em>something</em> using <code>ci</code>. For example, to change a string in double quotes use <code>ci"</code>, or to change parenthesized parameters, use <code>ci(</code>.</p></li>
+<li><p>When working with large number of files, you can run the same command on all buffers/windows/tabs by using <code>:bufdo</code>/<code>:windo</code>/<code>:tabdo</code>. Such a time saver.</p></li>
+<li><p>Learn how to use vim&#8217;s substitute command with regular expressions and the grouping operators \( and \). You can morph a file at will using the matched part of the pattern and \1, \2. Throw <code>i</code> at the end of the command for interactive substitution. Here&#8217;s a <a href="http://www.geocities.com/volontir/">good vim regex guide</a></p></li>
+<li><p>Vim&#8217;s built in autocompletion rocks. Use <code><C-n></code> or <code><C-p></code> in insert mode to activate and move through the options.</p></li>
+<li><p>When moving within a file, <code>f<char></code> moves the cursor forward until the first <code><char></code>. <code>;</code> repeats the action. You can move to the second occurrence of <code><char></code> by using <code>2f<char></code>. <code>F<char></code> does the same, but backwards.</p></li>
+<li><p>Learn the different ways to enter insert mode. The ones I use the most, other than <code>i</code> are</p>
+
+<ul>
+<li><code>a</code> to enter insert mode at the next character (as opposed to i, which enters insert mode before the current character).</li>
+<li><code>A</code> to enter insert mode at the end of the line.</li>
+<li><code>I</code> to enter insert mode at the beginning of the line.</li>
+<li><code>O</code> to create a new line above the current line and enter insert mode.</li>
+<li><code>o</code> to create a new line below the current line and enter insert mode.</li>
+</ul>
+</li>
+<li><p>Block selection is magical. Use it when you want to select a vertical block or column to yank it, delete it, etc. To enter visual block select, do <code><C-q></code>. You can also insert arbitrary text before the block with <code><C-I><type your chars>Esc</code>. For example, this is very useful for inserting the same text on a set of aligned <code><li>s</code>(like adding a class=&#8221;foo&#8221; attribute) or after hash rockets or equal signs on your ruby code - yet another reason to align these properly.</p></li>
+<li><p><code>C-e</code> and <code>C-y</code>, scrolls the buffer without moving the cursor. Make it scroll three lines at a time with:
+<code> nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y></code></p></li>
+<li><p>Use <code>%</code> to jump to the matching open or closing bracket/parenthesis. Use the <a href="http://www.vim.org/scripts/script.php?script_id=39">matchit plugin</a> to have it match more than single characters, for example <code>def</code> matches <code>end</code> in Ruby code, or <code><ul></code> matches <code></ul></code> in HTML.</p></li>
+</ul>
+
+
+<h3>Other miscellanea</h3>
+
+<ul>
+<li><p>For bash style command tab completion, put <code>set wildmode=list:longest</code> on your vimrc. Then tab away when running commands on ex mode.</p></li>
+<li><p>View unprintable characters with <code>:set list</code>. Cancel out with <code>:set nolist</code></p></li>
+<li><p>Analyzing log files with vim is also a win. For example, you may be in a rails app and used <code>Rails.vim</code>&#8217;s <code>:Rlog</code> command. Now you can use the global command to surface up the specific pattern you&#8217;re looking for using <code>:g/{pattern}/p</code>, or you may remove any useless lines with <code>:g/{useless}/d</code>.</p></li>
+<li><p>When pasting something, vim will autoindent which is usually not what you want. Use <code>:set paste</code> before the paste to avoid that.</p></li>
+<li><p>Use <code>gg=G</code> to apply proper indentation to a messy source file. I define 2 space &#8220;tabs&#8221; for all file types by using <code>set tabstop=2 shiftwidth=2 expandtab</code>.</p></li>
+<li><p>Saving and reopening a vim session is easy using <code>:mksession!</code> and <code>:source</code>. I have the following two maps in my vimrc to make this even easier with F2 and F3:
+<code>map <F2> :mksession! ~/vim_session <cr> " Quick write session with F2
+map <F3> :source ~/vim_session <cr>     " And load session with F3</code></p></li>
+<li><p><code>Ctrl-L</code> to redraw the screen (to fix broken syntax highlighting). The following mapping will also remove highlighting after a search: <code>nnoremap <C-L> :nohls<CR><C-L></code>.</p></li>
+<li><p>About those darn backup files infecting your project: Keep them, but on a different location - you may come to a crash, and you&#8217;ll need them. I created a directory called ~/.vim_backups, and vim puts them there. The relevant lines are:
+<code> silent execute '!mkdir -p ~/.vim_backups'
+set backupdir=~/.vim_backups//
+set directory=~/.vim_backups//</code></p></li>
+<li><p>I usually write blog posts in Vim using markdown. I use vim&#8217;s integrated spell checking by setting <code>:set spellang=en_us</code> on my vimrc. To invoke it, use <code>:set spell</code> which will underline misspelled words, and <code>z=</code> brings up suggestions for the misspelled words under the cursor.</p></li>
+<li><p>Word wrapping is sluggish by default. I added <a href="http://github.com/hgimenez/vimfiles/blob/c07ac584cbc477a0619c435df26a590a88c3e5a2/vimrc#L72-122">these lines</a> to my .vimrc which do a few of things: <code><leader>w</code> toggles between wrap and no wrap. It adds a <code>></code> character to new lines, making it obvious that you&#8217;re on a wrapping line. It tries to wrap on word boundaries, and finally, it remaps k and j so that you&#8217;re moving up/down on visual lines, not actual lines.</p></li>
+<li><p>Use <code>set showmatch</code> and <code>set mat=5</code> on your .vimrc to blink matching parenthesis or brackets. Unobstrusive and useful.</p></li>
+</ul>
+
+
+<p>I am sure I&#8217;m missing many, but this is what I use most often. Got any tips worth sharing or even better, improvements to the above?</p>
+
+<h4>Resources</h4>
+
+<p>The following are books, tutorials or articles that I&#8217;ve found useful in learning and improving my vim workflow.</p>
+
+<ul>
+<li><a href="http://vim.runpaint.org/toc/">Vim cookbook</a></li>
+<li><a href="http://www.networkcomputing.com/unixworld/tutorial/009/009.html">The vi/ex editor</a></li>
+<li><a href="http://jerrywang.net/vi/">Vi for smarties</a></li>
+<li><a href="http://jmcpherson.org/editing.html">Efficient editing with vim</a></li>
+<li><a href="http://www.viemu.com/a-why-vi-vim.html">Why, oh WHY, do those #?@! nutheads use vi?</a></li>
+<li><a href="http://www.swaroopch.com/notes/Vim">A byte of vim</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-18T16:44:42-04:00" pubdate  data-updated="true" >Aug 18<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/" data-via="hgimenez" data-counturl="http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+</div>
+
+    
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread"><div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname = 'hgimenez';
+  var disqus_identifier = 'http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/';
+  var disqus_url = 'http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/';
+  //var disqus_developer = 1;
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside role=sidebar>
+  
+    
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgimenez">@hgimenez</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgimenez',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgimenez", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgimenez" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @hgimenez</a>
+  
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - Harold Giménez -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+</body>
+</html>

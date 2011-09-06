@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MySQL unique key - Practice Above Theory</title>
+  <meta name="author" content="Harold Giménez">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://practiceabovetheory.com/blog/2006/08/17/mysql-unique-key/"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Practice Above Theory" type="application/atom+xml"/>
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">Practice Above Theory</a></h1>
+  
+    <h2>Try until you break it</h2>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:practiceabovetheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry">
+  
+  <header>
+    
+      <h1 class="entry-title">MySQL Unique Key</h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-17T15:08:00-04:00" pubdate  data-updated="true" >Aug 17<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>How to avoid table scans in MySQL</h4>
+
+<p>Let&#8217;s start out by showing what the table I&#8217;m referring to looks like:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">describe</span> <span class="n">Readings</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Field</span>          <span class="o">|</span> <span class="k">Type</span>             <span class="o">|</span> <span class="k">Null</span> <span class="o">|</span> <span class="k">Key</span> <span class="o">|</span> <span class="k">Default</span>    <span class="o">|</span> <span class="n">Extra</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">concentratorID</span> <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">unsigned</span>  <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">sensorID</span>       <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="n">unsigned</span> <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">channel</span>        <span class="o">|</span> <span class="nb">char</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">date</span>           <span class="o">|</span> <span class="nb">date</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0000</span><span class="o">-</span><span class="mi">00</span><span class="o">-</span><span class="mi">00</span> <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">time</span>           <span class="o">|</span> <span class="n">time</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>   <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">value</span>          <span class="o">|</span> <span class="n">double</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="k">type</span>           <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>       <span class="o">|</span>      <span class="o">|</span>     <span class="o">|</span>            <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">SWVersion</span>      <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>      <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="mi">8</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'> <span class="n">mysql</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">from</span> <span class="n">Readings</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div><div class='line'> <span class="o">|</span>   <span class="mi">728477</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Basically this table holds data for sensor readings and keeps date/time stamps for them. It contains over 700 thousand rows.
+ Have a look at the query below:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">03</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">0625</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">33</span><span class="p">.</span><span class="mi">85</span> <span class="n">sec</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Over <em>33 Seconds!??</em> Unacceptable. What&#8217;s happening here is that MySQL has to scan the entire table in order to identify and match all of the dates and times in the WHERE clause of the query.</p>
+
+<p>For this application, we know that one sensor reading only occurs once at a given date and time, so we can create a unique key using those columns:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">alter</span> <span class="k">table</span> <span class="n">Readings</span> <span class="k">add</span> <span class="k">UNIQUE</span> <span class="n">report_index</span> <span class="p">(</span><span class="n">sensorID</span><span class="p">,</span> <span class="nb">date</span><span class="p">,</span> <span class="n">time</span><span class="p">);</span>
+</div><div class='line'><span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">602969</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">11</span><span class="p">.</span><span class="mi">91</span> <span class="n">sec</span><span class="p">)</span>
+</div><div class='line'><span class="n">Records</span><span class="p">:</span> <span class="mi">602969</span>  <span class="n">Duplicates</span><span class="p">:</span> <span class="mi">0</span>  <span class="n">Warnings</span><span class="p">:</span> <span class="mi">0</span>
+</div><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">49</span> <span class="o">|</span>          <span class="mi">20</span><span class="p">.</span><span class="mi">75</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'><span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'><span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Ahhhh&#8230; much better: 0.00 seconds people!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-17T15:08:00-04:00" pubdate  data-updated="true" >Aug 17<span>th</span>, 2006</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceabovetheory.com/blog/2006/08/17/mysql-unique-key/" data-via="hgimenez" data-counturl="http://practiceabovetheory.com/blog/2006/08/17/mysql-unique-key/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+</div>
+
+    
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread"><div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname = 'hgimenez';
+  var disqus_identifier = 'http://practiceabovetheory.com/blog/2006/08/17/mysql-unique-key/';
+  var disqus_url = 'http://practiceabovetheory.com/blog/2006/08/17/mysql-unique-key/';
+  //var disqus_developer = 1;
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside role=sidebar>
+  
+    
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgimenez">@hgimenez</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgimenez',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgimenez", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgimenez" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @hgimenez</a>
+  
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - Harold Giménez -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+</body>
+</html>

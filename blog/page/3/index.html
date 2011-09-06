@@ -1,0 +1,675 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Practice Above Theory</title>
+  <meta name="author" content="Harold Giménez">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://practiceabovetheory.com/blog/page/3/index.html"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Practice Above Theory" type="application/atom+xml"/>
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">Practice Above Theory</a></h1>
+  
+    <h2>Try until you break it</h2>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:practiceabovetheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/">Setting Up Httpd as a Proxy for Tomcat</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-09-05T16:57:18-04:00" pubdate  data-updated="true" >Sep 5<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After installing Tomcat, the default port for the http requests it listens to is 8080.</p>
+
+<p>If your server is also running Apache&#8217;s httpd along with Tomcat, this solution makes them happily work together. It takes two steps:</p>
+
+<ol>
+<li>In httpd&#8217;s configuration file (httpd.conf - located in /etc/httpd/conf/httpd.conf on a Fedora Core installation), add the following lines (let&#8217;s assume your hostname is example.com).
+<code>ProxyPass               /       http://example.com:8080/
+ProxyPassReverse        /       http://example.com:8080/</code></li>
+</ol>
+
+
+<p>These lines say &#8220;redirect all trafic from / (on the httpd server) to http://example.com:8080/ (on Tomcat)&#8221;.</p>
+
+<ol>
+<li>Change the following lines to look like these (doing a search for mod_proxy will take you there).
+<code><IfModule mod_proxy.c>
+ProxyRequests Off
+<Proxy *>
+Order allow,deny
+Allow from all
+</Proxy></code></li>
+</ol>
+
+
+<p>I did this a while ago, so if this doesn&#8217;t work for you please let me know ;)</p>
+
+<p>Another way of integrating tomcat and httpd is by using httpd&#8217;s mod_jk. You can easily <a href="http://www.google.com/search?q=tomcat%20httpd%20mod_jk">google it.</a></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/30/tini-urlconnections-and-the-http-protocol/">Tini, URLConnections and the HTTP Protocol</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-30T14:38:12-04:00" pubdate  data-updated="true" >Aug 30<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The folks at Dalsemi have removed many of the classes which would make a .tini binary unnecessarily big. I guess it&#8217;s a feature, but upgrading from version 1.16 to 1.17 was painful because of this.</p>
+
+<p>When creating a URLConnection, you may get a MalformedURLException. The javadocs for the URL class explain this happens when the protocol is unknown. Hmmm, HTTP is unknown? This suggests that the classes that can handle HTTP are missing.</p>
+
+<p>To fix this, add the following classes to your .tini:</p>
+
+<ul>
+<li><code>com.dalsemi.protocol.http.Connection</code></li>
+<li><code>com.dalsemi.protocol.http.HTTPClient</code></li>
+<li><code>com.dalsemi.protocol.BasicClient</code></li>
+<li><code>com.dalsemi.protocol.HeaderManager</code></li>
+<li><code>com.dalsemi.protocol.DefaultFileNameMap</code></li>
+<li><code>com.dalsemi.protocol.http.HTTPOutputStream</code></li>
+</ul>
+
+
+<p>They can all be found in the <code>modules.jar</code> archive which is distributed with the tini1.17 SDK.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/30/http-post-from-java-client/">HTTP POST From Java Client</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-30T12:55:40-04:00" pubdate  data-updated="true" >Aug 30<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>When using the HTTP POST method to send data accross a network, Java offers some ready to use classes that implement much of the mechanical work:</p>
+
+<p>URL: to create the URL object needed to create the connection, the simplest constructor would be that of a String representing that URL (such as http://www.example.com/resource)</p>
+
+<p>URLConnection: use the URL object to get a connection to the remote resource. Use this instance to set parameters such as setDoInput, setDoOutput, setUsesCache and others - have a look at the javadocs for more.</p>
+
+<p>Use the URLConnection to set the <b>content type</b>. Not doing so will give you headaches&#8230;long ones. Here&#8217;s an example</p>
+
+<p><code>conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");</code></p>
+
+<p>Get a DataOutputStream and start sending to that resource.</p>
+
+<p>Get a BufferedReader and start getting a response.</p>
+
+<p>Not setting the content type turned out to be a major bug. The server side of my application is a Java Servlet, and the symptom was basically that the request.getParameter(&#8220;key-name&#8221;) is returned nothing, while the getQueryString() returned everything I sent.</p>
+
+<p>Below is a method that sends data via an HTTP POST, and returns the server&#8217;s response. Note that the method assumes that the &#8220;content&#8221; parameter has already been encoded using the static URLEncoder.encode() method.</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+<span class='line'>26</span>
+<span class='line'>27</span>
+</pre></td><td class='code' width='100%'><pre><code class='java'><div class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">postData</span><span class="o">(</span><span class="n">String</span> <span class="n">target</span><span class="o">,</span> <span class="n">String</span> <span class="n">content</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span><span class="o">{</span>
+</div><div class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;About to post\nURL: &quot;</span><span class="o">+</span><span class="n">target</span><span class="o">+</span> <span class="s">&quot;content: &quot;</span> <span class="o">+</span> <span class="n">content</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">String</span> <span class="n">response</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
+</div><div class='line'>  <span class="n">URL</span> <span class="n">url</span> <span class="o">=</span> <span class="k">new</span> <span class="n">URL</span><span class="o">(</span><span class="n">target</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">URLConnection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="na">openConnection</span><span class="o">();</span>
+</div><div class='line'>  <span class="c1">// Set connection parameters.</span>
+</div><div class='line'>  <span class="n">conn</span><span class="o">.</span><span class="na">setDoInput</span> <span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">conn</span><span class="o">.</span><span class="na">setDoOutput</span> <span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">conn</span><span class="o">.</span><span class="na">setUseCaches</span> <span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</div><div class='line'>  <span class="c1">// Make server believe we are form data...</span>
+</div><div class='line'>  <span class="n">conn</span><span class="o">.</span><span class="na">setRequestProperty</span><span class="o">(</span><span class="s">&quot;Content-Type&quot;</span><span class="o">,</span> <span class="s">&quot;application/x-www-form-urlencoded&quot;</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">DataOutputStream</span> <span class="n">out</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DataOutputStream</span> <span class="o">(</span><span class="n">conn</span><span class="o">.</span><span class="na">getOutputStream</span> <span class="o">());</span>
+</div><div class='line'>  <span class="c1">// Write out the bytes of the content string to the stream.</span>
+</div><div class='line'>  <span class="n">out</span><span class="o">.</span><span class="na">writeBytes</span><span class="o">(</span><span class="n">content</span><span class="o">);</span>
+</div><div class='line'>  <span class="n">out</span><span class="o">.</span><span class="na">flush</span> <span class="o">();</span>
+</div><div class='line'>  <span class="n">out</span><span class="o">.</span><span class="na">close</span> <span class="o">();</span>
+</div><div class='line'>  <span class="c1">// Read response from the input stream.</span>
+</div><div class='line'>  <span class="n">BufferedReader</span> <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BufferedReader</span> <span class="o">(</span><span class="k">new</span> <span class="n">InputStreamReader</span><span class="o">(</span><span class="n">conn</span><span class="o">.</span><span class="na">getInputStream</span> <span class="o">()));</span>
+</div><div class='line'>  <span class="n">String</span> <span class="n">temp</span><span class="o">;</span>
+</div><div class='line'>  <span class="k">while</span> <span class="o">((</span><span class="n">temp</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readLine</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+</div><div class='line'>    <span class="n">response</span> <span class="o">+=</span> <span class="n">temp</span> <span class="o">+</span> <span class="s">&quot;\n&quot;</span><span class="o">;</span>
+</div><div class='line'>   <span class="o">}</span>
+</div><div class='line'>  <span class="n">temp</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</div><div class='line'>  <span class="n">in</span><span class="o">.</span><span class="na">close</span> <span class="o">();</span>
+</div><div class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Server response:\n&#39;&quot;</span> <span class="o">+</span> <span class="n">response</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="o">);</span>
+</div><div class='line'>  <span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+</div><div class='line'><span class="o">}</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/21/squirrelmail-attachment-size-limit-annoyance/">Squirrelmail Attachment Size Limit Annoyance</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-21T12:58:00-04:00" pubdate  data-updated="true" >Aug 21<span>st</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>If you get the message &#8220;Documents contains no data&#8221; (message depends on browser) in a Squirrelmail deployment, it is probably Apache&#8217;s configuration.</p>
+
+<p>To fix this, comment out the line containing <code>LimitRequestBody</code> in <code>/etc/httpd/conf.d/php.conf</code> and it should work after restarting httpd.</p>
+
+<p>Also, check for <code>memory_limit</code>, <code>post_max_size</code>, and <code>upload_max_filesize</code> in <code>/etc/php.ini</code></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/21/run-commands-on-boot-for-fedora-core/">Run Commands on Boot for Fedora Core</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-21T08:36:00-04:00" pubdate  data-updated="true" >Aug 21<span>st</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>To easily run commands on boot, without going through the Sys V init scripts, add them to the following file:</p>
+
+<p><code>/etc/rc.d/rc.local</code></p>
+
+<p>Commands in this file will execute after all the other init scripts.</p>
+
+<p>On the other hand, here is how to start services on boot using Sys V init scripts. If we want to start the apache web server for run-levels 3 and 5:</p>
+
+<p><code>/sbin/chkconfig --level 35 httpd on</code></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/21/installing-vanilla-tomcat-on-fedora-core/">Installing Vanilla Tomcat on Fedora Core</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-21T07:51:00-04:00" pubdate  data-updated="true" >Aug 21<span>st</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><ol>
+<li><em>Install Sun JDK</em>
+This is quite straight forward if you follow the instructions at the unofficial fedora Faq, steps 1 through 11, located at http://www.fedorafaq.org/#java</li>
+<li><em>Compile and Install Tomcat 5</em>
+This is based on the instructions provided by the Apache foundation located <a href="http://tomcat.apache.org/tomcat-5.5-doc/setup.html">here</a>.
+
+<ol>
+<li><em>Download the tarball</em>: I downloaded the Core version 5.5.16 from <a href="http://apache.mirrormax.net/tomcat/tomcat-5/v5.5.16/bin/apache-tomcat-5.5.16.tar.gz">here</a>.</li>
+<li><em>Copy the tarball to /opt</em>: I used /opt to install it, but you can choose any other directory. /opt makes a lot of sense though!</li>
+<li><em>Untar it</em>  with the command
+<code>gunzip -c apache-tomcat-5.5.16.tar.gz |tar -xf -</code></li>
+</ol>
+</li>
+</ol>
+
+
+<p>The folder created is what Apache calls &#8220;CATALINA_HOME&#8221;, so in this case it is<code>/opt/apache-tomcat-5.5.16</code>
+1. Type the following commands to <em>build it</em>:</p>
+
+<p><highglight>$ cd /opt/apache-tomcat-5.5.16/bin/
+$ tar xvfs jsvc.tar.gz/r cd jsvc-src/
+$ chmod +x *
+$ ./configure &#8211;with-java=/usr/lib/jvm/jre-1.5.0-sun/
+$ make/r cp jsvc ..</highlight></p>
+
+<ol>
+<li><em>Smile</em></li>
+</ol>
+
+
+<p>Now you can start it by running <code>startup.sh</code> from the <code>/bin</code> directory (relative to <em>CATALINA_HOME</em>), stop it with <code>shutdown.sh</code>, dump your application into <code>webapps</code>, etc, etc, etc.</p>
+
+<p>By the way, you can have your entire system using your fresh installation of the JDK by using &#8220;alternatives&#8221;</p>
+
+<p><code>su -
+alternatives --config java</p>
+
+<p> There are 2 programs which provide 'java'.</p>
+
+<h2> Selection    Command</h2>
+
+<p> 1           /usr/lib/jvm/jre-1.4.2-gcj/bin/java
+ *+ 2           /usr/lib/jvm/jre-1.5.0-sun/bin/java</p>
+
+<p> Enter to keep the current selection[+], or type selection number:</code></p>
+
+<p>At this point, type <code>2</code>, then <code>enter</code>.</p>
+
+<p>You can make it start on boot by doing <a href="http://labnotesh.wordpress.com/2006/08/21/run-commands-on-boot-for-fedora-core/">this</a>.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/08/17/mysql-unique-key/">MySQL Unique Key</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-17T15:08:00-04:00" pubdate  data-updated="true" >Aug 17<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>How to avoid table scans in MySQL</h4>
+
+<p>Let&#8217;s start out by showing what the table I&#8217;m referring to looks like:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">describe</span> <span class="n">Readings</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Field</span>          <span class="o">|</span> <span class="k">Type</span>             <span class="o">|</span> <span class="k">Null</span> <span class="o">|</span> <span class="k">Key</span> <span class="o">|</span> <span class="k">Default</span>    <span class="o">|</span> <span class="n">Extra</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">concentratorID</span> <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">unsigned</span>  <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">sensorID</span>       <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="n">unsigned</span> <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">channel</span>        <span class="o">|</span> <span class="nb">char</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">date</span>           <span class="o">|</span> <span class="nb">date</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0000</span><span class="o">-</span><span class="mi">00</span><span class="o">-</span><span class="mi">00</span> <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">time</span>           <span class="o">|</span> <span class="n">time</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>   <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">value</span>          <span class="o">|</span> <span class="n">double</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="k">type</span>           <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>       <span class="o">|</span>      <span class="o">|</span>     <span class="o">|</span>            <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">SWVersion</span>      <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>      <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
+</div><div class='line'> <span class="mi">8</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'> <span class="n">mysql</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">from</span> <span class="n">Readings</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div><div class='line'> <span class="o">|</span>   <span class="mi">728477</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Basically this table holds data for sensor readings and keeps date/time stamps for them. It contains over 700 thousand rows.
+ Have a look at the query below:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">03</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">0625</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">33</span><span class="p">.</span><span class="mi">85</span> <span class="n">sec</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Over <em>33 Seconds!??</em> Unacceptable. What&#8217;s happening here is that MySQL has to scan the entire table in order to identify and match all of the dates and times in the WHERE clause of the query.</p>
+
+<p>For this application, we know that one sensor reading only occurs once at a given date and time, so we can create a unique key using those columns:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">alter</span> <span class="k">table</span> <span class="n">Readings</span> <span class="k">add</span> <span class="k">UNIQUE</span> <span class="n">report_index</span> <span class="p">(</span><span class="n">sensorID</span><span class="p">,</span> <span class="nb">date</span><span class="p">,</span> <span class="n">time</span><span class="p">);</span>
+</div><div class='line'><span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">602969</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">11</span><span class="p">.</span><span class="mi">91</span> <span class="n">sec</span><span class="p">)</span>
+</div><div class='line'><span class="n">Records</span><span class="p">:</span> <span class="mi">602969</span>  <span class="n">Duplicates</span><span class="p">:</span> <span class="mi">0</span>  <span class="n">Warnings</span><span class="p">:</span> <span class="mi">0</span>
+</div><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
+</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">49</span> <span class="o">|</span>          <span class="mi">20</span><span class="p">.</span><span class="mi">75</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
+</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
+</div><div class='line'><span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
+</div><div class='line'><span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Ahhhh&#8230; much better: 0.00 seconds people!</p>
+</div>
+  
+  
+
+
+  </article>
+
+<nav role="pagination">
+  <div>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
+</nav>
+
+<script type="text/javascript">
+    var disqus_shortname = 'hgimenez';
+    (function () {
+      var s = document.createElement('script'); s.async = true;
+      s.type = 'text/javascript';
+      s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+</div>
+<aside role=sidebar>
+  
+    
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgimenez">@hgimenez</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgimenez',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgimenez", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgimenez" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @hgimenez</a>
+  
+</section>
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - Harold Giménez -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+</body>
+</html>

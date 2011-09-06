@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Setting up httpd as a proxy for Tomcat - Practice Above Theory</title>
+  <meta name="author" content="Harold Giménez">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://practiceabovetheory.com/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Practice Above Theory" type="application/atom+xml"/>
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">Practice Above Theory</a></h1>
+  
+    <h2>Try until you break it</h2>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:practiceabovetheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry">
+  
+  <header>
+    
+      <h1 class="entry-title">Setting Up Httpd as a Proxy for Tomcat</h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-09-05T16:57:18-04:00" pubdate  data-updated="true" >Sep 5<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+<div class="entry-content"><p>After installing Tomcat, the default port for the http requests it listens to is 8080.</p>
+
+<p>If your server is also running Apache&#8217;s httpd along with Tomcat, this solution makes them happily work together. It takes two steps:</p>
+
+<ol>
+<li>In httpd&#8217;s configuration file (httpd.conf - located in /etc/httpd/conf/httpd.conf on a Fedora Core installation), add the following lines (let&#8217;s assume your hostname is example.com).
+<code>ProxyPass               /       http://example.com:8080/
+ProxyPassReverse        /       http://example.com:8080/</code></li>
+</ol>
+
+
+<p>These lines say &#8220;redirect all trafic from / (on the httpd server) to http://example.com:8080/ (on Tomcat)&#8221;.</p>
+
+<ol>
+<li>Change the following lines to look like these (doing a search for mod_proxy will take you there).
+<code><IfModule mod_proxy.c>
+ProxyRequests Off
+<Proxy *>
+Order allow,deny
+Allow from all
+</Proxy></code></li>
+</ol>
+
+
+<p>I did this a while ago, so if this doesn&#8217;t work for you please let me know ;)</p>
+
+<p>Another way of integrating tomcat and httpd is by using httpd&#8217;s mod_jk. You can easily <a href="http://www.google.com/search?q=tomcat%20httpd%20mod_jk">google it.</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-09-05T16:57:18-04:00" pubdate  data-updated="true" >Sep 5<span>th</span>, 2006</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceabovetheory.com/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/" data-via="hgimenez" data-counturl="http://practiceabovetheory.com/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+</div>
+
+    
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread"><div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname = 'hgimenez';
+  var disqus_identifier = 'http://practiceabovetheory.com/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/';
+  var disqus_url = 'http://practiceabovetheory.com/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/';
+  //var disqus_developer = 1;
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside role=sidebar>
+  
+    
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgimenez">@hgimenez</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgimenez',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgimenez", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgimenez" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @hgimenez</a>
+  
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - Harold Giménez -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+</body>
+</html>

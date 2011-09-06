@@ -1,0 +1,1447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>Practice Above Theory</title>
+  <link href="http://practiceabovetheory.com/atom.xml" rel="self"/>
+  <link href="http://practiceabovetheory.com/"/>
+  <updated>2011-09-06T15:21:17-04:00</updated>
+  <id>http://practiceabovetheory.com/</id>
+  <author>
+    <name>Harold Giménez</name>
+    
+      <email>harold.gimenez@gmail.com</email>
+    
+  </author>
+
+  
+  <entry>
+    <title>Machine Learning - Who's the Boss?</title>
+    <link href="http://practiceabovetheory.com/blog/2010/02/15/machine-learning-who-s-the-boss/"/>
+    <updated>2010-02-15T15:48:42-05:00</updated>
+    <id>http://practiceabovetheory.com/blog/2010/02/15/machine-learning-who-s-the-boss</id>
+    <content type="html">&lt;p&gt;In the Machine Learning field, there are two types of algorithms that can be applied to a set of data to solve different kinds of problems: &lt;em&gt;Supervised&lt;/em&gt; and &lt;em&gt;Unsupervised&lt;/em&gt; learning algorithms. Both of these have in common that they aim to extract information or gain knowledge from the raw data that would otherwise be very hard and unpractical to do. This is because we live in very dynamic environments with changing parameters and vast amounts of data being gathered. This data hides important patterns and correlations that are sometimes impossible to deduce manually, and where computing power and smart algorithms excel. They are also heavily dependent on the quantity and quality of the input data, and as such, evolve in their output and accuracy as more and better input data becomes available.&lt;/p&gt;
+
+&lt;p&gt;In this article we will walk through what constitues Supervised and Unsupervised Learning. An overview of the language and terms is presented, as well as the general workflow used for machine learning tasks.&lt;/p&gt;
+
+&lt;h3&gt;Supervised Learning&lt;/h3&gt;
+
+&lt;p&gt;In supervised machine learning we have a set of data points or &lt;em&gt;observations&lt;/em&gt; for which we know the desired output, class, &lt;em&gt;target variable&lt;/em&gt;  or &lt;em&gt;outcome&lt;/em&gt;. The outcome may take one of many values called &lt;em&gt;classes&lt;/em&gt; or &lt;em&gt;labels&lt;/em&gt;. A classic example is that given a few thousand emails for which we know whether they are spam or ham (their labels), the idea is to create a model that is able to deduce whether new, unsean emails are spam or not. In other words, we are creating a mapping function where the inputs are the email's sender, subject, date, time, body, attachments and other attributes, and the output is a prediction as to whether the email is spam or ham. The &lt;em&gt;target variable&lt;/em&gt; is in fact providing some level of &lt;em&gt;supervision&lt;/em&gt; in that it is used by the learning algorithm to adjust parameters or make decisions that will allow it to predict labels for new data. Finally of note, when the algorithm is predicting labels of observations we call it a &lt;em&gt;classifier&lt;/em&gt;. Some classifiers are also capable of providing a probability of a data point belonging to class in which case it is often referred to a probabilistic model or a regression - not to be confused with a &lt;a href=&quot;http://en.wikipedia.org/wiki/Regression_analysis#Regression_models&quot;&gt;statistical regression model&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Lets take this as an example in supervised learning algorithms. Given the following dataset, we want to predict on new emails whether they are spam or not. In the dataset below, note that the last column, &lt;code&gt;Spam?&lt;/code&gt;, contains the labels for the examples.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;td&gt;&lt;b&gt;Subject&lt;/b&gt;&lt;/td&gt; &lt;td&gt;&lt;b&gt;Date&lt;/b&gt;&lt;/td&gt; &lt;td&gt;&lt;b&gt;Time&lt;/b&gt;&lt;/td&gt; &lt;td&gt;&lt;b&gt;Body&lt;/b&gt;&lt;/td&gt; &lt;td&gt;&lt;b&gt;Spam?&lt;/b&gt;&lt;/td&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt; &lt;td&gt;I has the viagra for you&lt;/td&gt; &lt;td&gt;03/12/1992&lt;/td&gt; &lt;td&gt;12:23 pm&lt;/td&gt; &lt;td&gt;Hi! I noticed that you are a software engineer &lt;br/&gt;so here's the pleasure you were looking for...&lt;/td&gt; &lt;td&gt;Yes&lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt; &lt;td&gt;Important business&lt;/td&gt; &lt;td&gt;05/29/1995&lt;/td&gt; &lt;td&gt;01:24 pm&lt;/td&gt; &lt;td&gt;Give me your account number and you'll be rich. &lt;/ br&gt; I'm totally serial&lt;/td&gt; &lt;td&gt;Yes&lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt; &lt;td&gt;Business Plan&lt;/td&gt; &lt;td&gt;05/23/1996&lt;/td&gt; &lt;td&gt;07:19 pm&lt;/td&gt; &lt;td&gt;As per our conversation, here's the business plan for our new venture &lt;/ br&gt; Warm regards...&lt;/td&gt; &lt;td&gt;No&lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt; &lt;td&gt;Job Opportunity&lt;/td&gt; &lt;td&gt;02/29/1998&lt;/td&gt; &lt;td&gt;08:19 am&lt;/td&gt; &lt;td&gt;Hi &lt;name&gt;!&lt;/ br&gt;I am trying to fill a position for a PHP ... &lt;/td&gt; &lt;td&gt;Yes&lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt; &lt;td colspan=&quot;5&quot;&gt; [A few thousand rows ommitted] &lt;/td&gt; &lt;/tr&gt;
+    &lt;tr&gt; &lt;td&gt;Call mom&lt;/td&gt; &lt;td&gt;05/23/2000&lt;/td&gt; &lt;td&gt;02:14 pm&lt;/td&gt; &lt;td&gt;Call mom. She's been trying to reach you for a few days now&lt;/td&gt; &lt;td&gt;No&lt;/td&gt; &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;A common workflow approach, and one that I've taken for supervised learning analysis is shown in the diagram below:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.skitch.com/20100213-djhg1re7gaj83ngygcqgj1jm2d.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;The process is:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;em&gt;Scale and prepare training data&lt;/em&gt;: First we build input vectors that are appropriate for feeding into our supervised learning algorithm.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Create a training set and a validation set&lt;/em&gt; by randomly splitting the universe of data. The training set is the data that the classifier uses to learn how to classify the data, whereas the validation set is used to feed the already trained model in order to get an error rate (or other measures and techniques) that can help us identify the classifier's performance and accuracy. Typically you will use more training data (maybe 80% of the entire universe) than validation data. Note that there is also &lt;a href=&quot;http://en.wikipedia.org/wiki/Cross-validation_(statistics&quot;&gt;cross-validation&lt;/a&gt;), but that is beyond the scope of this article.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Train the model&lt;/em&gt;. We take the training data and we feed it into the algorithm. The end result is a model that has learned (hopefully) how to predict our outcome given new unknown data.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Validation and tuning&lt;/em&gt;: After we've created a model, we want to test its accuracy. It is critical to do this on data that the model has not seen yet - otherwise you are cheating. This is why on step 2 we separated out a subset of the data that was not used for training. We are indeed testing our model's generalization capabilities. It is very easy to learn every single combination of input vectors and their mappings to the output as observed on the training data, and we can achieve a very low error in doing that, but how does the very same rules or mappings perform on new data that may have different input to output mappings? If the classification error of the validation set is very big compared to the training set's, then we have to go back and adjust model parameters. The model will have essentially memorized the answers seen in the training data, loosing its generalization capabilities. This is called &lt;a href=&quot;http://en.wikipedia.org/wiki/Overfitting&quot;&gt;&lt;em&gt;overfitting&lt;/em&gt;&lt;/a&gt;, and there are various techniques for overcoming it.&lt;/li&gt;
+&lt;li&gt;Validate the model's performance. There are numerous techniques for achieving this, such as &lt;a href=&quot;http://en.wikipedia.org/wiki/Receiver_operating_characteristic&quot;&gt;ROC analysis&lt;/a&gt; and many others. The model's accuracy can be improved by changing its structure or the underlying training data. If the model's performance is not satisfactory, change model parameters, inputs and or scaling, go to step 3 and try again.&lt;/li&gt;
+&lt;li&gt;Use the model to classify new data. In production. Profit!&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h3&gt;Unsupervised Learning&lt;/h3&gt;
+
+&lt;p&gt;The kinds of problems that are suited for unsupervised algorithms may seem similar, but are very different to supervised learners. Instead of trying to predict a set of known classes, we are trying to identify the patterns inherent in the data that separate like observations in one way or another. Viewed from 20 thousand feet, the main difference is that we are not providing a target variable like we did in supervised learning.&lt;/p&gt;
+
+&lt;p&gt;This marks a fundamental difference in how both types of algorithms operate. On one hand, we have supervised algorithms which try to minimize the error in classifying observations, while unsupervised learning algorithms don't have such luxuries because there are no outcomes or labels. Unsupervised algorithms try to create clusters of data that are inherently similar. In some cases we don't necessarily know what makes them similar, but the algorithms are capable of finding these relationships between data points and group them in significant ways. While supervised algorithms aim to minimize the classification error, unsupervised algorithms aim to create groups or subsets of the data where data points belonging to a cluster are as similar to each other as possible, while making the difference between the clusters as high as possible.&lt;/p&gt;
+
+&lt;p&gt;Another main difference is that in a clustering problem, the concept of &quot;Training Set&quot; does not apply in the same way as with supervised learners. Typically we have a dataset that is used to find the relationships in the data that buckets them in different clusters. We could of course apply the same clustering model to new data, but unless it is too unpractical to do so (perhaps for performance reasons), we will most certainly want to rerun the algorithm on new data as it will typically find new relationships within the data that may surface up given the new observations.&lt;/p&gt;
+
+&lt;p&gt;As a simple example, you could imagine clustering customers by their demographics. The learning algorithm may help you discover distinct groups of customers by region, age ranges, gender and other attributes in such way that we can develop targeted marketing programs. Another example may be to cluster patients by their chronic diseases and comorbidities in such a way that targeted interventions can be developed to help manage their diseases and improve their lifestyles.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.skitch.com/20100215-qm59id21fs2kr2m1r2sc5umwgw.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;For unsupervised learning, the process is:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;em&gt;Scale and prepare raw data&lt;/em&gt;: As with supervised learners, this step entails selecting features to feed into our algorithm, and scaling them to build a suitable data set.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Build model&lt;/em&gt;: We run the unsupervised algorithm on the scaled dataset to get groups of like observations.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Validate&lt;/em&gt;: After clustering the data, we need to verify whether it cleanly separated the data in significant ways. This includes calculating a set of statistics on the resulting clusters (such as the within group sum of squares), as well as analysis based on domain knowledge, where you may measure how certain attributes behave when aggregated by the clusters.&lt;/li&gt;
+&lt;li&gt;Once we are satisfied with the clusters created there is no need to run the model with new data (although you can). Profit!&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h4&gt;Step zero&lt;/h4&gt;
+
+&lt;p&gt;A common step that I have not outlined above and should be performed when working on any such problem is to get a strong understanding for the characteristics of the data. This should be a combination of visual analysis (for which I prefer the excellent &lt;a href=&quot;http://had.co.nz/ggplot2/&quot;&gt;ggplot2&lt;/a&gt; library) as well as some basic descriptive statistics and data profiling such as quartiles, means, standard deviation, frequencies and others. &lt;a href=&quot;http://www.r-project.org&quot;&gt;R&lt;/a&gt;'s &lt;a href=&quot;http://cran.r-project.org/web/packages/Hmisc/index.html&quot;&gt;Hmisc&lt;/a&gt; package has a great function for this purpose called &lt;a href=&quot;http://lib.stat.cmu.edu/S/Harrell/help/Hmisc/html/describe.html&quot;&gt;&lt;code&gt;describe&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I am convinced that not performing this step is a non starter for any datamining project. It will allow you to identify missing values, general distributions of data, early outlier detection, among many other characteristics that drive the selection of attributes for your models.&lt;/p&gt;
+
+&lt;h3&gt;Wrapping up&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://televixen.files.wordpress.com/2009/02/wtb.jpg&quot;&gt;&lt;img src=&quot;http://televixen.files.wordpress.com/2009/02/wtb.jpg&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;This is certainly quite a bit of info, especially if these terms are new to you. To summarize:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;b&gt;Supervised Learning&lt;/b&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;b&gt;Unsupervised Learning&lt;/b&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;b&gt;Objective&lt;/b&gt;&lt;/td&gt;
+      &lt;td&gt;Classify or predict a class.&lt;/td&gt;
+      &lt;td&gt;Find patterns inherent to the data, creating cluster of like data points. &lt;a href=&quot;http://en.wikipedia.org/wiki/Dimension_reduction&quot;&gt;Dimensionality Reduction&lt;/a&gt;.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;b&gt;Example Implementations&lt;/b&gt;&lt;/td&gt;
+      &lt;td&gt;Neural Networks (&lt;a href=&quot;http://en.wikipedia.org/wiki/Multilayer_perceptron&quot;&gt;Multilayer Perceptrons&lt;/a&gt;, &lt;a href=&quot;http://en.wikipedia.org/wiki/Radial_basis_function_network&quot;&gt;RBF Networks&lt;/a&gt; and others, &lt;a href=&quot;http://en.wikipedia.org/wiki/Support_vector_machine&quot;&gt;Support Vector Machines&lt;/a&gt;, Decision Trees (&lt;a href=&quot;http://en.wikipedia.org/wiki/ID3_algorithm&quot;&gt;ID3&lt;/a&gt;, &lt;a href=&quot;http://en.wikipedia.org/wiki/C4.5_algorithm&quot;&gt;C4.5&lt;/a&gt; and others), &lt;a href=&quot;http://en.wikipedia.org/wiki/Naive_Bayes_classifier&quot;&gt;Naive Bayes Classifiers&lt;/a&gt;...&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/K-means_clustering&quot;&gt;K-Means&lt;/a&gt; (and variants), &lt;a href=&quot;http://en.wikipedia.org/wiki/Cluster_analysis#Hierarchical_clustering&quot;&gt;Hierarchical Clustering&lt;/a&gt;, &lt;a href=&quot;http://en.wikipedia.org/wiki/Self-organizing_map&quot;&gt;Kohonen Self Organizing Maps&lt;/a&gt;...&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;b&gt;Who's the Boss?&lt;/b&gt;&lt;/td&gt;
+      &lt;td&gt;The target variable or outcome.&lt;/td&gt;
+      &lt;td&gt;The relationships inherent to the data.&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;Hopefuly this article shows the main differences between Unsupervised and Supervised Learning. On followup posts we will dig into some of the specific implementations of these algorithms with examples in &lt;a href=&quot;http://www.r-project.org&quot;&gt;R&lt;/a&gt; and &lt;a href=&quot;http://ruby-lang.org&quot;&gt;Ruby&lt;/a&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Experiences porting a helper plugin to Rails 3</title>
+    <link href="http://practiceabovetheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3/"/>
+    <updated>2010-01-17T19:55:45-05:00</updated>
+    <id>http://practiceabovetheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3</id>
+    <content type="html">&lt;p&gt;Today I spent a few minutes porting &lt;a href=&quot;http://github.com/hgimenez/truncate_html&quot;&gt;truncate_html&lt;/a&gt; to Rails 3. This gem/plugin provides you with the &lt;code&gt;truncate_html()&lt;/code&gt; helper method, which is very similar to rails' &lt;code&gt;truncate()&lt;/code&gt;, but it takes care of closing open html tags and other peculiarities of truncating HTML. It works by using regular expressions and does not have any dependencies. I use this gem on this blog, as well as on the &lt;a href=&quot;http://bostonrb.org&quot;&gt;bostonrb.org&lt;/a&gt; site. Some other people have found it to be &lt;a href=&quot;http://twitter.com/dolzenko/status/6428360551&quot;&gt;useful&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;One of the promises of Rails 3 is that there is an &lt;a href=&quot;http://www.engineyard.com/blog/2010/rails-and-merb-merge-plugin-api-part-3-of-6/&quot;&gt;API for plugin developers&lt;/a&gt; that will allow you to hook into the right parts of Rails to add the functionality that your plugin provides. This means that you should not be mixing in or monkeypatching Rails core willy-nilly. In fact, it is now expected for you as a plugin developer to figure out how to hook into the right parts of Rails using the new API, as opposed to doing something like the following:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;ActionView&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Base&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class_eval&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;kp&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;TruncateHtmlHelper&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At this stage, there isn't much documentation around what the API actually is. But this shouldn't stop you from investigating and finding out. In this case, cloning the rails repo and using ack pointed me towards &lt;a href=&quot;http://github.com/rails/rails/blob/master/actionpack/lib/action_controller/metal/helpers.rb#L6-39&quot;&gt;actionpack/lib/action_controller/metal/helpers.rb&lt;/a&gt;, where I found all the info I needed to remove the now outdated meta-programmed mixin technique of the dark Rails 2 days. From the docs:&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;pre&gt;
+In addition to using the standard template helpers provided in the Rails framework,
+creating custom helpers to extract complicated logic or reusable functionality is strongly
+encouraged. By default, the controller will include a helper whose name matches that of
+the controller, e.g., MyController will automatically include MyHelper.
+
+Additional helpers can be specified using the helper class method in
+ActionController::Base or any controller which inherits from it.
+&lt;/pre&gt;&lt;/blockquote&gt;
+
+
+&lt;p&gt;Perfect. All I need to do in this case is &lt;a href=&quot;http://github.com/hgimenez/truncate_html/commit/5a33e52db3297a1b35af224d468636e2e68ecdc4&quot;&gt;call the &lt;code&gt;helper&lt;/code&gt; class method with my helper's module&lt;/a&gt;: &lt;code&gt;ActionController::Base.helper(TruncateHtmlHelper)&lt;/code&gt;. A quick run through the app demonstrates however that we now need to mark strings as html_safe. Fine, let's &lt;a href=&quot;http://github.com/hgimenez/truncate_html/commit/7539b71f3c572f81ed890d2a9e9156ff51408e2b&quot;&gt;do that&lt;/a&gt;: &lt;code&gt; (TruncateHtml::HtmlTruncator.new(html).truncate(options)).html_safe!&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, let's run the test suite - and &lt;em&gt;facepalm&lt;/em&gt;. The way this plugin is set up is that RSpec must be installed in the containing app for it to run the spec suite. Here's where I ran into the first real issue with the upgrade: I have not been able to install RSpec on a Rails 3 app. I also can't find any obvious way to do it by browsing its source code. For now I seem to be stuck in limbo land until the &lt;a href=&quot;http://blog.davidchelimsky.net/2010/01/12/rspec-2-and-rails-3/&quot;&gt;the RSpec/Rails 3 affair&lt;/a&gt; is all sorted out.&lt;/p&gt;
+
+&lt;h3&gt;Backward Compatibility&lt;/h3&gt;
+
+&lt;p&gt;The bigger question is how to maintain backward compatibility. One way to accomplish this is to continue to maintain two git branches for Rails2 and Rails3 (master), and cherry-picking any bug fixes or enhancements from the master branch into the Rails2 branch. However, how could we manage gem bundling and distribution of two gems built for two version of Rails? I'd like to know how you are planning on maintaining backward compatibility. In this particular case, I almost don't care for backward compatibility, and users will simply have to know that version 0.2.2 of the gem is the latest working Rails 2 version, and must install that specific version when running under Rails 2.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Spec your yields in RSpec</title>
+    <link href="http://practiceabovetheory.com/blog/2009/09/25/spec-your-yields-in-rspec/"/>
+    <updated>2009-09-25T20:31:37-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/09/25/spec-your-yields-in-rspec</id>
+    <content type="html">&lt;p&gt;Message expectations in RSpec's Mocking/Stubing framework provide means for spec'ing the yielded objects of a method. For example, consider the following spec where we expect the &lt;code&gt;here_i_am&lt;/code&gt; method to &lt;code&gt;yield self&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;#here_i_am&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:triviality&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;yields self&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;should_receive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:here_i_am&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;here_i_am&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Nice and easy. First we set the expectation and then we exercise the method so that the expectation is met, passing it a &quot;no op&quot; block - &lt;code&gt;{}&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Here's the method to make it pass.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Triviality&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;here_i_am&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Furthermore, we can test many yielded values by chaining the &lt;code&gt;and_yield&lt;/code&gt; method on the expectation. Let's add a spec for a method  that yields many times and see how that would play out:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;#one_two_three&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:triviality&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;yields the numbers 1, 2 and 3&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;should_receive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:one_two_three&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;one_two_three&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And the method to make that pass:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Triviality&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;one_two_three&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is kind of ugly though. What if it yields many more times, or if you just want to test that it yields all items of an array? A good example of this is the Enumerable's &lt;code&gt;each&lt;/code&gt; method. In such cases we can store the &lt;code&gt;MessageExpectation&lt;/code&gt; object and call &lt;code&gt;and_yield&lt;/code&gt; on it many times, in a loop. Take a look at the following example where we yield each letter of the alphabet:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;#alphabet&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:triviality&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;yields all letters of the alphabet&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;expectation&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;should_receive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:alphabet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;A&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;Z&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;letter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expectation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_yield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;letter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;triviality&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;alphabet&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And finally, the method to make it pass:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Triviality&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;alphabet&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;A&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;Z&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;letter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;letter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;and_yield&lt;/code&gt; is not only useful for message expectations. You can also use it on your &lt;code&gt;stubs&lt;/code&gt;, just like you'd use &lt;code&gt;and_returns&lt;/code&gt;.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>An object quacks like a duck</title>
+    <link href="http://practiceabovetheory.com/blog/2009/09/24/an-object-quacks-like-a-duck/"/>
+    <updated>2009-09-24T21:58:19-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/09/24/an-object-quacks-like-a-duck</id>
+    <content type="html">&lt;p&gt;I've been toying around with the idea of spec'ing mixins: that a class includes a module. Suppose the following class:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;FooList&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;kp&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Enumerable&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;kp&quot;&gt;attr_accessor&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:some_array&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;opts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;vi&quot;&gt;@some_array&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:the_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;each&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;vi&quot;&gt;@some_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We can test the behavior of the &lt;code&gt;each&lt;/code&gt; method using RSpec, but we can also make sure that &lt;code&gt;FooList&lt;/code&gt; actually acts like an &lt;code&gt;Enumerable&lt;/code&gt;. Here's a quick RSpec Matcher just for that (&lt;code&gt;require&lt;/code&gt; it in your spec_helper.rb)&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;span class='line'&gt;14&lt;/span&gt;
+&lt;span class='line'&gt;15&lt;/span&gt;
+&lt;span class='line'&gt;16&lt;/span&gt;
+&lt;span class='line'&gt;17&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Spec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Matchers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:quack_like&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;mod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance_methods&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;respond_to?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;failure_message_for_should&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;s2&quot;&gt;&amp;quot;expected the class &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; to include the module &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mod&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;failure_message_for_should_not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;s2&quot;&gt;&amp;quot;expected the class &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; not to include the module &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mod&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;s2&quot;&gt;&amp;quot;expected the class to behave like a module by responding to all of its instance methods&amp;quot;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This allows us to spec some quacking:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;describe&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;FooList&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo_list&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;vi&quot;&gt;@foo_list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;FooList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;quacks like an Enumerable&amp;quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;foo_list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;should&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;quack_like&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Enumerable&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I am still experimenting with this. In a way it is not really testing behavior, but it's not really testing the implementation either. In other words, if every method in &lt;code&gt;Enumerable&lt;/code&gt; is implemented in &lt;code&gt;FooList&lt;/code&gt; and we remove the &lt;code&gt;include Enumerable&lt;/code&gt; line, the spec still passes.&lt;/p&gt;
+
+&lt;p&gt;I've discussed this over IRC with some other &lt;a href=&quot;http://technicalpickles.com/&quot;&gt;smart&lt;/a&gt; &lt;a href=&quot;http://www.enlightsolutions.com/&quot;&gt;folks&lt;/a&gt;, but I want more input . Do you think this is appropriate? Useless?&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>PostgreSQL's group by</title>
+    <link href="http://practiceabovetheory.com/blog/2009/09/23/postgresql-s-group-by/"/>
+    <updated>2009-09-23T17:30:53-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/09/23/postgresql-s-group-by</id>
+    <content type="html">&lt;p&gt;Last night I noticed a user on IRC complaint on two different channels (#heroku and #rubyonrails) claiming something along the lines of &quot;PostgreSQL sucks: i have this code&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;named_scope&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:with_questions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;ss&quot;&gt;:joins&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:questions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;ss&quot;&gt;:group&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;categories.id, categories.name, categories.created_at, categories.updated_at&amp;quot;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt; because of the way postgresql handles group by. It should only be &lt;code&gt;&quot;categories.id&quot;&lt;/code&gt;.&quot;&lt;/p&gt;
+
+&lt;p&gt;The user was surprised that this query works on MySQL. Surely, the user was getting the PostgreSQL message: &lt;code&gt;ERROR: column &quot;categories.name&quot; must appear in the group by clause or be used in an aggregate function&lt;/code&gt;. It turns out that this is not a bug, and PostgreSQL does not suck as this user initially thought. Furthermore, I tried a similar query on MS SQL Server, and it rightfully complaints: &lt;code&gt;Column 'categories.name' is invalid in the select list because it is not contained in either an aggregate function or the GROUP BY clause.&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Let's look at solutions.&lt;/p&gt;
+
+&lt;h4&gt;Alternative Queries&lt;/h4&gt;
+
+&lt;p&gt;The first thing that's wrong about this query is that what the user really wanted was a distinct list of categories that had questions. This is the requirement. To that end, the query should look something like the following two options.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Option 1: Drop the &lt;code&gt;join&lt;/code&gt; and &lt;code&gt;group by&lt;/code&gt;, and just use a condition checking whether a question exists for the category:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Category&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:conditions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;s1&quot;&gt;&amp;#39;exists (select 1 from questions where categories.id = questions.category_id)&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;A variation of this can be achieved with the &lt;code&gt;in&lt;/code&gt; operator:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Category&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:conditions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;s1&quot;&gt;&amp;#39;clients.id in (select client_id from questions)&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;Option 2: Again, drop the &lt;code&gt;group by&lt;/code&gt;, and use a &lt;code&gt;distinct&lt;/code&gt; instead:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Category&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:select&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;distinct items.*&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;             &lt;span class=&quot;ss&quot;&gt;:joins&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:questions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;&lt;em&gt;Why&lt;/em&gt; PostgreSQL doesn't like the original query&lt;/h4&gt;
+
+&lt;p&gt;The &lt;code&gt;group by&lt;/code&gt; clause is used to collect data from multiple records having common values in a select statement, and project the result based on some aggregate function. It really does not make any sense to add a &lt;code&gt;group by&lt;/code&gt; to a query that does not have an aggregate such as &lt;code&gt;sum()&lt;/code&gt;, &lt;code&gt;avg()&lt;/code&gt;, &lt;code&gt;min()&lt;/code&gt;, &lt;code&gt;max()&lt;/code&gt;, &lt;code&gt;count()&lt;/code&gt;. There is an exception, but we'll talk about that later.&lt;/p&gt;
+
+&lt;p&gt;As an example, we could retrieve every item along with a count of categories per item:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='sql'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;inner&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;join&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;categories&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;categories&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item_id&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that every non-aggregated column on the &lt;code&gt;select&lt;/code&gt; list must appear on the &lt;code&gt;group by&lt;/code&gt; list. This is necessary for PostgreSQL to know which item's to &lt;code&gt;count&lt;/code&gt; on (or &lt;code&gt;sum&lt;/code&gt;, or calculate the &lt;code&gt;max&lt;/code&gt; on). Let's walk through a simplified example of what happens if we don't include one of these columns on the &lt;code&gt;group by&lt;/code&gt; list.&lt;/p&gt;
+
+&lt;p&gt;Suppose the following table&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;&lt;/p&gt;
+
+&lt;h2&gt;code | city&lt;/h2&gt;
+
+&lt;p&gt;0    | Cambridge
+0    | Boston
+1    | Foxboro
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;What happens if we run the following query:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='sql'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;table&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;What would you expect PostgreSQL to return for the row with a code equal to 0? Cambridge or Boston? When PostgreSQL is presented with an ambiguous query such as the above, it will stop and report an error. Some other databases may go on and make their own decision as to what to return. To me, this is a broken spec. Futhermore, the result set may be inconsistent and unpredictable across DBMSes, or even queries on the same DB.&lt;/p&gt;
+
+&lt;h4&gt;Exception to the rule&lt;/h4&gt;
+
+&lt;p&gt;On previous versions of PostgreSQL (pre 8.2), the query plan for a &lt;code&gt;group by&lt;/code&gt; was much more efficient than a &lt;code&gt;select distinct&lt;/code&gt;. In some older Rails apps, we wrote things like the following to optimize performance:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Question&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:all&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;ss&quot;&gt;:group&lt;/span&gt;      &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Question&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;column_names&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;, &amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;ss&quot;&gt;:conditions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;...&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Instead of the more natural:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Question&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;ss&quot;&gt;:select&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;distinct items.*&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;ss&quot;&gt;:conditions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;...&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This was an optimization that was specific to our environment and helped us avoid the relatively poor query plan and expensive &lt;code&gt;Seq Scan&lt;/code&gt; that was slowing our app down.&lt;/p&gt;
+
+&lt;object width=&quot;560&quot; height=&quot;340&quot;&gt;&lt;param name=&quot;movie&quot; value=&quot;http://www.youtube.com/v/XODMtOqmb9U&amp;hl=en&amp;fs=1&amp;&quot;&gt;&lt;/param&gt;&lt;param name=&quot;allowFullScreen&quot; value=&quot;true&quot;&gt;&lt;/param&gt;&lt;param name=&quot;allowscriptaccess&quot; value=&quot;always&quot;&gt;&lt;/param&gt;&lt;embed src=&quot;http://www.youtube.com/v/XODMtOqmb9U&amp;hl=en&amp;fs=1&amp;&quot; type=&quot;application/x-shockwave-flash&quot; allowscriptaccess=&quot;always&quot; allowfullscreen=&quot;true&quot; width=&quot;560&quot; height=&quot;340&quot;&gt;&lt;/embed&gt;&lt;/object&gt;
+
+
+&lt;p&gt;I hope that after reading this you realize that this error is helping you as a user write better SQL. Complaining that the example query doesn't run on PostgreSQL is like complaining that your new &lt;a href=&quot;http://www.fender.com/products//search.php?partno=0110100747&quot;&gt;Fender Strat&lt;/a&gt; sucks because when you play &lt;em&gt;Here comes the Sun&lt;/em&gt; the very same way you played it on your &lt;a href=&quot;http://www.thebeatlesrockband.com/&quot;&gt;Beatles Rock Band&lt;/a&gt; guitar, it doesn't sound the same. &lt;code&gt;/endrant&lt;/code&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Three ActiveRecord model utility methods</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/"/>
+    <updated>2009-08-31T20:40:34-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/31/three-activerecord-model-utility-methods</id>
+    <content type="html">&lt;p&gt;Lately I've found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. These methods leverage functionality of either Ruby by itself or Rails that will become helpful in other parts of your application.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.flickr.com/photos/adams_views/3096986188/&quot;&gt;&lt;img src=&quot;http://farm4.static.flickr.com/3057/3096986188_0599337f47.jpg&quot; title=&quot;Visit original on Flickr&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3&gt;The labeler: #to_s&lt;/h3&gt;
+
+&lt;p&gt;  Defining a to_s method enables a very clean way to display a label that represents your model instance. Suppose you have a Post model. You could define a #to_s method similar to the following:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;to_s&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now your views can simply do something like the following HAML:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='haml'&gt;&lt;div class='line'&gt;&lt;span class=&quot;nc&quot;&gt;.post&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nc&quot;&gt;.h2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@post&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;The quantifier: #&amp;lt;=&gt;&lt;/h3&gt;
+
+&lt;p&gt;This method is useful when you consistently need to be able to respond to the question &quot;Which of these is bigger/better/taller/fatter/purtier?&quot;. Which metric defines the quantity is completely up to you, but what's important is that defining this method will allow you to call the &lt;code&gt;Enumerable&lt;/code&gt; goodies &lt;code&gt;#min&lt;/code&gt;, &lt;code&gt;#max&lt;/code&gt;, and &lt;code&gt;#sort&lt;/code&gt;. For example, and following the Post model example above, you could imagine the following method definition.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;&amp;lt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;rating&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rating&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Assuming you have a &lt;code&gt;recent&lt;/code&gt; named_scope that returns the latest &lt;code&gt;n&lt;/code&gt; posts, you could do things like &lt;code&gt;Post.recent.max&lt;/code&gt; or &lt;code&gt;Post.recent.sort&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3&gt;The SEOer: #to_param&lt;/h3&gt;
+
+&lt;p&gt;Finally, this method is leveraged by Rails itself. You can take advantage of the fact that the :id parameter on Rails URLs can be any sequence of integers followed by any non-whitespace characters. Rails will ignore any character after the integers, and use that as the :id parameter. It is customary to use the post's title as part of the URL. An easy way to achieve this in Rails is to define the following method on your model:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;to_param&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameterize&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Rails will call to to_param method when using &lt;code&gt;post_url(@post)&lt;/code&gt;, and your URLs shal become &lt;em&gt;slugs&lt;/em&gt;, in SEO terms.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>On the subject of Enterprise Reporting</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting/"/>
+    <updated>2009-08-26T20:04:12-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting</id>
+    <content type="html">&lt;p&gt;Apparently this is how reporting works in big corporate environments.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;We have a bunch of data, terabytes. There's got to be something in there.&lt;/li&gt;
+&lt;li&gt;After a few months of cranking, the analyst comes up with a one page report with significant statistics and a couple of charts. This is the first, alpha version of the report.&lt;/li&gt;
+&lt;li&gt;Manager receives report. Loves it, since it's the first time they can see the deficiencies in the overall system, and sees opportunities for savings, optimization, improvement.&lt;/li&gt;
+&lt;li&gt;Manger passes it along to another set of managers, maybe by region, for constructive feedback.&lt;/li&gt;
+&lt;li&gt;A few weeks later, all feedback is taken in, and the analyst implements all of the new requirements into the new, 40 page report.&lt;/li&gt;
+&lt;li&gt;Report is sent out quarterly, where it sits on top of a pile labeled TO READ.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;http://farm3.static.flickr.com/2604/3859340277_0bae706b4a.jpg&quot; width=&quot;500&quot; height=&quot;365&quot; alt=&quot;On the subject of Enterprise Reporting&quot; /&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Small collection of useful vim tricks</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/"/>
+    <updated>2009-08-18T16:44:42-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks</id>
+    <content type="html">&lt;p&gt;I've been using vim for the past couple of years. Vim is a cross-platform programmer's editor that is highly customizable and has a ton of well known and not-so well known features. As time goes by, I always come across new or better ways of doing things that increase productivity. What's most important is to force yourself to start using them so that they become part of your workflow, becoming muscle memory.&lt;/p&gt;
+
+&lt;p&gt;Here's a small collection of tips that I've picked up along the way:&lt;/p&gt;
+
+&lt;h3&gt;Moving around files&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;I never bought into NERDTree or any of the other explorer plugins. I usually jump around using gf, using Rails.vim's &lt;code&gt;:R&lt;/code&gt;, &lt;code&gt;:A&lt;/code&gt;, etc, or you can open up vim's built in explorer using &lt;code&gt;:Ex&lt;/code&gt;. &lt;code&gt;:Sex&lt;/code&gt; opens it up in a split window.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use vim marks to jump around any number of files. Here's a quick &lt;a href=&quot;http://www.linux.com/archive/feature/54159&quot;&gt;reference&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;gf&lt;/code&gt; will open the filename under the cursor. &lt;code&gt;Rails.vim&lt;/code&gt; extends this by being smart about view partials. You can also use &lt;code&gt;&lt;C-W&gt;gf&lt;/code&gt; to open the file in a new tab.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use ctags. &lt;code&gt;C-]&lt;/code&gt; on any method name or attribute to jump to the declaration point (or &lt;code&gt;&lt;C-W&gt;-]&lt;/code&gt; to open on a new window. Use &lt;code&gt;&lt;C-T&gt;&lt;/code&gt; to come back. The tag stack is maintained. Then, &lt;code&gt;:ta&lt;/code&gt; to jump to the tag. I use F5 to rebuild my ctags database:
+&lt;code&gt;map &lt;silent&gt; &lt;F5&gt;:!ctags -R --exclude=.svn --exclude=.git --exclude=log *&lt;CR&gt;&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Learn how to use windows and tabs: it can really improve your work flow. I usually have multiple tabs open with different areas of the project. On each tab, I may have up to four windows open. I use tabs when it's a different context, for example, a CSS and a view file on one tab, and a controller, cucumber feature and step definitions on another tab, each on its own windows. When working with many windows, it's useful to quickly resize them: &lt;code&gt;&lt;C-W&gt;_&lt;/code&gt; maximizes the viewing area of the active window (for vertical windows, &lt;code&gt;&lt;C-W&gt;|&lt;/code&gt; does the same). You can come back to equally sized windows with &lt;code&gt;&lt;C-W&gt;=&lt;/code&gt;. The easiest way for me to move around tabs is using &lt;code&gt;gt&lt;/code&gt; and &lt;code&gt;gT&lt;/code&gt;. To move around windows, I typically use &lt;code&gt;&lt;C-W&gt;&lt;/code&gt; along with one of h, j, k, l.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;More efficient editing&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Automate simple tasks with macros. &lt;code&gt;q{reg}&lt;your-macro&gt;q&lt;/code&gt;. Then invoke it &lt;em&gt;n&lt;/em&gt; times with &lt;code&gt;n@{reg}&lt;/code&gt;. Learn about &lt;a href=&quot;http://vim.wikia.com/wiki/Record_a_recursive_macro&quot;&gt;recursive macros&lt;/a&gt; to run it until EOF.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use your registers. Yanking (and putting) and recording macros to different registers is most useful. Use &lt;code&gt;:reg&lt;/code&gt; to view contents of your registers.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Quickly change text surrounded by &lt;em&gt;something&lt;/em&gt; using &lt;code&gt;ci&lt;/code&gt;. For example, to change a string in double quotes use &lt;code&gt;ci&quot;&lt;/code&gt;, or to change parenthesized parameters, use &lt;code&gt;ci(&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;When working with large number of files, you can run the same command on all buffers/windows/tabs by using &lt;code&gt;:bufdo&lt;/code&gt;/&lt;code&gt;:windo&lt;/code&gt;/&lt;code&gt;:tabdo&lt;/code&gt;. Such a time saver.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Learn how to use vim's substitute command with regular expressions and the grouping operators \( and \). You can morph a file at will using the matched part of the pattern and \1, \2. Throw &lt;code&gt;i&lt;/code&gt; at the end of the command for interactive substitution. Here's a &lt;a href=&quot;http://www.geocities.com/volontir/&quot;&gt;good vim regex guide&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Vim's built in autocompletion rocks. Use &lt;code&gt;&lt;C-n&gt;&lt;/code&gt; or &lt;code&gt;&lt;C-p&gt;&lt;/code&gt; in insert mode to activate and move through the options.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;When moving within a file, &lt;code&gt;f&lt;char&gt;&lt;/code&gt; moves the cursor forward until the first &lt;code&gt;&lt;char&gt;&lt;/code&gt;. &lt;code&gt;;&lt;/code&gt; repeats the action. You can move to the second occurrence of &lt;code&gt;&lt;char&gt;&lt;/code&gt; by using &lt;code&gt;2f&lt;char&gt;&lt;/code&gt;. &lt;code&gt;F&lt;char&gt;&lt;/code&gt; does the same, but backwards.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Learn the different ways to enter insert mode. The ones I use the most, other than &lt;code&gt;i&lt;/code&gt; are&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;a&lt;/code&gt; to enter insert mode at the next character (as opposed to i, which enters insert mode before the current character).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;A&lt;/code&gt; to enter insert mode at the end of the line.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;I&lt;/code&gt; to enter insert mode at the beginning of the line.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;O&lt;/code&gt; to create a new line above the current line and enter insert mode.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;o&lt;/code&gt; to create a new line below the current line and enter insert mode.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Block selection is magical. Use it when you want to select a vertical block or column to yank it, delete it, etc. To enter visual block select, do &lt;code&gt;&lt;C-q&gt;&lt;/code&gt;. You can also insert arbitrary text before the block with &lt;code&gt;&lt;C-I&gt;&lt;type your chars&gt;Esc&lt;/code&gt;. For example, this is very useful for inserting the same text on a set of aligned &lt;code&gt;&lt;li&gt;s&lt;/code&gt;(like adding a class=&quot;foo&quot; attribute) or after hash rockets or equal signs on your ruby code - yet another reason to align these properly.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;C-e&lt;/code&gt; and &lt;code&gt;C-y&lt;/code&gt;, scrolls the buffer without moving the cursor. Make it scroll three lines at a time with:
+&lt;code&gt; nnoremap &lt;C-e&gt; 3&lt;C-e&gt;
+nnoremap &lt;C-y&gt; 3&lt;C-y&gt;&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use &lt;code&gt;%&lt;/code&gt; to jump to the matching open or closing bracket/parenthesis. Use the &lt;a href=&quot;http://www.vim.org/scripts/script.php?script_id=39&quot;&gt;matchit plugin&lt;/a&gt; to have it match more than single characters, for example &lt;code&gt;def&lt;/code&gt; matches &lt;code&gt;end&lt;/code&gt; in Ruby code, or &lt;code&gt;&lt;ul&gt;&lt;/code&gt; matches &lt;code&gt;&lt;/ul&gt;&lt;/code&gt; in HTML.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Other miscellanea&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;For bash style command tab completion, put &lt;code&gt;set wildmode=list:longest&lt;/code&gt; on your vimrc. Then tab away when running commands on ex mode.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;View unprintable characters with &lt;code&gt;:set list&lt;/code&gt;. Cancel out with &lt;code&gt;:set nolist&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Analyzing log files with vim is also a win. For example, you may be in a rails app and used &lt;code&gt;Rails.vim&lt;/code&gt;'s &lt;code&gt;:Rlog&lt;/code&gt; command. Now you can use the global command to surface up the specific pattern you're looking for using &lt;code&gt;:g/{pattern}/p&lt;/code&gt;, or you may remove any useless lines with &lt;code&gt;:g/{useless}/d&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;When pasting something, vim will autoindent which is usually not what you want. Use &lt;code&gt;:set paste&lt;/code&gt; before the paste to avoid that.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use &lt;code&gt;gg=G&lt;/code&gt; to apply proper indentation to a messy source file. I define 2 space &quot;tabs&quot; for all file types by using &lt;code&gt;set tabstop=2 shiftwidth=2 expandtab&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Saving and reopening a vim session is easy using &lt;code&gt;:mksession!&lt;/code&gt; and &lt;code&gt;:source&lt;/code&gt;. I have the following two maps in my vimrc to make this even easier with F2 and F3:
+&lt;code&gt;map &lt;F2&gt; :mksession! ~/vim_session &lt;cr&gt; &quot; Quick write session with F2
+map &lt;F3&gt; :source ~/vim_session &lt;cr&gt;     &quot; And load session with F3&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;Ctrl-L&lt;/code&gt; to redraw the screen (to fix broken syntax highlighting). The following mapping will also remove highlighting after a search: &lt;code&gt;nnoremap &lt;C-L&gt; :nohls&lt;CR&gt;&lt;C-L&gt;&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;About those darn backup files infecting your project: Keep them, but on a different location - you may come to a crash, and you'll need them. I created a directory called ~/.vim_backups, and vim puts them there. The relevant lines are:
+&lt;code&gt; silent execute '!mkdir -p ~/.vim_backups'
+set backupdir=~/.vim_backups//
+set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I usually write blog posts in Vim using markdown. I use vim's integrated spell checking by setting &lt;code&gt;:set spellang=en_us&lt;/code&gt; on my vimrc. To invoke it, use &lt;code&gt;:set spell&lt;/code&gt; which will underline misspelled words, and &lt;code&gt;z=&lt;/code&gt; brings up suggestions for the misspelled words under the cursor.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Word wrapping is sluggish by default. I added &lt;a href=&quot;http://github.com/hgimenez/vimfiles/blob/c07ac584cbc477a0619c435df26a590a88c3e5a2/vimrc#L72-122&quot;&gt;these lines&lt;/a&gt; to my .vimrc which do a few of things: &lt;code&gt;&lt;leader&gt;w&lt;/code&gt; toggles between wrap and no wrap. It adds a &lt;code&gt;&gt;&lt;/code&gt; character to new lines, making it obvious that you're on a wrapping line. It tries to wrap on word boundaries, and finally, it remaps k and j so that you're moving up/down on visual lines, not actual lines.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use &lt;code&gt;set showmatch&lt;/code&gt; and &lt;code&gt;set mat=5&lt;/code&gt; on your .vimrc to blink matching parenthesis or brackets. Unobstrusive and useful.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;I am sure I'm missing many, but this is what I use most often. Got any tips worth sharing or even better, improvements to the above?&lt;/p&gt;
+
+&lt;h4&gt;Resources&lt;/h4&gt;
+
+&lt;p&gt;The following are books, tutorials or articles that I've found useful in learning and improving my vim workflow.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://vim.runpaint.org/toc/&quot;&gt;Vim cookbook&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.networkcomputing.com/unixworld/tutorial/009/009.html&quot;&gt;The vi/ex editor&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://jerrywang.net/vi/&quot;&gt;Vi for smarties&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://jmcpherson.org/editing.html&quot;&gt;Efficient editing with vim&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.viemu.com/a-why-vi-vim.html&quot;&gt;Why, oh WHY, do those #?@! nutheads use vi?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.swaroopch.com/notes/Vim&quot;&gt;A byte of vim&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+  </entry>
+  
+  <entry>
+    <title>On the subject of e-voting</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/15/on-the-subject-of-e-voting/"/>
+    <updated>2009-08-15T21:52:37-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/15/on-the-subject-of-e-voting</id>
+    <content type="html">&lt;p&gt;May sound bitter, but this is exactly how I feel about e-voting. Not only are there many &lt;a href=&quot;http://en.wikipedia.org/wiki/Electronic_voting#Documented_problems&quot;&gt;documented issues&lt;/a&gt;, but it is just too easy to under/over count. Draw your own conclusions.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://farm4.static.flickr.com/3516/3823734007_72df752ec3.jpg&quot; width=&quot;500&quot; height=&quot;294&quot; alt=&quot;On the subject of e-voting&quot; /&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>On the subject of average body weight by day of the week</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/"/>
+    <updated>2009-08-07T23:37:34-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week</id>
+    <content type="html">&lt;p&gt;I have been diligently keeping track of my weight, every day, for the past 10 years. It's taken significant effort but persistence's my middle name.&lt;/p&gt;
+
+&lt;p&gt;Here's a chart of my average weight by day of the week:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://farm3.static.flickr.com/2524/3799614914_7848ef7b10.jpg&quot; width=&quot;500&quot; height=&quot;351&quot; alt=&quot;on the subject of body weight&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Sortable lists with JQuery in Rails</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails/"/>
+    <updated>2009-08-07T01:35:30-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails</id>
+    <content type="html">&lt;p&gt;Drag 'n Drop sortable lists are a great way to provide a UI for sorting, well, lists of things. Most Rails examples &lt;a href=&quot;http://railscasts.com/episodes/147-sortable-lists&quot;&gt;out&lt;/a&gt; &lt;a href=&quot;http://blog.wyeworks.com/2009/7/27/drag-drop-sortable-lists&quot;&gt;in&lt;/a&gt; &lt;a href=&quot;http://harryche2008.wordpress.com/2008/07/19/how-to-do-ajax-style-drag-n-drop-sorting-with-rails/&quot;&gt;the&lt;/a&gt; &lt;a href=&quot;http://www.devarticles.com/c/a/Ruby-on-Rails/Dropping-and-Sorting-with-AJAX-and-scriptaculous/2/&quot;&gt;wild&lt;/a&gt; use prototype/scriptaculous and the built in Rails javascript helpers. In this walkthrough we'll provide the same functionality using JQuery instead. We will not be using the &lt;a href=&quot;http://api.rubyonrails.org/classes/ActionView/Helpers/ScriptaculousHelper.html#M001640&quot;&gt;built in Rails javascript helper&lt;/a&gt;. Instead we'll write Unobstrusive Javascript using JQuery.&lt;/p&gt;
+
+&lt;p&gt;For this example we'll use a UserStory and a Task model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://yuml.me/diagram/scruffy/class/[UserStory]-&gt;[Task].&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The very first step is to download JQuery into your Rails app, as well as some basic setup that will make our lives easier when dealing with Unobstrusive Javascript (UJS). UJS is overlooked amongst web app developers. It's all about separation of concerns. Remember in the late 80s and 90s when it was common to throw style right there on your HTML with things like &lt;code&gt;color=&quot;magenta&quot;&lt;/code&gt; or tags like &lt;code&gt;&lt;center&gt;&lt;/code&gt;? Same thing is happening with Javascript: separate behavior from content and presentation. So instead of saying &lt;code&gt;&lt;a href=&quot;#&quot; onclick=&quot;some_function()&quot;&gt;foo&lt;/a&gt;&lt;/code&gt;, you want to create a plain old link, and unobstrusively change the click's behavior via javascript. The basic feel for this looks like:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='html'&gt;&lt;div class='line'&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- in your view --&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;foo&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;http://foo.info&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;This is foo!&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='javascript'&gt;&lt;div class='line'&gt;&lt;span class=&quot;c1&quot;&gt;//in application.js (possibly)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;#foo&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;click&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;c1&quot;&gt;//handle the click&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//cancel the browser&amp;#39;s traditional event.&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Just like we use CSS selectors to style an element, we can use JQuery selectors to describe the behavior of the element. Just like you may have &lt;code&gt;styles.css&lt;/code&gt;, you may have &lt;code&gt;application.js&lt;/code&gt;. This separation of behavior helps avoid cross browser inconsistencies, dry up and reuse your code, as well as provide graceful degradation to user agents that don't even support Javascript. For instance, a form may be submitted via AJAX if the browser supports Javascript, or the traditional action may execute if it doesn't. I've come to the point where looking at something like &lt;code&gt;&lt;a href=&quot;#&quot; onclick='foo()'&gt;foo&lt;/a&gt;&lt;/code&gt; has the same effect as seeing style code in the middle of an HTML document: &lt;em&gt;repugnance&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h4&gt;Set yourself up for JQuery&lt;/h4&gt;
+
+&lt;p&gt;Head over to &lt;a href=&quot;http://jquery.com/&quot;&gt;the JQuery site&lt;/a&gt; and download the minified (production) version of JQuery. The sortable() function is part of &lt;a href=&quot;http://jqueryui.com/home&quot;&gt;JQuery UI&lt;/a&gt;, which you can download from &lt;a href=&quot;http://jqueryui.com/download&quot;&gt;here&lt;/a&gt;. Place both under public/javascripts and include it on your layouts. Pretty standard stuff.&lt;/p&gt;
+
+&lt;p&gt;Add a content block on your layout for &lt;code&gt;:javascript&lt;/code&gt;. This pattern was picked up while hacking on the &lt;a href=&quot;http://bostonrb.org&quot;&gt;bostonrb site's&lt;/a&gt; &lt;a href=&quot;http://github.com/bostonrb/bostonrb/blob/bca256689a5e381b1a8e729a9769820322f44cfa/app/views/shared/_javascripts.html.haml#L2&quot;&gt;code&lt;/a&gt; and I've stolen it for my own projects. It is a great way to throw UJS in your views. This should be at the bottom of your layout, right before the closing &lt;code&gt;&lt;/body&gt;&lt;/code&gt; tag (or in it's own partial along with other javascript related stuffs):&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='html'&gt;&lt;div class='line'&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nt&quot;&gt;&amp;lt;head&amp;gt;&amp;lt;title&amp;gt;&lt;/span&gt;My boring blog&lt;span class=&quot;nt&quot;&gt;&amp;lt;/title&amp;gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nt&quot;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    ...
+&lt;/div&gt;&lt;div class='line'&gt;    yield :javascript
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Having that out of the way, we need to set up jQuery's AJAX requests. We can use &lt;a href=&quot;http://docs.jquery.com/Ajax/jQuery.ajaxSetup&quot;&gt;JQuery's &lt;code&gt;$.ajaxSetup()&lt;/code&gt;&lt;/a&gt; hook to set the appropriate headers. Additionally, we'll include Rails' authenticity token on our AJAX Post requests.&lt;/p&gt;
+
+&lt;p&gt;For this to work, we need to store the Rails authenticity token &lt;em&gt;somewhere&lt;/em&gt;. One option is to simply store it on a javascript variable as described &lt;a href=&quot;http://henrik.nyh.se/2008/05/rails-authenticity-token-with-jquery&quot;&gt;here&lt;/a&gt;. Add this to your layout:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sx&quot;&gt;%= javascript_tag &amp;quot;var AUTH_TOKEN =&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#{form_authenticity_token.inspect};&amp;quot; if protect_against_forgery? %&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then, throw the following on your public/javascripts/application.js file - I haven't seen any downside to this, but leave a comment if you do.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;span class='line'&gt;14&lt;/span&gt;
+&lt;span class='line'&gt;15&lt;/span&gt;
+&lt;span class='line'&gt;16&lt;/span&gt;
+&lt;span class='line'&gt;17&lt;/span&gt;
+&lt;span class='line'&gt;18&lt;/span&gt;
+&lt;span class='line'&gt;19&lt;/span&gt;
+&lt;span class='line'&gt;20&lt;/span&gt;
+&lt;span class='line'&gt;21&lt;/span&gt;
+&lt;span class='line'&gt;22&lt;/span&gt;
+&lt;span class='line'&gt;23&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='javascript'&gt;&lt;div class='line'&gt;&lt;span class=&quot;c1&quot;&gt;//public/javascripts/application.js&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;c1&quot;&gt;// This sets up the proper header for rails to understand the request type,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;c1&quot;&gt;// and therefore properly respond to js requests (via respond_to block, for example)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ajaxSetup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;s1&quot;&gt;&amp;#39;beforeSend&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setRequestHeader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Accept&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;c1&quot;&gt;// UJS authenticity token fix: add the authenticy_token parameter&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;c1&quot;&gt;// expected by any Rails POST request.&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ajaxSend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;c1&quot;&gt;// do nothing if this is a GET request. Rails doesn&amp;#39;t need&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;c1&quot;&gt;// the authenticity token, and IE converts the request method&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;c1&quot;&gt;// to POST, just because - with love from redmond.&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;GET&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;AUTH_TOKEN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;undefined&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;&amp;amp;&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;authenticity_token=&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;encodeURIComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;AUTH_TOKEN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Having done that, let's prep our models. Let's assume you've created the &lt;code&gt;UserStory&lt;/code&gt; and &lt;code&gt;Task&lt;/code&gt; classes with the required &lt;code&gt;has_many&lt;/code&gt; and &lt;code&gt;belongs_to&lt;/code&gt; associations.&lt;/p&gt;
+
+&lt;h4&gt;Models set up.&lt;/h4&gt;
+
+&lt;p&gt;The models require just a few things: the acts_as_list plugin and a position attribute on the tasks table&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Install the &lt;a href=&quot;http://github.com/rails/acts_as_list/tree/master&quot;&gt;acts_as_list&lt;/a&gt; plugin:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='bash'&gt;&lt;div class='line'&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;script/plugin install git://github.com/rails/acts_as_list.git
+&lt;/div&gt;&lt;div class='line'&gt;Initialized empty Git repository in /Users/hgimenez/code/foo/vendor/plugins/acts_as_list/.git/
+&lt;/div&gt;&lt;div class='line'&gt;remote: Counting objects: 13, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+&lt;/div&gt;&lt;div class='line'&gt;remote: Compressing objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;9/9&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+&lt;/div&gt;&lt;div class='line'&gt;remote: Total 13 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, reused 0 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;Unpacking objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;13/13&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+&lt;/div&gt;&lt;div class='line'&gt;From git://github.com/rails/acts_as_list
+&lt;/div&gt;&lt;div class='line'&gt; * branch            HEAD       -&amp;gt; FETCH_HEAD
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;Create a position column on the tasks table with:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='bash'&gt;&lt;div class='line'&gt;script/generate migration add_position_to_tasks
+&lt;/div&gt;&lt;div class='line'&gt;rake db:migrate
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;Add &lt;code&gt;acts_as_list :scope =&gt; :user_story&lt;/code&gt; to the Task model.&lt;/li&gt;
+&lt;li&gt;Optionally, add &lt;code&gt;default_scope =&gt; 'position'&lt;/code&gt; to the Task model.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h4&gt;View setup&lt;/h4&gt;
+
+&lt;p&gt;The idea is to create an &lt;code&gt;&lt;ul&gt;&lt;/code&gt; of tasks that belong to a given user story. Each &lt;code&gt;&lt;li&gt;&lt;/code&gt; contains a task and we have to &quot;stage&quot; the element's IDs so that when we serialize the list using JQuery, the task's IDs are sent over to the server via an AJAX request.&lt;/p&gt;
+
+&lt;p&gt;We also create a span with a class of &quot;handle&quot;, which is where the user can hold on to when dragging and dropping tasks around.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='html'&gt;&lt;div class='line'&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;ul&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;tasks-list&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;% @user_story.tasks.each do |t| %&amp;gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;task_&amp;lt;%= t.id -%&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;%= t.name -%&amp;gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;handle&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;[handle]&lt;span class=&quot;nt&quot;&gt;&amp;lt;span&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;% end %&amp;gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;(Unobstrusive) javascript setup&lt;/h4&gt;
+
+&lt;p&gt;Now we are ready to wire in the javascript on your view. At the bottom of your view, and using the &lt;code&gt;:javascript&lt;/code&gt; content block created earlier, use &lt;a href=&quot;http://docs.jquery.com/UI/Sortable&quot;&gt;JQuery's sortable()&lt;/a&gt; function and attach it to the #tasks-list element:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;span class='line'&gt;14&lt;/span&gt;
+&lt;span class='line'&gt;15&lt;/span&gt;
+&lt;span class='line'&gt;16&lt;/span&gt;
+&lt;span class='line'&gt;17&lt;/span&gt;
+&lt;span class='line'&gt;18&lt;/span&gt;
+&lt;span class='line'&gt;19&lt;/span&gt;
+&lt;span class='line'&gt;20&lt;/span&gt;
+&lt;span class='line'&gt;21&lt;/span&gt;
+&lt;span class='line'&gt;22&lt;/span&gt;
+&lt;span class='line'&gt;23&lt;/span&gt;
+&lt;span class='line'&gt;24&lt;/span&gt;
+&lt;span class='line'&gt;25&lt;/span&gt;
+&lt;span class='line'&gt;26&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sx&quot;&gt;% content_for &lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:javascript&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;  &amp;lt;% javascript_tag do %&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;     &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;#tasks-list&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sortable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;y&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;dropOnEmpty&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;.handle&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;crosshair&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;li&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;opacity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;scroll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;n&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;            &lt;span class=&quot;vg&quot;&gt;$.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ajax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;post&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;#tasks-list&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sortable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;serialize&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;&amp;amp;id=&amp;lt;%=@user_story.id-%&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                &lt;span class=&quot;n&quot;&gt;dataType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;script&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                &lt;span class=&quot;n&quot;&gt;complete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                    &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;#tasks-list&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;effect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;highlight&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                  &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;                &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/user_stories/prioritize_tasks&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;          &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sx&quot;&gt;% end %&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;  &lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;&amp;lt;% end %&amp;gt;&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is basically saying: Take the element with an ID of &lt;code&gt;#tasks-list&lt;/code&gt; and make it sortable. Do an &lt;code&gt;HTTP POST&lt;/code&gt; to the &lt;code&gt;user_stories/prioritize_tasks&lt;/code&gt; path with the serialized tasks-lists as data. Note that we're also appending the user_story id as a post parameter so that our controller action knows which tasks to prioritize.&lt;/p&gt;
+
+&lt;p&gt;Feel free to go over the &lt;a href=&quot;http://docs.jquery.com/UI/Sortable&quot;&gt;sortable()&lt;/a&gt; documentation to tweak the options.&lt;/p&gt;
+
+&lt;h4&gt;Controller set up&lt;/h4&gt;
+
+&lt;p&gt;The controller's work is to take the parameters sent in from the view and to set the position attribute of each of the user story's tasks. The parameters received in the controller look something like:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inspect&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;authenticity_token&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;9HJQs99d4vqhLwjPAdC8uSLwjPAd4OpbaJQs99dFCch8XisI=&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;id&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;1&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;task&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;1&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As expected, we receive the Rails authenticity token, as well as the id (the UserStory ID) and an array of task IDs (&lt;code&gt;params['task']&lt;/code&gt; contains task IDs in the order specified by the user).&lt;/p&gt;
+
+&lt;p&gt;Here's the implementation of the prioritize_tasks action:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prioritize_tasks&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;user_story&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;UserStory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;tasks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_story&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tasks&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;tasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;position&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;task&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;n&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;save&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;render&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:nothing&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;Route setup&lt;/h4&gt;
+
+&lt;p&gt;Almost there. The one thing that's missing would be adding a collection route to the user_story resource for the prioritize_tasks action:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;  &lt;span class=&quot;c1&quot;&gt;# add the :collection option&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;resources&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:user_story&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:collection&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:prioritize_tasks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:post&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This pretty much wraps it up! This process will become easier as Rails core evolves and the Javascript framework becomes easier to swap out. It is known that Rails 3's helpers will not produce inline javascript. Instead, they will add hooks to your DOM elements in the form of HTML5's custom data attributes which then can be used by unobstrusive javascript code to add the appropriate behavior to the DOM elements. Even though Rails will continue to ship with the Prototype/Scriptaculous frameworks by default, JQuery will be easier to plug in, and the Rails helpers that simply add data attributes to your DOM elements can be used to achieve all sorts of presentation behavior.&lt;/p&gt;
+
+&lt;p&gt;Regardless of that, the closer you are to your Javascript, the better you'll understand how the pieces play together and the more control you'll have over the app's client side behavior.&lt;/p&gt;
+
+&lt;h5&gt;Resources&lt;/h5&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.railsenvy.com/2008/1/3/unobtrusive-javascript&quot;&gt;Unobstrusive Javascript presentation&lt;/a&gt; by Jason Seifer.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://railscasts.com/episodes/136-jquery&quot;&gt;JQuery Railscast&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ejohn.org/blog/html-5-data-attributes/&quot;&gt;HTML 5 data attributes&lt;/a&gt;, an explanation by John Resig.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+  </entry>
+  
+  <entry>
+    <title>PostgreSQL, Rails, and why you should care</title>
+    <link href="http://practiceabovetheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/"/>
+    <updated>2009-08-03T12:59:46-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care</id>
+    <content type="html">&lt;p&gt;MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance, efficiency, feature set, configurability, and seamless integration in your Rails projects.&lt;/p&gt;
+
+&lt;h3&gt;PostgreSQL Features&lt;/h3&gt;
+
+&lt;p&gt;PostgreSQL supports all of the features you would expect from an open source RDMS, including many that are found in commercial databases (Oracle, DB2, SQL Server) such as:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The basics: &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/sql-createview.html&quot;&gt;views&lt;/a&gt;, &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/triggers.html&quot;&gt;triggers&lt;/a&gt;, &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/indexes.html&quot;&gt;indexes&lt;/a&gt;, &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/ddl-constraints.html#DDL-CONSTRAINTS-FK&quot;&gt;foreign keys&lt;/a&gt;, ACIDity, &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/transaction-iso.html&quot;&gt;transactions&lt;/a&gt;, &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/geqo-pg-intro.html&quot;&gt;query optimization&lt;/a&gt;, comprehensive SQL support and &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/datatype.html&quot;&gt;data types&lt;/a&gt;, &lt;a href=&quot;http://www.postgresql.org/docs/current/static/routine-vacuuming.html&quot;&gt;autovacuum&lt;/a&gt; (keeps your table statistics up to date).&lt;/li&gt;
+&lt;li&gt;The not so basics: Features that may not be seen on other DBMSes include reverse, partial and expression indexes, table partitioning, table inheritance, cursors, data domains, user-defined operators, arrays and regular expressions.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/xplang.html&quot;&gt;Procedural Languages&lt;/a&gt;: analogous to Oracle's PL/SQL or SQL Server's T/SQL, PostgreSQL supports internal procedural languages for when you need to get down and dirty with the data. Additionally, it supports a wide range of languages &lt;a href=&quot;http://raa.ruby-lang.org/project/pl-ruby/&quot;&gt;including &lt;em&gt;Ruby&lt;/em&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/rules.html&quot;&gt;Rules&lt;/a&gt;, which pretty much allow you to rewrite an incoming query. A typical use of Rules is to implement updatable views.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.postgresql.org/docs/current/static/mvcc-intro.html&quot;&gt;Multi-Version Concurrency Control&lt;/a&gt;: MVCC is how PostgreSQL (and other DBMSes) deal with concurrency and table locking. In practical terms, it allows for database reads while the data is being writen.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/wal-intro.html&quot;&gt;Write-Ahead-Log&lt;/a&gt;: the WAL is the mechanism by which PostgreSQL writes transactions to the log before they are written to the database. This increases reliability in the unlikely event of a database crash, as there will be a transaction log by which to rebuild the database's state. PostgreSQL includes many configuration parameters to &lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/wal-configuration.html&quot;&gt;tweak the behavior of the WAL&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;PostgreSQL scales up by efficiently using multi-core servers. It also sport an &lt;a href=&quot;http://www.postgresql.org/docs/8.3/static/libpq-async.html&quot;&gt;asynchronous processing API&lt;/a&gt;. Subselects are fast, you can refer to tmp tables more than once in a query and it can use more than one index per query, making it suitable for data warehousing applications as well.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.postgresql.org/docs/8.4/static/tsearch2.html&quot;&gt;tsearch2&lt;/a&gt;, which is PostgreSQL's highly efficient full text search component. If you are committed to PostgreSQL, this is a very high performant search engine for PostgreSQL (as an alternative to &lt;a href=&quot;http://lucene.apache.org/solr/&quot;&gt;solr&lt;/a&gt; or &lt;a href=&quot;http://www.sphinxsearch.com/&quot;&gt;sphinx&lt;/a&gt;, for instance), with the added benefit that you're not running a separate daemon or search service.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://postgis.refractions.net/&quot;&gt;PostGIS&lt;/a&gt; for geospacial objects.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://pgcluster.projects.postgresql.org/&quot;&gt;There&lt;/a&gt; &lt;a href=&quot;http://slony1.projects.postgresql.org/&quot;&gt;are&lt;/a&gt; &lt;a href=&quot;http://sourceforge.net/projects/dbbalancer&quot;&gt;many&lt;/a&gt; &lt;a href=&quot;http://pgpool.projects.postgresql.org/&quot;&gt;replication&lt;/a&gt; &lt;a href=&quot;http://pg-comparator.projects.postgresql.org/&quot;&gt;options&lt;/a&gt;, although non of them are built into the core. This will &lt;a href=&quot;http://archives.postgresql.org/pgsql-hackers/2008-05/msg00913.php&quot;&gt;change very soon&lt;/a&gt;, though.&lt;/li&gt;
+&lt;li&gt;You can tweak its brains out: open up postgresql.conf, and you'll find many configuration options that can be tweaked to your application load and server capabilities. If you're like me, this is lots of fun. I will say, however, that it will take time to understand many of the options and how they affect each other.&lt;/li&gt;
+&lt;li&gt;Excellent &lt;a href=&quot;http://www.postgresql.org/docs/8.4/interactive/index.html&quot;&gt;documentation&lt;/a&gt;, which not only goes through the basics of setting up and using PostgreSQL, but really gets into the details of the inner workings of the system. This is an invaluable resource, not only for day-to-day development but also for tweaking the database's configuration files.&lt;/li&gt;
+&lt;li&gt;Much more in the &lt;a href=&quot;http://www.postgresql.org/docs/8.4/interactive/contrib.html&quot;&gt;contrib&lt;/a&gt; packages.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;PostgreSQL License&lt;/h3&gt;
+
+&lt;p&gt;PostgreSQL is &lt;a href=&quot;http://www.postgresql.org/about/licence&quot;&gt;released under a BSD License&lt;/a&gt;, and as such it is truly an Open Source Project. There are many contributors to the project, both individuals who donate their time as well as companies that improve the codebase (such as &lt;a href=&quot;http://www.enterprisedb.com/&quot;&gt;EnterpriseDB&lt;/a&gt; and &lt;a href=&quot;http://www.commandprompt.com/&quot;&gt;Command Prompt&lt;/a&gt;). If you are looking for the PostgreSQL gatekeeper, you'll be chasing your tail: There's no such thing. It is truly &quot;Free Software&quot;.&lt;/p&gt;
+
+&lt;h3&gt;So, what is it? MySQL or PostgreSQL?&lt;/h3&gt;
+
+&lt;p&gt;Historically, MySQL was built with performance in mind, whereas PostgreSQL was built with features in mind. The ease of use of MySQL earned it the popularity seen on most open source web application developers. Since then, however, two things have happened: PostgreSQL has become much faster and efficient, and MySQL has become more feature-rich. In my mind, the performance or feature argument is no longer valid for web applications. Both databases have their strengths and weaknesses and as you work out an expertise on either one of them it will become a moot point. Some of the lacking MySQL features are of interest only to DBAs, not web app developers, although this may be a consideration for larger shops and deployments.&lt;/p&gt;
+
+&lt;p&gt;One of the major reasons for trying out PostgreSQL, regardless of it's feature set, is it's &lt;em&gt;license and community&lt;/em&gt;. This can't be more true these days, when MySQL AB was consumed by Sun Microsystems, which in turn recently got acquired by Oracle. While I doubt that the product itself may die off, the fact that the copyright to the code, and the direction of the database system itself may and will be dictated by a company like Oracle is a deal breaker for me. At this point it is hard to tell if this is good or bad for MySQL and the community around it, but it definitely shows turmoil in the MySQL ecosystem. Note that I am not implying that Oracle sees MySQL as a threat to Oracle DB. In fact, I believe that MySQL satisfies a completely different niche.&lt;/p&gt;
+
+&lt;p&gt;On the other hand, PostgreSQL is a community effort along the same lines as the Ruby and Rails communities. This makes it a more attractive option as the direction of the project is community driven, immune to corporate politics and revenue motives.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Attach non image files in Rails with paperclip</title>
+    <link href="http://practiceabovetheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/"/>
+    <updated>2009-05-19T18:40:10-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip</id>
+    <content type="html">&lt;p&gt;Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to &lt;a href=&quot;http://dev.thoughtbot.com/paperclip/classes/Paperclip/Processor.html&quot;&gt;create her own post-processing code&lt;/a&gt; (such as OCR or others), and provides callbacks for before and after post-processing.This post does not cover getting started with paperclip. There are plenty of other posts that cover that. The intent is to get you up and running on using paperclip to attach non-image files.&lt;/p&gt;
+
+&lt;p&gt;Out of the box, the default post processor invoked upon upload is the &lt;a href=&quot;http://dev.thoughtbot.com/paperclip/classes/Paperclip/Thumbnail.html&quot;&gt;Paperclip::Thumbnail&lt;/a&gt; processor. This processor creates thumbnails of an image based on the styles hash passed to the &lt;code&gt;has_attached_file&lt;/code&gt; method. If you want to upload word documents, excel files, and other non-image data, the Thumbnail processor will fail, and the attachment will not succeed. This processor does not check if the file itself is an image, and tries to call ImageMagick's identify command on the file anyways.&lt;/p&gt;
+
+&lt;p&gt;Paperclip makes solving this extremely simple: prevent the post processing from happening when the file is not an image. Just like on &lt;code&gt;ActiveRecord&lt;/code&gt; callbacks, you can return false on paperclip's &lt;code class=&quot;inline_code&quot;&gt;before_post_process&lt;/code&gt; callback to avoid the processing from happening in the first place.&lt;/p&gt;
+
+&lt;p&gt;One possible solution is to put the following in whatever model you're using paperclip on:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;before_post_process&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:image?&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;image?&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data_content_type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=~&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/^image.*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nil?&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In this case, we've created an image? method which returns true if the content type starts with the string image (as in 'image/png', 'image/jpeg', etc). What's neat about this is that this same method can be used in your views to either render an &lt;code&gt;image_tag&lt;/code&gt;, or something else such as an icon or the file's name, depending on whether the file is an image.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Really silly percentage calculation in Ruby</title>
+    <link href="http://practiceabovetheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/"/>
+    <updated>2009-03-22T15:56:07-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby</id>
+    <content type="html">&lt;p&gt;Here's a silly way to calculate percentages of numbers in a Ruby project or Rails app.&lt;/p&gt;
+
+&lt;p&gt;The end result of this is having created a few methods for Ruby numeric classes that allow you to calculate percentages:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;456&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;five_percent&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1728&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;46&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;seven_percent&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;0322&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fifty_percent&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;47&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To accomplish this, we'll use use meta programming to add the methods to the Fixnum and Float classes.&lt;/p&gt;
+
+&lt;p&gt;First, create a way to translate numbers in English to numeric values. This was taken from a thread at &lt;a href=&quot;http://www.ruby-forum.com/topic/132735#591799&quot;&gt;ruby-forum&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Then, we'll make use of Ruby's &lt;code&gt;method_missing&lt;/code&gt; to find out if this is a &lt;code&gt;*_percent&lt;/code&gt; method and act accordingly. The &lt;code&gt;percent_method?&lt;/code&gt; method returns &lt;code&gt;true&lt;/code&gt; if it is, &lt;code&gt;false&lt;/code&gt; if it ain't.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;span class='line'&gt;14&lt;/span&gt;
+&lt;span class='line'&gt;15&lt;/span&gt;
+&lt;span class='line'&gt;16&lt;/span&gt;
+&lt;span class='line'&gt;17&lt;/span&gt;
+&lt;span class='line'&gt;18&lt;/span&gt;
+&lt;span class='line'&gt;19&lt;/span&gt;
+&lt;span class='line'&gt;20&lt;/span&gt;
+&lt;span class='line'&gt;21&lt;/span&gt;
+&lt;span class='line'&gt;22&lt;/span&gt;
+&lt;span class='line'&gt;23&lt;/span&gt;
+&lt;span class='line'&gt;24&lt;/span&gt;
+&lt;span class='line'&gt;25&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;NumberPercentageExtension&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;InstanceMethods&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;sx&quot;&gt;%w| zero one two three four five six seven eight nine ten eleven&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;          twelve thirteen fourteen fifteen sixteen seventeen eighteen&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;          nineteen |&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each_with_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;sx&quot;&gt;%w| zero ten twenty thirty forty fifty sixty seventy eighty&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;sx&quot;&gt;          ninety|&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each_with_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;hundred&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;percent_method?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;tokens&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;false&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tokens&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;is_percent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tokens&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;percent&amp;#39;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;n&quot;&gt;tokens&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;collect&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is_percent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;has_key?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is_percent&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;method_missing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;percent_method?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENGLISH_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_f&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;        &lt;span class=&quot;k&quot;&gt;super&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt; We also want &lt;code&gt;respond_to?&lt;/code&gt; to be aware of the new *_percent methods, so we include that as well.&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;respond_to?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kp&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;percent_method?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;k&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt; Finally, include the module in &lt;code&gt;Numeric&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;Numeric&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class_eval&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;kp&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;InstanceMethods&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The full code listing can be found in &lt;a href=&quot;http://gist.github.com/83258&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Flash messages Rails helper plugin</title>
+    <link href="http://practiceabovetheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin/"/>
+    <updated>2008-12-21T03:45:48-05:00</updated>
+    <id>http://practiceabovetheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin</id>
+    <content type="html">&lt;p&gt;I just pushed my first &lt;a href=&quot;http://github.com/hgimenez/sexy_flash&quot;&gt;Rails plugin&lt;/a&gt; to github(http://github.com) .&lt;/p&gt;
+
+&lt;p&gt;This is dead simple: it provides a helper for showing flash messages on your Rails apps with scriptaculous appear/fade effects.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://github.com/hgimenez/sexy_flash&quot;&gt;The readme&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;To install it:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;ruby&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plugin&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;git&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:/&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;github&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hgimenez&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sexy_flash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;git&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+
+</content>
+  </entry>
+  
+  <entry>
+    <title>Installing FANN and ruby-fann on Fedora Core 9</title>
+    <link href="http://practiceabovetheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/"/>
+    <updated>2008-08-01T11:07:30-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9</id>
+    <content type="html">&lt;p&gt;As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Download the source code for FANN 2.1beta from any of the mirrors found here: &lt;a href=&quot;http://leenissen.dk/fann&quot;&gt;http://leenissen.dk/fann&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;After extracting it, run the usual:
+&lt;code&gt;
+./configure
+make
+sudo make install
+&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Make sure the files are present:
+&lt;code&gt;ls /usr/local/lib |grep fann
+libdoublefann.a
+libdoublefann.la
+libdoublefann.so
+libdoublefann.so.2
+libdoublefann.so.2.0.1
+libfann.a
+libfann.la
+libfann.so
+libfann.so.2
+libfann.so.2.0.1
+libfixedfann.a
+libfixedfann.la
+libfixedfann.so
+libfixedfann.so.2
+libfixedfann.so.2.0.1
+libfloatfann.a
+libfloatfann.la
+libfloatfann.so
+libfloatfann.so.2
+libfloatfann.so.2.0.1&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Since these libraries where &lt;em&gt;just&lt;/em&gt; installed, you have to run &lt;code&gt;ldconfig&lt;/code&gt; in order to cache them and create the required links. This was the gotcha:
+&lt;code&gt;ldconfig /usr/local/lib&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, use ruby-gems to install the ruby-fann bindings:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;sudo gem install ruby-fann&lt;/code&gt;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Cannot connect to SQL Server 2005 Express</title>
+    <link href="http://practiceabovetheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/"/>
+    <updated>2007-11-28T16:09:52-05:00</updated>
+    <id>http://practiceabovetheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express</id>
+    <content type="html">&lt;p&gt;(Very old news, but I keep having to go back to this)&lt;/p&gt;
+
+&lt;p&gt;If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can't connect to a MS SQL Server 2005 Express Edition installation, follow these steps:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Launch &lt;code&gt;SQL Server Configuration Manager&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;SQL Server 2005 Network Configuration&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;Protocols for MSSERVER&lt;/code&gt; =&gt; &lt;code&gt;right click on TCP/IP&lt;/code&gt; =&gt; &lt;code&gt;properties&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;Protocols&lt;/code&gt;, make sure it is enabled&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;IP Addresses&lt;/code&gt; and make sure under each of the &lt;code&gt;IP1&lt;/code&gt;, &lt;code&gt;IP2&lt;/code&gt; and &lt;code&gt;IPAll&lt;/code&gt;, that the port is &lt;code&gt;1433&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;SQL Native Client Configuration&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Click on &lt;code&gt;Client protocols&lt;/code&gt; =&gt; &lt;code&gt;TCP/IP&lt;/code&gt; =&gt; right click =&gt; &lt;code&gt;Properties&lt;/code&gt; =&gt; make sure the &lt;code&gt;port&lt;/code&gt; is &lt;code&gt;1433&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Right click on &lt;code&gt;Alias&lt;/code&gt; =&gt; &lt;code&gt;New alias&lt;/code&gt; =&gt; &lt;code&gt;Alias&lt;/code&gt;: &lt;code&gt;any name&lt;/code&gt;. Port&lt;code&gt;:&lt;/code&gt;1433&lt;code&gt;.&lt;/code&gt;Server`: host name for the SQL Server Express instance&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Try to connect&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+  </entry>
+  
+  <entry>
+    <title>GnuPG on MacOS X (Apple Mail)</title>
+    <link href="http://practiceabovetheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail/"/>
+    <updated>2007-02-11T19:48:21-05:00</updated>
+    <id>http://practiceabovetheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail</id>
+    <content type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Install GnuPG. &lt;a href=&quot;http://macgpg.sourceforge.net/&quot;&gt;http://macgpg.sourceforge.net/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Create a key pair:
+&lt;strong&gt; Open terminal and type: &lt;code&gt;gpg --gen-key&lt;/code&gt;
+&lt;/strong&gt; Follow on screen instructions.
+** Choose a key length of 4096, and an expiration of 0 (never expires). Be patient, generating the keys took about an hour.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Install GPGPreferences. http://macgpg.sourceforge.net/&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Go to System Preferences, and open GnuPG (located at the bottom under &quot;Other&quot;). Go to the keyserver tab, and check: &lt;code&gt;&quot;Automatically retrieve keys from server while verifying&quot;.&lt;/code&gt;/r &lt;code&gt;&quot;Include subkeys&quot;.&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Install GPG Keychain access. http://macgpg.sourceforge.net/. Open it up after the key has been generated (step 2). Import other's keys for people you will exchanged signed messages with.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Install GnuPGMail plugin. http://www.sente.ch/software/GPGMail/English.lproj/GPGMail.html
+Open Mail, and go to preferences (Apple + ,). Defaults are fine.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Sign and send an email.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+  </entry>
+  
+  <entry>
+    <title>Stop spam on sendmail</title>
+    <link href="http://practiceabovetheory.com/blog/2006/09/15/stop-spam-on-sendmail/"/>
+    <updated>2006-09-15T22:50:44-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2006/09/15/stop-spam-on-sendmail</id>
+    <content type="html">&lt;p&gt;Lately the number of spam messages has grown very rapidly on my organization's sendmail server. There's a few things you can do. Here are two which helped considerably:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Deny access to the domain&lt;/strong&gt;: You can add the domain name to &lt;code&gt;/etc/mail/access&lt;/code&gt; followed by the word &lt;code&gt;REJECT&lt;/code&gt;. After editing the access file, you have to run &lt;code&gt;make&lt;/code&gt; on the &lt;code&gt;/etc/mail&lt;/code&gt; directory.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Use online spam blacklists&lt;/strong&gt;: There are many of these lists, such as &lt;a href=&quot;http://www.spamhaus.org/rokso/index.lasso&quot;&gt;Spamhaus ROKSO&lt;/a&gt;, &lt;a href=&quot;http://www.spamcop.net/&quot;&gt;Spamcop&lt;/a&gt;, or the &lt;a href=&quot;http://www.ordb.org/&quot;&gt;Open Relay Database&lt;/a&gt;. These are organizations that basically provide a list of spammers. Many thanks to all of you!.
+To use their lists on sendmail, add the following lines to your &lt;code&gt;/etc/mail/sendmail.mc&lt;/code&gt; file before the &lt;code&gt;MAILER&lt;/code&gt; lines:&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;code&gt;FEATURE(&lt;code&gt;dnsbl',&lt;/code&gt;relays.ordb.org', &lt;code&gt;Rejected - see http://ordb.org/')dnl
+FEATURE(&lt;/code&gt;dnsbl',&lt;code&gt;bl.spamcop.net',&lt;/code&gt;Rejected - see http://spamcop.net/')dnl
+FEATURE(&lt;code&gt;dnsbl',&lt;/code&gt;sbl.spamhaus.org',&lt;code&gt;Rejected - see http://www.spamhaus.org/')dnl&amp;lt;/code&amp;gt;
+After editing sendmail.mc, you have to rebuild sendmail.cf. Here's how I did it:
+&amp;lt;code&amp;gt;$ cp /etc/mail/sendmail.mc .
+$ m4 ../m4/cf.m4 sendmail.mc &amp;gt; sendmail.cf
+$ cp /etc/mail/sendmail.cf /etc/mail/sendmail.cf.BAK
+$ cp sendmail.cf /etc/mail/sendmail.cf
+$ cp: overwrite&lt;/code&gt;/etc/mail/sendmail.cf'? y
+$ /etc/rc.d/init.d/sendmail restart
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don't they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>How to use Java&#039;s URLEncoder.encode() method</title>
+    <link href="http://practiceabovetheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/"/>
+    <updated>2006-09-07T23:15:39-04:00</updated>
+    <id>http://practiceabovetheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method</id>
+    <content type="html">&lt;p&gt;For the lazy readers, here's how to use it:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='java'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encodedString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;URLEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;the key&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;=&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;URLEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;the value with any type of character such as @, ñ, or even ç!&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When &lt;a href=&quot;http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/&quot;&gt;POSTing to a URL&lt;/a&gt;, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.&lt;/p&gt;
+
+&lt;p&gt;Lookin at the &lt;a href=&quot;http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html&quot;&gt;javadocs for URLEncoder&lt;/a&gt;, we find that &lt;em&gt;normal&lt;/em&gt; alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.&lt;/p&gt;
+
+&lt;p&gt;The server expects something like &lt;code&gt;key1=value1&amp;amp;key2=value2&lt;/code&gt;. The &lt;code&gt;=&lt;/code&gt; and &lt;code&gt;&amp;amp;&lt;/code&gt; signs must be sent &lt;strong&gt;as is&lt;/strong&gt;, without encoding. The &lt;code&gt;URLEncoder.encode&lt;/code&gt; method is not &quot;smart&quot; enough to know that &lt;code&gt;=&lt;/code&gt; and &lt;code&gt;&amp;amp;&lt;/code&gt; are to be used as part of the URL. Of course, it isn't fair to assume that...&lt;/p&gt;
+</content>
+  </entry>
+  
+</feed>

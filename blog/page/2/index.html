@@ -1,0 +1,1071 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Practice Above Theory</title>
+  <meta name="author" content="Harold Giménez">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://practiceabovetheory.com/blog/page/2/index.html"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Practice Above Theory" type="application/atom+xml"/>
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">Practice Above Theory</a></h1>
+  
+    <h2>Try until you break it</h2>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:practiceabovetheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/08/07/sortable-lists-with-jquery-in-rails/">Sortable Lists With JQuery in Rails</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-07T01:35:30-04:00" pubdate  data-updated="true" >Aug 7<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Drag &#8216;n Drop sortable lists are a great way to provide a UI for sorting, well, lists of things. Most Rails examples <a href="http://railscasts.com/episodes/147-sortable-lists">out</a> <a href="http://blog.wyeworks.com/2009/7/27/drag-drop-sortable-lists">in</a> <a href="http://harryche2008.wordpress.com/2008/07/19/how-to-do-ajax-style-drag-n-drop-sorting-with-rails/">the</a> <a href="http://www.devarticles.com/c/a/Ruby-on-Rails/Dropping-and-Sorting-with-AJAX-and-scriptaculous/2/">wild</a> use prototype/scriptaculous and the built in Rails javascript helpers. In this walkthrough we&#8217;ll provide the same functionality using JQuery instead. We will not be using the <a href="http://api.rubyonrails.org/classes/ActionView/Helpers/ScriptaculousHelper.html#M001640">built in Rails javascript helper</a>. Instead we&#8217;ll write Unobstrusive Javascript using JQuery.</p>
+
+<p>For this example we&#8217;ll use a UserStory and a Task model:</p>
+
+<p><img src="http://yuml.me/diagram/scruffy/class/[UserStory]->[Task].&#8221; /></p>
+
+<p>The very first step is to download JQuery into your Rails app, as well as some basic setup that will make our lives easier when dealing with Unobstrusive Javascript (UJS). UJS is overlooked amongst web app developers. It&#8217;s all about separation of concerns. Remember in the late 80s and 90s when it was common to throw style right there on your HTML with things like <code>color="magenta"</code> or tags like <code><center></code>? Same thing is happening with Javascript: separate behavior from content and presentation. So instead of saying <code><a href="#" onclick="some_function()">foo</a></code>, you want to create a plain old link, and unobstrusively change the click&#8217;s behavior via javascript. The basic feel for this looks like:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="c">&lt;!-- in your view --&gt;</span>
+</div><div class='line'><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">&quot;foo&quot;</span> <span class="na">href=</span><span class="s">&quot;http://foo.info&quot;</span><span class="nt">&gt;</span>This is foo!<span class="nt">&lt;/a&gt;</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//in application.js (possibly)</span>
+</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#foo&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</div><div class='line'>    <span class="c1">//handle the click</span>
+</div><div class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="c1">//cancel the browser&#39;s traditional event.</span>
+</div><div class='line'>  <span class="p">});</span>
+</div><div class='line'><span class="p">});</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Just like we use CSS selectors to style an element, we can use JQuery selectors to describe the behavior of the element. Just like you may have <code>styles.css</code>, you may have <code>application.js</code>. This separation of behavior helps avoid cross browser inconsistencies, dry up and reuse your code, as well as provide graceful degradation to user agents that don&#8217;t even support Javascript. For instance, a form may be submitted via AJAX if the browser supports Javascript, or the traditional action may execute if it doesn&#8217;t. I&#8217;ve come to the point where looking at something like <code><a href="#" onclick='foo()'>foo</a></code> has the same effect as seeing style code in the middle of an HTML document: <em>repugnance</em>.</p>
+
+<h4>Set yourself up for JQuery</h4>
+
+<p>Head over to <a href="http://jquery.com/">the JQuery site</a> and download the minified (production) version of JQuery. The sortable() function is part of <a href="http://jqueryui.com/home">JQuery UI</a>, which you can download from <a href="http://jqueryui.com/download">here</a>. Place both under public/javascripts and include it on your layouts. Pretty standard stuff.</p>
+
+<p>Add a content block on your layout for <code>:javascript</code>. This pattern was picked up while hacking on the <a href="http://bostonrb.org">bostonrb site&#8217;s</a> <a href="http://github.com/bostonrb/bostonrb/blob/bca256689a5e381b1a8e729a9769820322f44cfa/app/views/shared/_javascripts.html.haml#L2">code</a> and I&#8217;ve stolen it for my own projects. It is a great way to throw UJS in your views. This should be at the bottom of your layout, right before the closing <code></body></code> tag (or in it&#8217;s own partial along with other javascript related stuffs):</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;html&gt;</span>
+</div><div class='line'>  <span class="nt">&lt;head&gt;&lt;title&gt;</span>My boring blog<span class="nt">&lt;/title&gt;&lt;/head&gt;</span>
+</div><div class='line'>  <span class="nt">&lt;body&gt;</span>
+</div><div class='line'>    ...
+</div><div class='line'>    yield :javascript
+</div><div class='line'>  <span class="nt">&lt;/body&gt;</span>
+</div><div class='line'><span class="nt">&lt;/html&gt;</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Having that out of the way, we need to set up jQuery&#8217;s AJAX requests. We can use <a href="http://docs.jquery.com/Ajax/jQuery.ajaxSetup">JQuery&#8217;s <code>$.ajaxSetup()</code></a> hook to set the appropriate headers. Additionally, we&#8217;ll include Rails&#8217; authenticity token on our AJAX Post requests.</p>
+
+<p>For this to work, we need to store the Rails authenticity token <em>somewhere</em>. One option is to simply store it on a javascript variable as described <a href="http://henrik.nyh.se/2008/05/rails-authenticity-token-with-jquery">here</a>. Add this to your layout:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">%= javascript_tag &quot;var AUTH_TOKEN =</span> <span class="c1">#{form_authenticity_token.inspect};&quot; if protect_against_forgery? %&gt;</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Then, throw the following on your public/javascripts/application.js file - I haven&#8217;t seen any downside to this, but leave a comment if you do.</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//public/javascripts/application.js</span>
+</div><div class='line'>
+</div><div class='line'><span class="c1">// This sets up the proper header for rails to understand the request type,</span>
+</div><div class='line'><span class="c1">// and therefore properly respond to js requests (via respond_to block, for example)</span>
+</div><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span><span class="p">({</span>
+</div><div class='line'>  <span class="s1">&#39;beforeSend&#39;</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">)</span> <span class="p">{</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&quot;Accept&quot;</span><span class="p">,</span> <span class="s2">&quot;text/javascript&quot;</span><span class="p">)}</span>
+</div><div class='line'><span class="p">})</span>
+</div><div class='line'>
+</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="c1">// UJS authenticity token fix: add the authenticy_token parameter</span>
+</div><div class='line'>  <span class="c1">// expected by any Rails POST request.</span>
+</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ajaxSend</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">request</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</div><div class='line'>    <span class="c1">// do nothing if this is a GET request. Rails doesn&#39;t need</span>
+</div><div class='line'>    <span class="c1">// the authenticity token, and IE converts the request method</span>
+</div><div class='line'>    <span class="c1">// to POST, just because - with love from redmond.</span>
+</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">type</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;undefined&quot;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">?</span> <span class="s2">&quot;&amp;&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;authenticity_token=&quot;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">);</span>
+</div><div class='line'>  <span class="p">});</span>
+</div><div class='line'>
+</div><div class='line'><span class="p">});</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Having done that, let&#8217;s prep our models. Let&#8217;s assume you&#8217;ve created the <code>UserStory</code> and <code>Task</code> classes with the required <code>has_many</code> and <code>belongs_to</code> associations.</p>
+
+<h4>Models set up.</h4>
+
+<p>The models require just a few things: the acts_as_list plugin and a position attribute on the tasks table</p>
+
+<ul>
+<li>Install the <a href="http://github.com/rails/acts_as_list/tree/master">acts_as_list</a> plugin:</li>
+</ul>
+
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'><span class="nv">$ </span>script/plugin install git://github.com/rails/acts_as_list.git
+</div><div class='line'>Initialized empty Git repository in /Users/hgimenez/code/foo/vendor/plugins/acts_as_list/.git/
+</div><div class='line'>remote: Counting objects: 13, <span class="k">done</span>.
+</div><div class='line'>remote: Compressing objects: 100% <span class="o">(</span>9/9<span class="o">)</span>, <span class="k">done</span>.
+</div><div class='line'>remote: Total 13 <span class="o">(</span>delta 2<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
+</div><div class='line'>Unpacking objects: 100% <span class="o">(</span>13/13<span class="o">)</span>, <span class="k">done</span>.
+</div><div class='line'>From git://github.com/rails/acts_as_list
+</div><div class='line'> * branch            HEAD       -&gt; FETCH_HEAD
+</div><div class='line'><span class="err">$</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<ul>
+<li>Create a position column on the tasks table with:</li>
+</ul>
+
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'>script/generate migration add_position_to_tasks
+</div><div class='line'>rake db:migrate
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<ul>
+<li>Add <code>acts_as_list :scope => :user_story</code> to the Task model.</li>
+<li>Optionally, add <code>default_scope => 'position'</code> to the Task model.</li>
+</ul>
+
+
+<h4>View setup</h4>
+
+<p>The idea is to create an <code><ul></code> of tasks that belong to a given user story. Each <code><li></code> contains a task and we have to &#8220;stage&#8221; the element&#8217;s IDs so that when we serialize the list using JQuery, the task&#8217;s IDs are sent over to the server via an AJAX request.</p>
+
+<p>We also create a span with a class of &#8220;handle&#8221;, which is where the user can hold on to when dragging and dropping tasks around.</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;tasks-list&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>  <span class="err">&lt;</span>% @user_story.tasks.each do |t| %&gt;
+</div><div class='line'>    <span class="nt">&lt;li</span> <span class="na">id=</span><span class="s">&quot;task_&lt;%= t.id -%&gt;&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;name&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>        <span class="err">&lt;</span>%= t.name -%&gt;
+</div><div class='line'>      <span class="nt">&lt;/span&gt;</span>
+</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;handle&quot;</span><span class="nt">&gt;</span>[handle]<span class="nt">&lt;span&gt;</span>
+</div><div class='line'>    <span class="nt">&lt;/li&gt;</span>
+</div><div class='line'>  <span class="err">&lt;</span>% end %&gt;
+</div><div class='line'><span class="nt">&lt;ul&gt;</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<h4>(Unobstrusive) javascript setup</h4>
+
+<p>Now we are ready to wire in the javascript on your view. At the bottom of your view, and using the <code>:javascript</code> content block created earlier, use <a href="http://docs.jquery.com/UI/Sortable">JQuery&#8217;s sortable()</a> function and attach it to the #tasks-list element:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+<span class='line'>26</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">% content_for </span><span class="ss">:javascript</span> <span class="k">do</span> <span class="sx">%&gt;</span>
+</div><div class='line'>
+</div><div class='line'><span class="sx">  &lt;% javascript_tag do %&gt;</span>
+</div><div class='line'>     <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span>
+</div><div class='line'>        <span class="p">{</span>
+</div><div class='line'>          <span class="n">axis</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">dropOnEmpty</span><span class="ss">:false</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">handle</span><span class="p">:</span> <span class="s1">&#39;.handle&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">cursor</span><span class="p">:</span> <span class="s1">&#39;crosshair&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">items</span><span class="p">:</span> <span class="s1">&#39;li&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">opacity</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">scroll</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">update</span><span class="p">:</span> <span class="n">function</span><span class="p">(){</span>
+</div><div class='line'>            <span class="vg">$.</span><span class="n">ajax</span><span class="p">({</span>
+</div><div class='line'>                <span class="n">type</span><span class="p">:</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">data</span><span class="p">:</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;id=&lt;%=@user_story.id-%&gt;&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">dataType</span><span class="p">:</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">complete</span><span class="p">:</span> <span class="n">function</span><span class="p">(</span><span class="n">request</span><span class="p">){</span>
+</div><div class='line'>                    <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">effect</span><span class="p">(</span><span class="s1">&#39;highlight&#39;</span><span class="p">);</span>
+</div><div class='line'>                  <span class="p">},</span>
+</div><div class='line'>                <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;/user_stories/prioritize_tasks&#39;</span><span class="p">})</span>
+</div><div class='line'>            <span class="p">}</span>
+</div><div class='line'>          <span class="p">})</span>
+</div><div class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</div><div class='line'><span class="sx">  </span>
+</div><div class='line'><span class="sx">&lt;% end %&gt;</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>This is basically saying: Take the element with an ID of <code>#tasks-list</code> and make it sortable. Do an <code>HTTP POST</code> to the <code>user_stories/prioritize_tasks</code> path with the serialized tasks-lists as data. Note that we&#8217;re also appending the user_story id as a post parameter so that our controller action knows which tasks to prioritize.</p>
+
+<p>Feel free to go over the <a href="http://docs.jquery.com/UI/Sortable">sortable()</a> documentation to tweak the options.</p>
+
+<h4>Controller set up</h4>
+
+<p>The controller&#8217;s work is to take the parameters sent in from the view and to set the position attribute of each of the user story&#8217;s tasks. The parameters received in the controller look something like:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">params</span><span class="o">.</span><span class="n">inspect</span>
+</div><div class='line'> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;authenticity_token&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;9HJQs99d4vqhLwjPAdC8uSLwjPAd4OpbaJQs99dFCch8XisI=&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="o">=&gt;[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="o">]</span><span class="p">}</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>As expected, we receive the Rails authenticity token, as well as the id (the UserStory ID) and an array of task IDs (<code>params['task']</code> contains task IDs in the order specified by the user).</p>
+
+<p>Here&#8217;s the implementation of the prioritize_tasks action:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">prioritize_tasks</span>
+</div><div class='line'>  <span class="n">user_story</span> <span class="o">=</span> <span class="no">UserStory</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">tasks</span> <span class="o">=</span> <span class="n">user_story</span><span class="o">.</span><span class="n">tasks</span>
+</div><div class='line'>  <span class="n">tasks</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">task</span><span class="o">|</span>
+</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="s1">&#39;task&#39;</span><span class="o">].</span><span class="n">index</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">save</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>  <span class="n">render</span> <span class="ss">:nothing</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<h4>Route setup</h4>
+
+<p>Almost there. The one thing that&#8217;s missing would be adding a collection route to the user_story resource for the prioritize_tasks action:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>  <span class="c1"># add the :collection option</span>
+</div><div class='line'>  <span class="n">map</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:user_story</span><span class="p">,</span> <span class="ss">:collection</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:prioritize_tasks</span> <span class="o">=&gt;</span> <span class="ss">:post</span> <span class="p">}</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>This pretty much wraps it up! This process will become easier as Rails core evolves and the Javascript framework becomes easier to swap out. It is known that Rails 3&#8217;s helpers will not produce inline javascript. Instead, they will add hooks to your DOM elements in the form of HTML5&#8217;s custom data attributes which then can be used by unobstrusive javascript code to add the appropriate behavior to the DOM elements. Even though Rails will continue to ship with the Prototype/Scriptaculous frameworks by default, JQuery will be easier to plug in, and the Rails helpers that simply add data attributes to your DOM elements can be used to achieve all sorts of presentation behavior.</p>
+
+<p>Regardless of that, the closer you are to your Javascript, the better you&#8217;ll understand how the pieces play together and the more control you&#8217;ll have over the app&#8217;s client side behavior.</p>
+
+<h5>Resources</h5>
+
+<ul>
+<li><a href="http://www.railsenvy.com/2008/1/3/unobtrusive-javascript">Unobstrusive Javascript presentation</a> by Jason Seifer.</li>
+<li><a href="http://railscasts.com/episodes/136-jquery">JQuery Railscast</a></li>
+<li><a href="http://ejohn.org/blog/html-5-data-attributes/">HTML 5 data attributes</a>, an explanation by John Resig.</li>
+</ul>
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/08/03/postgresql-rails-and-why-you-should-care/">PostgreSQL, Rails, and Why You Should Care</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-03T12:59:46-04:00" pubdate  data-updated="true" >Aug 3<span>rd</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance, efficiency, feature set, configurability, and seamless integration in your Rails projects.</p>
+
+<h3>PostgreSQL Features</h3>
+
+<p>PostgreSQL supports all of the features you would expect from an open source RDMS, including many that are found in commercial databases (Oracle, DB2, SQL Server) such as:</p>
+
+<ul>
+<li>The basics: <a href="http://www.postgresql.org/docs/8.4/static/sql-createview.html">views</a>, <a href="http://www.postgresql.org/docs/8.4/static/triggers.html">triggers</a>, <a href="http://www.postgresql.org/docs/8.4/static/indexes.html">indexes</a>, <a href="http://www.postgresql.org/docs/8.4/static/ddl-constraints.html#DDL-CONSTRAINTS-FK">foreign keys</a>, ACIDity, <a href="http://www.postgresql.org/docs/8.4/static/transaction-iso.html">transactions</a>, <a href="http://www.postgresql.org/docs/8.4/static/geqo-pg-intro.html">query optimization</a>, comprehensive SQL support and <a href="http://www.postgresql.org/docs/8.4/static/datatype.html">data types</a>, <a href="http://www.postgresql.org/docs/current/static/routine-vacuuming.html">autovacuum</a> (keeps your table statistics up to date).</li>
+<li>The not so basics: Features that may not be seen on other DBMSes include reverse, partial and expression indexes, table partitioning, table inheritance, cursors, data domains, user-defined operators, arrays and regular expressions.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/xplang.html">Procedural Languages</a>: analogous to Oracle&#8217;s PL/SQL or SQL Server&#8217;s T/SQL, PostgreSQL supports internal procedural languages for when you need to get down and dirty with the data. Additionally, it supports a wide range of languages <a href="http://raa.ruby-lang.org/project/pl-ruby/">including <em>Ruby</em></a>.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/rules.html">Rules</a>, which pretty much allow you to rewrite an incoming query. A typical use of Rules is to implement updatable views.</li>
+<li><a href="http://www.postgresql.org/docs/current/static/mvcc-intro.html">Multi-Version Concurrency Control</a>: MVCC is how PostgreSQL (and other DBMSes) deal with concurrency and table locking. In practical terms, it allows for database reads while the data is being writen.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/wal-intro.html">Write-Ahead-Log</a>: the WAL is the mechanism by which PostgreSQL writes transactions to the log before they are written to the database. This increases reliability in the unlikely event of a database crash, as there will be a transaction log by which to rebuild the database&#8217;s state. PostgreSQL includes many configuration parameters to <a href="http://www.postgresql.org/docs/8.4/static/wal-configuration.html">tweak the behavior of the WAL</a>.</li>
+<li>PostgreSQL scales up by efficiently using multi-core servers. It also sport an <a href="http://www.postgresql.org/docs/8.3/static/libpq-async.html">asynchronous processing API</a>. Subselects are fast, you can refer to tmp tables more than once in a query and it can use more than one index per query, making it suitable for data warehousing applications as well.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/tsearch2.html">tsearch2</a>, which is PostgreSQL&#8217;s highly efficient full text search component. If you are committed to PostgreSQL, this is a very high performant search engine for PostgreSQL (as an alternative to <a href="http://lucene.apache.org/solr/">solr</a> or <a href="http://www.sphinxsearch.com/">sphinx</a>, for instance), with the added benefit that you&#8217;re not running a separate daemon or search service.</li>
+<li><a href="http://postgis.refractions.net/">PostGIS</a> for geospacial objects.</li>
+<li><a href="http://pgcluster.projects.postgresql.org/">There</a> <a href="http://slony1.projects.postgresql.org/">are</a> <a href="http://sourceforge.net/projects/dbbalancer">many</a> <a href="http://pgpool.projects.postgresql.org/">replication</a> <a href="http://pg-comparator.projects.postgresql.org/">options</a>, although non of them are built into the core. This will <a href="http://archives.postgresql.org/pgsql-hackers/2008-05/msg00913.php">change very soon</a>, though.</li>
+<li>You can tweak its brains out: open up postgresql.conf, and you&#8217;ll find many configuration options that can be tweaked to your application load and server capabilities. If you&#8217;re like me, this is lots of fun. I will say, however, that it will take time to understand many of the options and how they affect each other.</li>
+<li>Excellent <a href="http://www.postgresql.org/docs/8.4/interactive/index.html">documentation</a>, which not only goes through the basics of setting up and using PostgreSQL, but really gets into the details of the inner workings of the system. This is an invaluable resource, not only for day-to-day development but also for tweaking the database&#8217;s configuration files.</li>
+<li>Much more in the <a href="http://www.postgresql.org/docs/8.4/interactive/contrib.html">contrib</a> packages.</li>
+</ul>
+
+
+<h3>PostgreSQL License</h3>
+
+<p>PostgreSQL is <a href="http://www.postgresql.org/about/licence">released under a BSD License</a>, and as such it is truly an Open Source Project. There are many contributors to the project, both individuals who donate their time as well as companies that improve the codebase (such as <a href="http://www.enterprisedb.com/">EnterpriseDB</a> and <a href="http://www.commandprompt.com/">Command Prompt</a>). If you are looking for the PostgreSQL gatekeeper, you&#8217;ll be chasing your tail: There&#8217;s no such thing. It is truly &#8220;Free Software&#8221;.</p>
+
+<h3>So, what is it? MySQL or PostgreSQL?</h3>
+
+<p>Historically, MySQL was built with performance in mind, whereas PostgreSQL was built with features in mind. The ease of use of MySQL earned it the popularity seen on most open source web application developers. Since then, however, two things have happened: PostgreSQL has become much faster and efficient, and MySQL has become more feature-rich. In my mind, the performance or feature argument is no longer valid for web applications. Both databases have their strengths and weaknesses and as you work out an expertise on either one of them it will become a moot point. Some of the lacking MySQL features are of interest only to DBAs, not web app developers, although this may be a consideration for larger shops and deployments.</p>
+
+<p>One of the major reasons for trying out PostgreSQL, regardless of it&#8217;s feature set, is it&#8217;s <em>license and community</em>. This can&#8217;t be more true these days, when MySQL AB was consumed by Sun Microsystems, which in turn recently got acquired by Oracle. While I doubt that the product itself may die off, the fact that the copyright to the code, and the direction of the database system itself may and will be dictated by a company like Oracle is a deal breaker for me. At this point it is hard to tell if this is good or bad for MySQL and the community around it, but it definitely shows turmoil in the MySQL ecosystem. Note that I am not implying that Oracle sees MySQL as a threat to Oracle DB. In fact, I believe that MySQL satisfies a completely different niche.</p>
+
+<p>On the other hand, PostgreSQL is a community effort along the same lines as the Ruby and Rails communities. This makes it a more attractive option as the direction of the project is community driven, immune to corporate politics and revenue motives.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/">Attach Non Image Files in Rails With Paperclip</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-05-19T18:40:10-04:00" pubdate  data-updated="true" >May 19<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Processor.html">create her own post-processing code</a> (such as OCR or others), and provides callbacks for before and after post-processing.This post does not cover getting started with paperclip. There are plenty of other posts that cover that. The intent is to get you up and running on using paperclip to attach non-image files.</p>
+
+<p>Out of the box, the default post processor invoked upon upload is the <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Thumbnail.html">Paperclip::Thumbnail</a> processor. This processor creates thumbnails of an image based on the styles hash passed to the <code>has_attached_file</code> method. If you want to upload word documents, excel files, and other non-image data, the Thumbnail processor will fail, and the attachment will not succeed. This processor does not check if the file itself is an image, and tries to call ImageMagick&#8217;s identify command on the file anyways.</p>
+
+<p>Paperclip makes solving this extremely simple: prevent the post processing from happening when the file is not an image. Just like on <code>ActiveRecord</code> callbacks, you can return false on paperclip&#8217;s <code class="inline_code">before_post_process</code> callback to avoid the processing from happening in the first place.</p>
+
+<p>One possible solution is to put the following in whatever model you&#8217;re using paperclip on:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">before_post_process</span> <span class="ss">:image?</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">image?</span>
+</div><div class='line'>  <span class="o">!</span><span class="p">(</span><span class="n">data_content_type</span> <span class="o">=~</span> <span class="sr">/^image.*/</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>In this case, we&#8217;ve created an image? method which returns true if the content type starts with the string image (as in &#8216;image/png&#8217;, &#8216;image/jpeg&#8217;, etc). What&#8217;s neat about this is that this same method can be used in your views to either render an <code>image_tag</code>, or something else such as an icon or the file&#8217;s name, depending on whether the file is an image.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/">Really Silly Percentage Calculation in Ruby</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-03-22T15:56:07-04:00" pubdate  data-updated="true" >Mar 22<span>nd</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Here&#8217;s a silly way to calculate percentages of numbers in a Ruby project or Rails app.</p>
+
+<p>The end result of this is having created a few methods for Ruby numeric classes that allow you to calculate percentages:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="o">.</span><span class="mi">456</span><span class="o">.</span><span class="n">five_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">1728</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">100</span><span class="o">.</span><span class="mi">46</span><span class="o">.</span><span class="n">seven_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">7</span><span class="o">.</span><span class="mo">0322</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">95</span><span class="o">.</span><span class="n">fifty_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">47</span><span class="o">.</span><span class="mi">5</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>To accomplish this, we&#8217;ll use use meta programming to add the methods to the Fixnum and Float classes.</p>
+
+<p>First, create a way to translate numbers in English to numeric values. This was taken from a thread at <a href="http://www.ruby-forum.com/topic/132735#591799">ruby-forum</a>.</p>
+
+<p>Then, we&#8217;ll make use of Ruby&#8217;s <code>method_missing</code> to find out if this is a <code>*_percent</code> method and act accordingly. The <code>percent_method?</code> method returns <code>true</code> if it is, <code>false</code> if it ain&#8217;t.</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">module</span> <span class="nn">NumberPercentageExtension</span>
+</div><div class='line'>  <span class="k">module</span> <span class="nn">InstanceMethods</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span> <span class="o">=</span> <span class="p">{}</span>
+</div><div class='line'>      <span class="sx">%w| zero one two three four five six seven eight nine ten eleven</span>
+</div><div class='line'><span class="sx">          twelve thirteen fourteen fifteen sixteen seventeen eighteen</span>
+</div><div class='line'><span class="sx">          nineteen |</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span> <span class="p">}</span>
+</div><div class='line'>      <span class="sx">%w| zero ten twenty thirty forty fifty sixty seventy eighty</span>
+</div><div class='line'><span class="sx">          ninety|</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="mi">10</span> <span class="p">}</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="s1">&#39;hundred&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="mi">100</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>      <span class="n">tokens</span> <span class="o">=</span> <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">tokens</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</div><div class='line'>      <span class="n">is_percent</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">[-</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;percent&#39;</span>
+</div><div class='line'>      <span class="n">tokens</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">collect</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">is_percent</span> <span class="o">&amp;&amp;=</span> <span class="no">ENGLISH_VALUE</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="p">}</span>
+</div><div class='line'>      <span class="k">return</span> <span class="n">is_percent</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>        <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">sum</span> <span class="o">*</span> <span class="nb">self</span> <span class="o">/</span> <span class="mi">100</span><span class="o">.</span><span class="n">to_f</span>
+</div><div class='line'>      <span class="k">else</span>
+</div><div class='line'>        <span class="k">super</span>
+</div><div class='line'>      <span class="k">end</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p> We also want <code>respond_to?</code> to be aware of the new *_percent methods, so we include that as well.</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">return</span> <span class="kp">true</span> <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">super</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p> Finally, include the module in <code>Numeric</code>:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="no">Numeric</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</div><div class='line'>  <span class="kp">include</span> <span class="no">InstanceMethods</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>The full code listing can be found in <a href="http://gist.github.com/83258">this gist</a>.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/12/21/flash-messages-rails-helper-plugin/">Flash Messages Rails Helper Plugin</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2008-12-21T03:45:48-05:00" pubdate  data-updated="true" >Dec 21<span>st</span>, 2008</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I just pushed my first <a href="http://github.com/hgimenez/sexy_flash">Rails plugin</a> to github(http://github.com) .</p>
+
+<p>This is dead simple: it provides a helper for showing flash messages on your Rails apps with scriptaculous appear/fade effects.</p>
+
+<p><a href="http://github.com/hgimenez/sexy_flash">The readme</a></p>
+
+<p>To install it:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">ruby</span> <span class="n">script</span><span class="o">/</span><span class="n">plugin</span> <span class="n">install</span> <span class="n">git</span><span class="ss">:/</span><span class="o">/</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">hgimenez</span><span class="o">/</span><span class="n">sexy_flash</span><span class="o">.</span><span class="n">git</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/">Installing FANN and Ruby-fann on Fedora Core 9</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2008-08-01T11:07:30-04:00" pubdate  data-updated="true" >Aug 1<span>st</span>, 2008</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:</p>
+
+<ul>
+<li><p>Download the source code for FANN 2.1beta from any of the mirrors found here: <a href="http://leenissen.dk/fann">http://leenissen.dk/fann</a></p></li>
+<li><p>After extracting it, run the usual:
+<code>
+./configure
+make
+sudo make install
+</code></p></li>
+<li><p>Make sure the files are present:
+<code>ls /usr/local/lib |grep fann
+libdoublefann.a
+libdoublefann.la
+libdoublefann.so
+libdoublefann.so.2
+libdoublefann.so.2.0.1
+libfann.a
+libfann.la
+libfann.so
+libfann.so.2
+libfann.so.2.0.1
+libfixedfann.a
+libfixedfann.la
+libfixedfann.so
+libfixedfann.so.2
+libfixedfann.so.2.0.1
+libfloatfann.a
+libfloatfann.la
+libfloatfann.so
+libfloatfann.so.2
+libfloatfann.so.2.0.1</code></p></li>
+</ul>
+
+
+<p>Since these libraries where <em>just</em> installed, you have to run <code>ldconfig</code> in order to cache them and create the required links. This was the gotcha:
+<code>ldconfig /usr/local/lib</code></p>
+
+<p>Now, use ruby-gems to install the ruby-fann bindings:</p>
+
+<p><code>sudo gem install ruby-fann</code></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/">Cannot Connect to SQL Server 2005 Express</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2007-11-28T16:09:52-05:00" pubdate  data-updated="true" >Nov 28<span>th</span>, 2007</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>(Very old news, but I keep having to go back to this)</p>
+
+<p>If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can&#8217;t connect to a MS SQL Server 2005 Express Edition installation, follow these steps:</p>
+
+<ul>
+<li><p>Launch <code>SQL Server Configuration Manager</code></p></li>
+<li><p>Click on <code>SQL Server 2005 Network Configuration</code></p></li>
+<li><p>Click on <code>Protocols for MSSERVER</code> => <code>right click on TCP/IP</code> => <code>properties</code></p></li>
+<li><p>Click on <code>Protocols</code>, make sure it is enabled</p></li>
+<li><p>Click on <code>IP Addresses</code> and make sure under each of the <code>IP1</code>, <code>IP2</code> and <code>IPAll</code>, that the port is <code>1433</code></p></li>
+<li><p>Click on <code>SQL Native Client Configuration</code></p></li>
+<li><p>Click on <code>Client protocols</code> => <code>TCP/IP</code> => right click => <code>Properties</code> => make sure the <code>port</code> is <code>1433</code></p></li>
+<li><p>Right click on <code>Alias</code> => <code>New alias</code> => <code>Alias</code>: <code>any name</code>. Port<code>:</code>1433<code>.</code>Server`: host name for the SQL Server Express instance</p></li>
+<li><p>Try to connect</p></li>
+</ul>
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2007/02/11/gnupg-on-macos-x-apple-mail/">GnuPG on MacOS X (Apple Mail)</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2007-02-11T19:48:21-05:00" pubdate  data-updated="true" >Feb 11<span>th</span>, 2007</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li><p>Install GnuPG. <a href="http://macgpg.sourceforge.net/">http://macgpg.sourceforge.net/</a></p></li>
+<li><p>Create a key pair:
+<strong> Open terminal and type: <code>gpg --gen-key</code>
+</strong> Follow on screen instructions.
+** Choose a key length of 4096, and an expiration of 0 (never expires). Be patient, generating the keys took about an hour.</p></li>
+<li><p>Install GPGPreferences. http://macgpg.sourceforge.net/</p></li>
+<li><p>Go to System Preferences, and open GnuPG (located at the bottom under &#8220;Other&#8221;). Go to the keyserver tab, and check: <code>"Automatically retrieve keys from server while verifying".</code>/r <code>"Include subkeys".</code></p></li>
+<li><p>Install GPG Keychain access. http://macgpg.sourceforge.net/. Open it up after the key has been generated (step 2). Import other&#8217;s keys for people you will exchanged signed messages with.</p></li>
+<li><p>Install GnuPGMail plugin. http://www.sente.ch/software/GPGMail/English.lproj/GPGMail.html
+Open Mail, and go to preferences (Apple + ,). Defaults are fine.</p></li>
+<li><p>Sign and send an email.</p></li>
+</ul>
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/15/stop-spam-on-sendmail/">Stop Spam on Sendmail</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-09-15T22:50:44-04:00" pubdate  data-updated="true" >Sep 15<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Lately the number of spam messages has grown very rapidly on my organization&#8217;s sendmail server. There&#8217;s a few things you can do. Here are two which helped considerably:</p>
+
+<ol>
+<li><p><strong>Deny access to the domain</strong>: You can add the domain name to <code>/etc/mail/access</code> followed by the word <code>REJECT</code>. After editing the access file, you have to run <code>make</code> on the <code>/etc/mail</code> directory.</p></li>
+<li><p><strong>Use online spam blacklists</strong>: There are many of these lists, such as <a href="http://www.spamhaus.org/rokso/index.lasso">Spamhaus ROKSO</a>, <a href="http://www.spamcop.net/">Spamcop</a>, or the <a href="http://www.ordb.org/">Open Relay Database</a>. These are organizations that basically provide a list of spammers. Many thanks to all of you!.
+To use their lists on sendmail, add the following lines to your <code>/etc/mail/sendmail.mc</code> file before the <code>MAILER</code> lines:</p></li>
+</ol>
+
+
+<p><code>FEATURE(<code>dnsbl',</code>relays.ordb.org&#8217;, <code>Rejected - see http://ordb.org/')dnl
+FEATURE(</code>dnsbl&#8217;,<code>bl.spamcop.net',</code>Rejected - see http://spamcop.net/&#8217;)dnl
+FEATURE(<code>dnsbl',</code>sbl.spamhaus.org&#8217;,<code>Rejected - see http://www.spamhaus.org/')dnl&lt;/code&gt;
+After editing sendmail.mc, you have to rebuild sendmail.cf. Here's how I did it:
+&lt;code&gt;$ cp /etc/mail/sendmail.mc .
+$ m4 ../m4/cf.m4 sendmail.mc &gt; sendmail.cf
+$ cp /etc/mail/sendmail.cf /etc/mail/sendmail.cf.BAK
+$ cp sendmail.cf /etc/mail/sendmail.cf
+$ cp: overwrite</code>/etc/mail/sendmail.cf&#8217;? y
+$ /etc/rc.d/init.d/sendmail restart
+</code></p>
+
+<p>Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don&#8217;t they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/">How to Use Java&#039;s URLEncoder.encode() Method</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-09-07T23:15:39-04:00" pubdate  data-updated="true" >Sep 7<span>th</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For the lazy readers, here&#8217;s how to use it:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='java'><div class='line'><span class="n">String</span> <span class="n">encodedString</span> <span class="o">=</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the key&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the value with any type of character such as @, ñ, or even ç!&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">);</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>When <a href="http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/">POSTing to a URL</a>, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.</p>
+
+<p>Lookin at the <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html">javadocs for URLEncoder</a>, we find that <em>normal</em> alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.</p>
+
+<p>The server expects something like <code>key1=value1&amp;key2=value2</code>. The <code>=</code> and <code>&amp;</code> signs must be sent <strong>as is</strong>, without encoding. The <code>URLEncoder.encode</code> method is not &#8220;smart&#8221; enough to know that <code>=</code> and <code>&amp;</code> are to be used as part of the URL. Of course, it isn&#8217;t fair to assume that&#8230;</p>
+</div>
+  
+  
+
+
+  </article>
+
+<nav role="pagination">
+  <div>
+    
+      <a class="prev" href="/blog/page/3/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/">Newer &rarr;</a>
+    
+  </div>
+</nav>
+
+<script type="text/javascript">
+    var disqus_shortname = 'hgimenez';
+    (function () {
+      var s = document.createElement('script'); s.async = true;
+      s.type = 'text/javascript';
+      s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+</div>
+<aside role=sidebar>
+  
+    
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgimenez">@hgimenez</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgimenez',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgimenez", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgimenez" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @hgimenez</a>
+  
+</section>
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - Harold Giménez -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+</body>
+</html>
