@@ -10,7 +10,6 @@ simple_search: http://google.com/search
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
 subscribe_rss: /atom.xml
-subscribe_email:
 # RSS feeds can list your email address if you like
 email: harold.gimenez@gmail.com
 
@@ -65,14 +64,6 @@ twitter_tweet_button: true
 # Google Plus
 google_plus_one: true
 google_plus_one_size: medium
-
-# Pinboard
-pinboard_user:
-pinboard_count: 3
-
-# Delicious
-delicious_user:
-delicious_count: 3
 
 # Disqus Comments
 disqus_short_name: hgimenez
