@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-06T22:29:17-04:00</updated>
+  <updated>2011-09-06T22:31:59-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -62,7 +62,7 @@
 
 &lt;p&gt;Pretty neat, huh? The syntax highlighting, I mean.&lt;/p&gt;
 
-&lt;p&gt;Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a HTTP 301 permanent redirect. The interesting bit is the HTTP caching employed. Heroku's (awesome) varnish servers, and your browser, will remember that response for one year. Try it &lt;a href=&quot;http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a &lt;code&gt;HTTP 301 Moved Permanently&lt;/code&gt;. The interesting bit is the HTTP caching employed. Heroku's (awesome) varnish servers, and your browser, will remember that response for one year. Try it &lt;a href=&quot;http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;[1] it's a hash!&lt;/p&gt;
 </content>
