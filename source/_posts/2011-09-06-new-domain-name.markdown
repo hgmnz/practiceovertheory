@@ -19,7 +19,7 @@ require 'sinatra'
 
 REDIRECTS = {
               'awesomeful-post-1' => 'new-location-1',
-              'awesomeful-post-2' => 'new-location-2
+              'awesomeful-post-2' => 'new-location-2'
             }
 
 get '/*' do |path|
