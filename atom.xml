@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-07T13:50:50-04:00</updated>
+  <updated>2011-09-07T13:51:40-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -25,7 +25,7 @@
 
 &lt;h3&gt;The stack&lt;/h3&gt;
 
-&lt;p&gt;Rails 3.1, Backbone.js, Coffeescript, PostgreSQL, Cucumber, RSpec and Jasmine.&lt;/p&gt;
+&lt;p&gt;Rails 3.1, Backbone.js, Coffeescript, faye, PostgreSQL, Cucumber, RSpec and Jasmine.&lt;/p&gt;
 
 &lt;h3&gt;The process&lt;/h3&gt;
 
