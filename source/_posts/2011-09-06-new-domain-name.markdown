@@ -20,7 +20,7 @@ require 'sinatra'
 REDIRECTS = {
               'awesomeful-post-1' => 'new-location-1',
               'awesomeful-post-2' => 'new-location-2'
-            }
+            }.freeze
 
 get '/*' do |path|
   one_year_in_seconds = 31536000
