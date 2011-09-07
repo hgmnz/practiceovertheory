@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-06T23:12:15-04:00</updated>
+  <updated>2011-09-07T13:43:10-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -13,6 +13,33 @@
     
   </author>
 
+  
+  <entry>
+    <title>You Should Work for These Guys</title>
+    <link href="http://practiceovertheory.com/blog/2011/09/07/you-should-work-for-these-guys/"/>
+    <updated>2011-09-07T13:42:00-04:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/07/you-should-work-for-these-guys</id>
+    <content type="html">&lt;p&gt;For the last few months &lt;a href=&quot;http://thoughtbot.com&quot;&gt;we've&lt;/a&gt; been on a team working for an awesome company on a greenfield project.&lt;/p&gt;
+
+&lt;p&gt;The space: Healthcare. The goal: Improve patient's lives by changing the way the entire system works.&lt;/p&gt;
+
+&lt;h3&gt;The stack&lt;/h3&gt;
+
+&lt;p&gt;Rails 3.1, Backbone.js, Coffeescript, Cucumber, RSpec and Jasmine.&lt;/p&gt;
+
+&lt;h3&gt;The process&lt;/h3&gt;
+
+&lt;p&gt;Daily standups, TDD, code reviews via github pull requests.&lt;/p&gt;
+
+&lt;h3&gt;The result&lt;/h3&gt;
+
+&lt;p&gt;A highly responsive non-trivial app with a very clean code base and beautiful design.&lt;/p&gt;
+
+&lt;p&gt;The future holds a mobile app, web service integrations and improvements to the current code base.&lt;/p&gt;
+
+&lt;p&gt;If you live in the Boston area, you should apply. If you don't, you should move. &lt;a href=&quot;http://thoughtbot.com/jobs/iora/developer/&quot;&gt;Right here&lt;/a&gt;&lt;/p&gt;
+</content>
+  </entry>
   
   <entry>
     <title>New domain name, new blog engine</title>
@@ -1445,36 +1472,6 @@ Open Mail, and go to preferences (Apple + ,). Defaults are fine.&lt;/p&gt;&lt;/l
 &lt;li&gt;&lt;p&gt;Sign and send an email.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-</content>
-  </entry>
-  
-  <entry>
-    <title>Stop spam on sendmail</title>
-    <link href="http://practiceovertheory.com/blog/2006/09/15/stop-spam-on-sendmail/"/>
-    <updated>2006-09-15T22:50:44-04:00</updated>
-    <id>http://practiceovertheory.com/blog/2006/09/15/stop-spam-on-sendmail</id>
-    <content type="html">&lt;p&gt;Lately the number of spam messages has grown very rapidly on my organization's sendmail server. There's a few things you can do. Here are two which helped considerably:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Deny access to the domain&lt;/strong&gt;: You can add the domain name to &lt;code&gt;/etc/mail/access&lt;/code&gt; followed by the word &lt;code&gt;REJECT&lt;/code&gt;. After editing the access file, you have to run &lt;code&gt;make&lt;/code&gt; on the &lt;code&gt;/etc/mail&lt;/code&gt; directory.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Use online spam blacklists&lt;/strong&gt;: There are many of these lists, such as &lt;a href=&quot;http://www.spamhaus.org/rokso/index.lasso&quot;&gt;Spamhaus ROKSO&lt;/a&gt;, &lt;a href=&quot;http://www.spamcop.net/&quot;&gt;Spamcop&lt;/a&gt;, or the &lt;a href=&quot;http://www.ordb.org/&quot;&gt;Open Relay Database&lt;/a&gt;. These are organizations that basically provide a list of spammers. Many thanks to all of you!.
-To use their lists on sendmail, add the following lines to your &lt;code&gt;/etc/mail/sendmail.mc&lt;/code&gt; file before the &lt;code&gt;MAILER&lt;/code&gt; lines:&lt;/p&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;&lt;code&gt;FEATURE(&lt;code&gt;dnsbl',&lt;/code&gt;relays.ordb.org', &lt;code&gt;Rejected - see http://ordb.org/')dnl
-FEATURE(&lt;/code&gt;dnsbl',&lt;code&gt;bl.spamcop.net',&lt;/code&gt;Rejected - see http://spamcop.net/')dnl
-FEATURE(&lt;code&gt;dnsbl',&lt;/code&gt;sbl.spamhaus.org',&lt;code&gt;Rejected - see http://www.spamhaus.org/')dnl&amp;lt;/code&amp;gt;
-After editing sendmail.mc, you have to rebuild sendmail.cf. Here's how I did it:
-&amp;lt;code&amp;gt;$ cp /etc/mail/sendmail.mc .
-$ m4 ../m4/cf.m4 sendmail.mc &amp;gt; sendmail.cf
-$ cp /etc/mail/sendmail.cf /etc/mail/sendmail.cf.BAK
-$ cp sendmail.cf /etc/mail/sendmail.cf
-$ cp: overwrite&lt;/code&gt;/etc/mail/sendmail.cf'? y
-$ /etc/rc.d/init.d/sendmail restart
-&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don't they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?&lt;/p&gt;
 </content>
   </entry>
   

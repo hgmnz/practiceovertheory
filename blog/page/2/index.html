@@ -48,6 +48,39 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2009/08/15/on-the-subject-of-e-voting/">On the Subject of E-voting</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-15T21:52:37-04:00" pubdate  data-updated="true" >Aug 15<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>May sound bitter, but this is exactly how I feel about e-voting. Not only are there many <a href="http://en.wikipedia.org/wiki/Electronic_voting#Documented_problems">documented issues</a>, but it is just too easy to under/over count. Draw your own conclusions.</p>
+
+<p><img src="http://farm4.static.flickr.com/3516/3823734007_72df752ec3.jpg" width="500" height="294" alt="On the subject of e-voting" /></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/">On the Subject of Average Body Weight by Day of the Week</a></h1>
     
     
@@ -877,58 +910,6 @@ Open Mail, and go to preferences (Apple + ,). Defaults are fine.</p></li>
 <li><p>Sign and send an email.</p></li>
 </ul>
 
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2006/09/15/stop-spam-on-sendmail/">Stop Spam on Sendmail</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2006-09-15T22:50:44-04:00" pubdate  data-updated="true" >Sep 15<span>th</span>, 2006</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Lately the number of spam messages has grown very rapidly on my organization&#8217;s sendmail server. There&#8217;s a few things you can do. Here are two which helped considerably:</p>
-
-<ol>
-<li><p><strong>Deny access to the domain</strong>: You can add the domain name to <code>/etc/mail/access</code> followed by the word <code>REJECT</code>. After editing the access file, you have to run <code>make</code> on the <code>/etc/mail</code> directory.</p></li>
-<li><p><strong>Use online spam blacklists</strong>: There are many of these lists, such as <a href="http://www.spamhaus.org/rokso/index.lasso">Spamhaus ROKSO</a>, <a href="http://www.spamcop.net/">Spamcop</a>, or the <a href="http://www.ordb.org/">Open Relay Database</a>. These are organizations that basically provide a list of spammers. Many thanks to all of you!.
-To use their lists on sendmail, add the following lines to your <code>/etc/mail/sendmail.mc</code> file before the <code>MAILER</code> lines:</p></li>
-</ol>
-
-
-<p><code>FEATURE(<code>dnsbl',</code>relays.ordb.org&#8217;, <code>Rejected - see http://ordb.org/')dnl
-FEATURE(</code>dnsbl&#8217;,<code>bl.spamcop.net',</code>Rejected - see http://spamcop.net/&#8217;)dnl
-FEATURE(<code>dnsbl',</code>sbl.spamhaus.org&#8217;,<code>Rejected - see http://www.spamhaus.org/')dnl&lt;/code&gt;
-After editing sendmail.mc, you have to rebuild sendmail.cf. Here's how I did it:
-&lt;code&gt;$ cp /etc/mail/sendmail.mc .
-$ m4 ../m4/cf.m4 sendmail.mc &gt; sendmail.cf
-$ cp /etc/mail/sendmail.cf /etc/mail/sendmail.cf.BAK
-$ cp sendmail.cf /etc/mail/sendmail.cf
-$ cp: overwrite</code>/etc/mail/sendmail.cf&#8217;? y
-$ /etc/rc.d/init.d/sendmail restart
-</code></p>
-
-<p>Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don&#8217;t they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?</p>
 </div>
   
   
