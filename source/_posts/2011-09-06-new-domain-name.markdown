@@ -34,6 +34,6 @@ end
 
 Pretty neat, huh? The syntax highlighting, I mean.
 
-Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a `HTTP 301 Moved Permanently`. The interesting bit is the HTTP caching employed. Heroku's (awesome) varnish servers, and your browser, will remember that response for one year. Try it [here](http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care).
+Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a `HTTP 301 Moved Permanently`. The interesting bit is the HTTP caching employed. Heroku's (awesome) varnish servers will remember that response for one year. Try it [here](http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care).
 
 [1] it's a hash!
