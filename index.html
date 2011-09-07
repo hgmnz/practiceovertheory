@@ -48,6 +48,82 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2011/09/06/new-domain-name/">New Domain Name, New Blog Engine</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2011-09-06T21:58:00-04:00" pubdate  data-updated="true" >Sep 6<span>th</span>, 2011</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself &#8220;Awesomeful&#8221; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so <a href="http://twitter.com/hgimenez">hit me up</a> if you&#8217;re interested - I&#8217;m talking to you mister <code>whois awesomeful.com</code>.</p>
+
+<p>Welcome to the new blog: <em>Practice Over Theory</em>. I hope that the new name and engine inspire me to post more often.</p>
+
+<p>Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a <a href="http://octopress.org/docs/deploying/">really weird method</a> of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It&#8217;s backed by jekyll and has a few nice addons, the most useful of which is it&#8217;s code highlighting theme which is based on Solarized.</p>
+
+<p>Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:</p>
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</div><div class='line'>
+</div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2</span>
+</div><div class='line'><span class="s1">            }</span>
+</div><div class='line'>
+</div><div class='line'><span class="s1">get &#39;</span><span class="o">/*</span><span class="s1">&#39; do |path|</span>
+</div><div class='line'><span class="s1">  one_year_in_seconds = 31536000</span>
+</div><div class='line'><span class="s1">  headers &#39;</span><span class="no">Cache</span><span class="o">-</span><span class="no">Control</span><span class="s1">&#39; =&gt; &quot;public, max-age=#{one_year_in_seconds}&quot;,</span>
+</div><div class='line'><span class="s1">          &#39;</span><span class="no">Expires</span><span class="err">&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<p>Pretty neat, huh? The syntax highlighting, I mean.</p>
+
+<p>Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a HTTP 301 permanent redirect. The interesting bit is the HTTP caching employed. Heroku&#8217;s (awesome) varnish servers, and your browser, will remember that response for one year.</p>
+
+<p>[1] it&#8217;s a hash!</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2010/02/15/machine-learning-who-s-the-boss/">Machine Learning - Who&#8217;s the Boss?</a></h1>
     
     
@@ -971,41 +1047,6 @@ set directory=~/.vim_backups//</code></p></li>
   <div class="entry-content"><p>May sound bitter, but this is exactly how I feel about e-voting. Not only are there many <a href="http://en.wikipedia.org/wiki/Electronic_voting#Documented_problems">documented issues</a>, but it is just too easy to under/over count. Draw your own conclusions.</p>
 
 <p><img src="http://farm4.static.flickr.com/3516/3823734007_72df752ec3.jpg" width="500" height="294" alt="On the subject of e-voting" /></p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/">On the Subject of Average Body Weight by Day of the Week</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2009-08-07T23:37:34-04:00" pubdate  data-updated="true" >Aug 7<span>th</span>, 2009</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I have been diligently keeping track of my weight, every day, for the past 10 years. It&#8217;s taken significant effort but persistence&#8217;s my middle name.</p>
-
-<p>Here&#8217;s a chart of my average weight by day of the week:</p>
-
-<p><img src="http://farm3.static.flickr.com/2524/3799614914_7848ef7b10.jpg" width="500" height="351" alt="on the subject of body weight" /></a></p>
 </div>
   
   

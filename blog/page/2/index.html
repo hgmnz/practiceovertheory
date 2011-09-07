@@ -48,6 +48,41 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/">On the Subject of Average Body Weight by Day of the Week</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-07T23:37:34-04:00" pubdate  data-updated="true" >Aug 7<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I have been diligently keeping track of my weight, every day, for the past 10 years. It&#8217;s taken significant effort but persistence&#8217;s my middle name.</p>
+
+<p>Here&#8217;s a chart of my average weight by day of the week:</p>
+
+<p><img src="http://farm3.static.flickr.com/2524/3799614914_7848ef7b10.jpg" width="500" height="351" alt="on the subject of body weight" /></a></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2009/08/07/sortable-lists-with-jquery-in-rails/">Sortable Lists With JQuery in Rails</a></h1>
     
     
@@ -894,48 +929,6 @@ $ /etc/rc.d/init.d/sendmail restart
 </code></p>
 
 <p>Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don&#8217;t they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?</p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/">How to Use Java&#039;s URLEncoder.encode() Method</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2006-09-07T23:15:39-04:00" pubdate  data-updated="true" >Sep 7<span>th</span>, 2006</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>For the lazy readers, here&#8217;s how to use it:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-</pre></td><td class='code' width='100%'><pre><code class='java'><div class='line'><span class="n">String</span> <span class="n">encodedString</span> <span class="o">=</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the key&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the value with any type of character such as @, ñ, or even ç!&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">);</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>When <a href="http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/">POSTing to a URL</a>, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.</p>
-
-<p>Lookin at the <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html">javadocs for URLEncoder</a>, we find that <em>normal</em> alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.</p>
-
-<p>The server expects something like <code>key1=value1&amp;key2=value2</code>. The <code>=</code> and <code>&amp;</code> signs must be sent <strong>as is</strong>, without encoding. The <code>URLEncoder.encode</code> method is not &#8220;smart&#8221; enough to know that <code>=</code> and <code>&amp;</code> are to be used as part of the URL. Of course, it isn&#8217;t fair to assume that&#8230;</p>
 </div>
   
   

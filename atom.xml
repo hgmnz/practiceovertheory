@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-06T21:54:01-04:00</updated>
+  <updated>2011-09-06T22:18:38-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -13,6 +13,60 @@
     
   </author>
 
+  
+  <entry>
+    <title>New domain name, new blog engine</title>
+    <link href="http://practiceovertheory.com/blog/2011/09/06/new-domain-name/"/>
+    <updated>2011-09-06T21:58:00-04:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/06/new-domain-name</id>
+    <content type="html">&lt;p&gt;I haven't touched my blog for a while. Part of it is that I just didn't identify myself &quot;Awesomeful&quot; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so &lt;a href=&quot;http://twitter.com/hgimenez&quot;&gt;hit me up&lt;/a&gt; if you're interested - I'm talking to you mister &lt;code&gt;whois awesomeful.com&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Welcome to the new blog: &lt;em&gt;Practice Over Theory&lt;/em&gt;. I hope that the new name and engine inspire me to post more often.&lt;/p&gt;
+
+&lt;p&gt;Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a &lt;a href=&quot;http://octopress.org/docs/deploying/&quot;&gt;really weird method&lt;/a&gt; of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It's backed by jekyll and has a few nice addons, the most useful of which is it's code highlighting theme which is based on Solarized.&lt;/p&gt;
+
+&lt;p&gt;Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:&lt;/p&gt;
+
+&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
+&lt;span class='line'&gt;2&lt;/span&gt;
+&lt;span class='line'&gt;3&lt;/span&gt;
+&lt;span class='line'&gt;4&lt;/span&gt;
+&lt;span class='line'&gt;5&lt;/span&gt;
+&lt;span class='line'&gt;6&lt;/span&gt;
+&lt;span class='line'&gt;7&lt;/span&gt;
+&lt;span class='line'&gt;8&lt;/span&gt;
+&lt;span class='line'&gt;9&lt;/span&gt;
+&lt;span class='line'&gt;10&lt;/span&gt;
+&lt;span class='line'&gt;11&lt;/span&gt;
+&lt;span class='line'&gt;12&lt;/span&gt;
+&lt;span class='line'&gt;13&lt;/span&gt;
+&lt;span class='line'&gt;14&lt;/span&gt;
+&lt;span class='line'&gt;15&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;&lt;div class='line'&gt;&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;rubygems&amp;#39;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;sinatra&amp;#39;&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;REDIRECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;s1&quot;&gt;&amp;#39;awesomeful-post-1&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;new-location-1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;s1&quot;&gt;&amp;#39;awesomeful-post-2&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;new-location-2&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;s1&quot;&gt;            }&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;s1&quot;&gt;get &amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/*&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39; do |path|&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;s1&quot;&gt;  one_year_in_seconds = 31536000&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;s1&quot;&gt;  headers &amp;#39;&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Control&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39; =&amp;gt; &amp;quot;public, max-age=#{one_year_in_seconds}&amp;quot;,&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;s1&quot;&gt;          &amp;#39;&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Expires&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;#39;&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;one_year_in_seconds&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;httpdate&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;
+&lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;redirect&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;http://practiceovertheory.com/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REDIRECTS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;301&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Pretty neat, huh? The syntax highlighting, I mean.&lt;/p&gt;
+
+&lt;p&gt;Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a HTTP 301 permanent redirect. The interesting bit is the HTTP caching employed. Heroku's (awesome) varnish servers, and your browser, will remember that response for one year.&lt;/p&gt;
+
+&lt;p&gt;[1] it's a hash!&lt;/p&gt;
+</content>
+  </entry>
   
   <entry>
     <title>Machine Learning - Who's the Boss?</title>
@@ -1421,26 +1475,6 @@ $ /etc/rc.d/init.d/sendmail restart
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don't they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?&lt;/p&gt;
-</content>
-  </entry>
-  
-  <entry>
-    <title>How to use Java&#039;s URLEncoder.encode() method</title>
-    <link href="http://practiceovertheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/"/>
-    <updated>2006-09-07T23:15:39-04:00</updated>
-    <id>http://practiceovertheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method</id>
-    <content type="html">&lt;p&gt;For the lazy readers, here's how to use it:&lt;/p&gt;
-
-&lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
-&lt;/pre&gt;&lt;/td&gt;&lt;td class='code' width='100%'&gt;&lt;pre&gt;&lt;code class='java'&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encodedString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;URLEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;the key&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;=&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;URLEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;the value with any type of character such as @, ñ, or even ç!&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/div&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/figure&gt;&lt;/div&gt;
-
-
-&lt;p&gt;When &lt;a href=&quot;http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/&quot;&gt;POSTing to a URL&lt;/a&gt;, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.&lt;/p&gt;
-
-&lt;p&gt;Lookin at the &lt;a href=&quot;http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html&quot;&gt;javadocs for URLEncoder&lt;/a&gt;, we find that &lt;em&gt;normal&lt;/em&gt; alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.&lt;/p&gt;
-
-&lt;p&gt;The server expects something like &lt;code&gt;key1=value1&amp;amp;key2=value2&lt;/code&gt;. The &lt;code&gt;=&lt;/code&gt; and &lt;code&gt;&amp;amp;&lt;/code&gt; signs must be sent &lt;strong&gt;as is&lt;/strong&gt;, without encoding. The &lt;code&gt;URLEncoder.encode&lt;/code&gt; method is not &quot;smart&quot; enough to know that &lt;code&gt;=&lt;/code&gt; and &lt;code&gt;&amp;amp;&lt;/code&gt; are to be used as part of the URL. Of course, it isn't fair to assume that...&lt;/p&gt;
 </content>
   </entry>
   
