@@ -10,7 +10,7 @@ The industry: Healthcare. The goal: Improve patient's lives by changing the way 
 
 ### The stack
 
-Rails 3.1, Backbone.js, Coffeescript, PostgreSQL, Cucumber, RSpec and Jasmine.
+Rails 3.1, Backbone.js, Coffeescript, faye, PostgreSQL, Cucumber, RSpec and Jasmine.
 
 ### The process
 
