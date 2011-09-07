@@ -91,13 +91,13 @@
 </div><div class='line'>
 </div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
 </div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
-</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2</span>
-</div><div class='line'><span class="s1">            }</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2&#39;</span>
+</div><div class='line'>            <span class="p">}</span>
 </div><div class='line'>
-</div><div class='line'><span class="s1">get &#39;</span><span class="o">/*</span><span class="s1">&#39; do |path|</span>
-</div><div class='line'><span class="s1">  one_year_in_seconds = 31536000</span>
-</div><div class='line'><span class="s1">  headers &#39;</span><span class="no">Cache</span><span class="o">-</span><span class="no">Control</span><span class="s1">&#39; =&gt; &quot;public, max-age=#{one_year_in_seconds}&quot;,</span>
-</div><div class='line'><span class="s1">          &#39;</span><span class="no">Expires</span><span class="err">&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
+</div><div class='line'><span class="n">get</span> <span class="s1">&#39;/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">path</span><span class="o">|</span>
+</div><div class='line'>  <span class="n">one_year_in_seconds</span> <span class="o">=</span> <span class="mi">31536000</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Cache-Control&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;public, max-age=</span><span class="si">#{</span><span class="n">one_year_in_seconds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Expires&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
 </div><div class='line'>
 </div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
 </div><div class='line'><span class="k">end</span>
