@@ -20,6 +20,6 @@ Daily standups, TDD, code reviews via github pull requests.
 
 A highly responsive non-trivial app with a very clean code base and beautiful design.
 
-The future holds a mobile app, web service integrations and improvements to the current code base.
+The future holds a mobile app, web service integrations and ongoing maintenance to the current code base.
 
-If you live in the Boston area, you should apply. If you don't, you should move here. [Right here](http://thoughtbot.com/jobs/iora/developer/)
+If you live in the Boston area, you should apply. If you don't, you should move here. [Right here](http://thoughtbot.com/jobs/iora/developer/).
