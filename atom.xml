@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-06T23:05:44-04:00</updated>
+  <updated>2011-09-06T23:12:15-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -48,7 +48,7 @@
 &lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;no&quot;&gt;REDIRECTS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 &lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;s1&quot;&gt;&amp;#39;awesomeful-post-1&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;new-location-1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
 &lt;/div&gt;&lt;div class='line'&gt;              &lt;span class=&quot;s1&quot;&gt;&amp;#39;awesomeful-post-2&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;new-location-2&amp;#39;&lt;/span&gt;
-&lt;/div&gt;&lt;div class='line'&gt;            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/div&gt;&lt;div class='line'&gt;            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;freeze&lt;/span&gt;
 &lt;/div&gt;&lt;div class='line'&gt;
 &lt;/div&gt;&lt;div class='line'&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/*&amp;#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
 &lt;/div&gt;&lt;div class='line'&gt;  &lt;span class=&quot;n&quot;&gt;one_year_in_seconds&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;31536000&lt;/span&gt;
