@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title>Practice Above Theory</title>
-  <link href="http://practiceabovetheory.com/atom.xml" rel="self"/>
-  <link href="http://practiceabovetheory.com/"/>
-  <updated>2011-09-06T20:29:11-04:00</updated>
-  <id>http://practiceabovetheory.com/</id>
+  <title>Practice Over Theory</title>
+  <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
+  <link href="http://practiceovertheory.com/"/>
+  <updated>2011-09-06T20:31:05-04:00</updated>
+  <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
     
@@ -16,9 +16,9 @@
   
   <entry>
     <title>Machine Learning - Who's the Boss?</title>
-    <link href="http://practiceabovetheory.com/blog/2010/02/15/machine-learning-who-s-the-boss/"/>
+    <link href="http://practiceovertheory.com/blog/2010/02/15/machine-learning-who-s-the-boss/"/>
     <updated>2010-02-15T15:48:42-05:00</updated>
-    <id>http://practiceabovetheory.com/blog/2010/02/15/machine-learning-who-s-the-boss</id>
+    <id>http://practiceovertheory.com/blog/2010/02/15/machine-learning-who-s-the-boss</id>
     <content type="html">&lt;p&gt;In the Machine Learning field, there are two types of algorithms that can be applied to a set of data to solve different kinds of problems: &lt;em&gt;Supervised&lt;/em&gt; and &lt;em&gt;Unsupervised&lt;/em&gt; learning algorithms. Both of these have in common that they aim to extract information or gain knowledge from the raw data that would otherwise be very hard and unpractical to do. This is because we live in very dynamic environments with changing parameters and vast amounts of data being gathered. This data hides important patterns and correlations that are sometimes impossible to deduce manually, and where computing power and smart algorithms excel. They are also heavily dependent on the quantity and quality of the input data, and as such, evolve in their output and accuracy as more and better input data becomes available.&lt;/p&gt;
 
 &lt;p&gt;In this article we will walk through what constitues Supervised and Unsupervised Learning. An overview of the language and terms is presented, as well as the general workflow used for machine learning tasks.&lt;/p&gt;
@@ -128,9 +128,9 @@
   
   <entry>
     <title>Experiences porting a helper plugin to Rails 3</title>
-    <link href="http://practiceabovetheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3/"/>
+    <link href="http://practiceovertheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3/"/>
     <updated>2010-01-17T19:55:45-05:00</updated>
-    <id>http://practiceabovetheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3</id>
+    <id>http://practiceovertheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3</id>
     <content type="html">&lt;p&gt;Today I spent a few minutes porting &lt;a href=&quot;http://github.com/hgimenez/truncate_html&quot;&gt;truncate_html&lt;/a&gt; to Rails 3. This gem/plugin provides you with the &lt;code&gt;truncate_html()&lt;/code&gt; helper method, which is very similar to rails' &lt;code&gt;truncate()&lt;/code&gt;, but it takes care of closing open html tags and other peculiarities of truncating HTML. It works by using regular expressions and does not have any dependencies. I use this gem on this blog, as well as on the &lt;a href=&quot;http://bostonrb.org&quot;&gt;bostonrb.org&lt;/a&gt; site. Some other people have found it to be &lt;a href=&quot;http://twitter.com/dolzenko/status/6428360551&quot;&gt;useful&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;One of the promises of Rails 3 is that there is an &lt;a href=&quot;http://www.engineyard.com/blog/2010/rails-and-merb-merge-plugin-api-part-3-of-6/&quot;&gt;API for plugin developers&lt;/a&gt; that will allow you to hook into the right parts of Rails to add the functionality that your plugin provides. This means that you should not be mixing in or monkeypatching Rails core willy-nilly. In fact, it is now expected for you as a plugin developer to figure out how to hook into the right parts of Rails using the new API, as opposed to doing something like the following:&lt;/p&gt;
@@ -169,9 +169,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>Spec your yields in RSpec</title>
-    <link href="http://practiceabovetheory.com/blog/2009/09/25/spec-your-yields-in-rspec/"/>
+    <link href="http://practiceovertheory.com/blog/2009/09/25/spec-your-yields-in-rspec/"/>
     <updated>2009-09-25T20:31:37-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/09/25/spec-your-yields-in-rspec</id>
+    <id>http://practiceovertheory.com/blog/2009/09/25/spec-your-yields-in-rspec</id>
     <content type="html">&lt;p&gt;Message expectations in RSpec's Mocking/Stubing framework provide means for spec'ing the yielded objects of a method. For example, consider the following spec where we expect the &lt;code&gt;here_i_am&lt;/code&gt; method to &lt;code&gt;yield self&lt;/code&gt;:&lt;/p&gt;
 
 &lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
@@ -330,9 +330,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>An object quacks like a duck</title>
-    <link href="http://practiceabovetheory.com/blog/2009/09/24/an-object-quacks-like-a-duck/"/>
+    <link href="http://practiceovertheory.com/blog/2009/09/24/an-object-quacks-like-a-duck/"/>
     <updated>2009-09-24T21:58:19-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/09/24/an-object-quacks-like-a-duck</id>
+    <id>http://practiceovertheory.com/blog/2009/09/24/an-object-quacks-like-a-duck</id>
     <content type="html">&lt;p&gt;I've been toying around with the idea of spec'ing mixins: that a class includes a module. Suppose the following class:&lt;/p&gt;
 
 &lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
@@ -432,9 +432,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>PostgreSQL's group by</title>
-    <link href="http://practiceabovetheory.com/blog/2009/09/23/postgresql-s-group-by/"/>
+    <link href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/"/>
     <updated>2009-09-23T17:30:53-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/09/23/postgresql-s-group-by</id>
+    <id>http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by</id>
     <content type="html">&lt;p&gt;Last night I noticed a user on IRC complaint on two different channels (#heroku and #rubyonrails) claiming something along the lines of &quot;PostgreSQL sucks: i have this code&lt;/p&gt;
 
 &lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
@@ -569,9 +569,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>Three ActiveRecord model utility methods</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/"/>
     <updated>2009-08-31T20:40:34-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/31/three-activerecord-model-utility-methods</id>
+    <id>http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods</id>
     <content type="html">&lt;p&gt;Lately I've found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. These methods leverage functionality of either Ruby by itself or Rails that will become helpful in other parts of your application.&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://www.flickr.com/photos/adams_views/3096986188/&quot;&gt;&lt;img src=&quot;http://farm4.static.flickr.com/3057/3096986188_0599337f47.jpg&quot; title=&quot;Visit original on Flickr&quot;&gt;&lt;/a&gt;&lt;/p&gt;
@@ -632,9 +632,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>On the subject of Enterprise Reporting</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting/"/>
     <updated>2009-08-26T20:04:12-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting</id>
+    <id>http://practiceovertheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting</id>
     <content type="html">&lt;p&gt;Apparently this is how reporting works in big corporate environments.&lt;/p&gt;
 
 &lt;ol&gt;
@@ -653,9 +653,9 @@ ActionController::Base or any controller which inherits from it.
   
   <entry>
     <title>Small collection of useful vim tricks</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/"/>
     <updated>2009-08-18T16:44:42-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks</id>
+    <id>http://practiceovertheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks</id>
     <content type="html">&lt;p&gt;I've been using vim for the past couple of years. Vim is a cross-platform programmer's editor that is highly customizable and has a ton of well known and not-so well known features. As time goes by, I always come across new or better ways of doing things that increase productivity. What's most important is to force yourself to start using them so that they become part of your workflow, becoming muscle memory.&lt;/p&gt;
 
 &lt;p&gt;Here's a small collection of tips that I've picked up along the way:&lt;/p&gt;
@@ -742,9 +742,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>On the subject of e-voting</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/15/on-the-subject-of-e-voting/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/15/on-the-subject-of-e-voting/"/>
     <updated>2009-08-15T21:52:37-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/15/on-the-subject-of-e-voting</id>
+    <id>http://practiceovertheory.com/blog/2009/08/15/on-the-subject-of-e-voting</id>
     <content type="html">&lt;p&gt;May sound bitter, but this is exactly how I feel about e-voting. Not only are there many &lt;a href=&quot;http://en.wikipedia.org/wiki/Electronic_voting#Documented_problems&quot;&gt;documented issues&lt;/a&gt;, but it is just too easy to under/over count. Draw your own conclusions.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://farm4.static.flickr.com/3516/3823734007_72df752ec3.jpg&quot; width=&quot;500&quot; height=&quot;294&quot; alt=&quot;On the subject of e-voting&quot; /&gt;&lt;/p&gt;
@@ -753,9 +753,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>On the subject of average body weight by day of the week</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/"/>
     <updated>2009-08-07T23:37:34-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week</id>
+    <id>http://practiceovertheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week</id>
     <content type="html">&lt;p&gt;I have been diligently keeping track of my weight, every day, for the past 10 years. It's taken significant effort but persistence's my middle name.&lt;/p&gt;
 
 &lt;p&gt;Here's a chart of my average weight by day of the week:&lt;/p&gt;
@@ -766,9 +766,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Sortable lists with JQuery in Rails</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails/"/>
     <updated>2009-08-07T01:35:30-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails</id>
+    <id>http://practiceovertheory.com/blog/2009/08/07/sortable-lists-with-jquery-in-rails</id>
     <content type="html">&lt;p&gt;Drag 'n Drop sortable lists are a great way to provide a UI for sorting, well, lists of things. Most Rails examples &lt;a href=&quot;http://railscasts.com/episodes/147-sortable-lists&quot;&gt;out&lt;/a&gt; &lt;a href=&quot;http://blog.wyeworks.com/2009/7/27/drag-drop-sortable-lists&quot;&gt;in&lt;/a&gt; &lt;a href=&quot;http://harryche2008.wordpress.com/2008/07/19/how-to-do-ajax-style-drag-n-drop-sorting-with-rails/&quot;&gt;the&lt;/a&gt; &lt;a href=&quot;http://www.devarticles.com/c/a/Ruby-on-Rails/Dropping-and-Sorting-with-AJAX-and-scriptaculous/2/&quot;&gt;wild&lt;/a&gt; use prototype/scriptaculous and the built in Rails javascript helpers. In this walkthrough we'll provide the same functionality using JQuery instead. We will not be using the &lt;a href=&quot;http://api.rubyonrails.org/classes/ActionView/Helpers/ScriptaculousHelper.html#M001640&quot;&gt;built in Rails javascript helper&lt;/a&gt;. Instead we'll write Unobstrusive Javascript using JQuery.&lt;/p&gt;
 
 &lt;p&gt;For this example we'll use a UserStory and a Task model:&lt;/p&gt;
@@ -1094,9 +1094,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>PostgreSQL, Rails, and why you should care</title>
-    <link href="http://practiceabovetheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/"/>
+    <link href="http://practiceovertheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/"/>
     <updated>2009-08-03T12:59:46-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care</id>
+    <id>http://practiceovertheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care</id>
     <content type="html">&lt;p&gt;MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance, efficiency, feature set, configurability, and seamless integration in your Rails projects.&lt;/p&gt;
 
 &lt;h3&gt;PostgreSQL Features&lt;/h3&gt;
@@ -1136,9 +1136,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Attach non image files in Rails with paperclip</title>
-    <link href="http://practiceabovetheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/"/>
+    <link href="http://practiceovertheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/"/>
     <updated>2009-05-19T18:40:10-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip</id>
+    <id>http://practiceovertheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip</id>
     <content type="html">&lt;p&gt;Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to &lt;a href=&quot;http://dev.thoughtbot.com/paperclip/classes/Paperclip/Processor.html&quot;&gt;create her own post-processing code&lt;/a&gt; (such as OCR or others), and provides callbacks for before and after post-processing.This post does not cover getting started with paperclip. There are plenty of other posts that cover that. The intent is to get you up and running on using paperclip to attach non-image files.&lt;/p&gt;
 
 &lt;p&gt;Out of the box, the default post processor invoked upon upload is the &lt;a href=&quot;http://dev.thoughtbot.com/paperclip/classes/Paperclip/Thumbnail.html&quot;&gt;Paperclip::Thumbnail&lt;/a&gt; processor. This processor creates thumbnails of an image based on the styles hash passed to the &lt;code&gt;has_attached_file&lt;/code&gt; method. If you want to upload word documents, excel files, and other non-image data, the Thumbnail processor will fail, and the attachment will not succeed. This processor does not check if the file itself is an image, and tries to call ImageMagick's identify command on the file anyways.&lt;/p&gt;
@@ -1164,9 +1164,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Really silly percentage calculation in Ruby</title>
-    <link href="http://practiceabovetheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/"/>
+    <link href="http://practiceovertheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/"/>
     <updated>2009-03-22T15:56:07-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby</id>
+    <id>http://practiceovertheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby</id>
     <content type="html">&lt;p&gt;Here's a silly way to calculate percentages of numbers in a Ruby project or Rails app.&lt;/p&gt;
 
 &lt;p&gt;The end result of this is having created a few methods for Ruby numeric classes that allow you to calculate percentages:&lt;/p&gt;
@@ -1279,9 +1279,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Flash messages Rails helper plugin</title>
-    <link href="http://practiceabovetheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin/"/>
+    <link href="http://practiceovertheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin/"/>
     <updated>2008-12-21T03:45:48-05:00</updated>
-    <id>http://practiceabovetheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin</id>
+    <id>http://practiceovertheory.com/blog/2008/12/21/flash-messages-rails-helper-plugin</id>
     <content type="html">&lt;p&gt;I just pushed my first &lt;a href=&quot;http://github.com/hgimenez/sexy_flash&quot;&gt;Rails plugin&lt;/a&gt; to github(http://github.com) .&lt;/p&gt;
 
 &lt;p&gt;This is dead simple: it provides a helper for showing flash messages on your Rails apps with scriptaculous appear/fade effects.&lt;/p&gt;
@@ -1301,9 +1301,9 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Installing FANN and ruby-fann on Fedora Core 9</title>
-    <link href="http://practiceabovetheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/"/>
+    <link href="http://practiceovertheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/"/>
     <updated>2008-08-01T11:07:30-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9</id>
+    <id>http://practiceovertheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9</id>
     <content type="html">&lt;p&gt;As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:&lt;/p&gt;
 
 &lt;ul&gt;
@@ -1350,9 +1350,9 @@ libfloatfann.so.2.0.1&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>Cannot connect to SQL Server 2005 Express</title>
-    <link href="http://practiceabovetheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/"/>
+    <link href="http://practiceovertheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/"/>
     <updated>2007-11-28T16:09:52-05:00</updated>
-    <id>http://practiceabovetheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express</id>
+    <id>http://practiceovertheory.com/blog/2007/11/28/cannot-connect-to-sql-server-2005-express</id>
     <content type="html">&lt;p&gt;(Very old news, but I keep having to go back to this)&lt;/p&gt;
 
 &lt;p&gt;If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can't connect to a MS SQL Server 2005 Express Edition installation, follow these steps:&lt;/p&gt;
@@ -1374,9 +1374,9 @@ libfloatfann.so.2.0.1&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
   
   <entry>
     <title>GnuPG on MacOS X (Apple Mail)</title>
-    <link href="http://practiceabovetheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail/"/>
+    <link href="http://practiceovertheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail/"/>
     <updated>2007-02-11T19:48:21-05:00</updated>
-    <id>http://practiceabovetheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail</id>
+    <id>http://practiceovertheory.com/blog/2007/02/11/gnupg-on-macos-x-apple-mail</id>
     <content type="html">&lt;ul&gt;
 &lt;li&gt;&lt;p&gt;Install GnuPG. &lt;a href=&quot;http://macgpg.sourceforge.net/&quot;&gt;http://macgpg.sourceforge.net/&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Create a key pair:
@@ -1396,9 +1396,9 @@ Open Mail, and go to preferences (Apple + ,). Defaults are fine.&lt;/p&gt;&lt;/l
   
   <entry>
     <title>Stop spam on sendmail</title>
-    <link href="http://practiceabovetheory.com/blog/2006/09/15/stop-spam-on-sendmail/"/>
+    <link href="http://practiceovertheory.com/blog/2006/09/15/stop-spam-on-sendmail/"/>
     <updated>2006-09-15T22:50:44-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2006/09/15/stop-spam-on-sendmail</id>
+    <id>http://practiceovertheory.com/blog/2006/09/15/stop-spam-on-sendmail</id>
     <content type="html">&lt;p&gt;Lately the number of spam messages has grown very rapidly on my organization's sendmail server. There's a few things you can do. Here are two which helped considerably:&lt;/p&gt;
 
 &lt;ol&gt;
@@ -1426,9 +1426,9 @@ $ /etc/rc.d/init.d/sendmail restart
   
   <entry>
     <title>How to use Java&#039;s URLEncoder.encode() method</title>
-    <link href="http://practiceabovetheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/"/>
+    <link href="http://practiceovertheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/"/>
     <updated>2006-09-07T23:15:39-04:00</updated>
-    <id>http://practiceabovetheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method</id>
+    <id>http://practiceovertheory.com/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method</id>
     <content type="html">&lt;p&gt;For the lazy readers, here's how to use it:&lt;/p&gt;
 
 &lt;div&gt;&lt;figure role=code&gt; &lt;div class=&quot;highlight&quot;&gt;&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre class=&quot;line-numbers&quot;&gt;&lt;span class='line'&gt;1&lt;/span&gt;
