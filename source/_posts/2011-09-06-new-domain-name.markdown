@@ -5,7 +5,7 @@ date: 2011-09-06 21:58
 comments: true
 ---
 
-I haven't touched my blog for a while. Part of it is that I just didn't identify myself "Awesomeful" any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so [hit me up](http://twitter.com/hgimenez) if you're interested - I'm talking to you mister `whois awesomeful.com`.
+I haven't touched my blog for a while. Part of it is that I just didn't identify myself with "Awesomeful" any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so [hit me up](http://twitter.com/hgimenez) if you're interested - I'm talking to you mister `whois awesomeful.com`.
 
 Welcome to the new blog: *Practice Over Theory*. I hope that the new name and engine inspire me to post more often.
 
