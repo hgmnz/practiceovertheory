@@ -52,9 +52,11 @@ body {
   }
 }
 
+/* typography */
 body {
   font-family: "Helvetical Neue", Helvetica, "Lucida Grande", Arial, Verdana, sans-serif !important;
   font-weight: normal !important;
+  color: #2b2d2f;
 }
 
 h1, h2, h3, h4, h5, h6, h7, h8 {
@@ -62,10 +64,8 @@ h1, h2, h3, h4, h5, h6, h7, h8 {
   font-weight: normal;
 }
 
+/* entry overrides */
 article {
-  header {
-    color: #2b2d2f;
-  }
   .entry-content {
     color: #3d4045;
     a {
@@ -74,5 +74,23 @@ article {
         color: #4669a2;
       }
     }
+  }
+}
+
+body > footer {
+  @extend .clearfix;
+  background: #2b2d2f;
+  color: #f0f0f0;
+  text-shadow: none;
+  border: none;
+  a, a:visited, a:hover {
+    color: #91b3c2;
+  }
+  .copyright-and-license {
+    float: left;
+  }
+  .credit {
+    font-size: 0.8em;
+    float: right;
   }
 }
