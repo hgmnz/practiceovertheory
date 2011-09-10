@@ -1,2 +1,52 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+
+.clearfix:before, .clearfix:after {
+  content: "\0020";
+  display: block;
+  height: 0;
+  visibility: hidden;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+/* Fix clearfix: blueprintcss.lighthouseapp.com/projects/15318/tickets/5-extra-margin-padding-bottom-of-page */
+.clearfix {
+  zoom: 1;
+}
+
+body {
+  > header {
+    padding-top: 0.2em;
+    padding-bottom: 1em;
+    background: #2b2d2f;
+    h1 {
+      #logo {
+        @extend .clearfix;
+        font-family: 'Dancing Script', cursive;
+        width: 150px;
+        #practice {
+          float: left;
+          clear: right;
+          border-bottom: 2px solid;
+        }
+        #over {
+          display: none;
+        }
+        #theory {
+          float: left;
+          margin-top: -8px;
+        }
+      }
+      a {
+        text-decoration: none;
+        /* color: #99b2b7; */
+      }
+    }
+    h2 {
+      color: #e3d2cc;
+    }
+  }
+}
