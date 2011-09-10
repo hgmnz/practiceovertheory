@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-10T14:10:11-04:00</updated>
+  <updated>2011-09-10T18:53:25-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -19,7 +19,7 @@
     <link href="http://practiceovertheory.com/blog/2011/09/10/design-tweaks/"/>
     <updated>2011-09-10T13:46:00-04:00</updated>
     <id>http://practiceovertheory.com/blog/2011/09/10/design-tweaks</id>
-    <content type="html">&lt;p&gt;Today I made a few design tweaks to this blog. The goals was to move a bit away from the stock default octopress theme - but my design chops aren't all that great and I can't really budget the time to do a design from scratch.&lt;/p&gt;
+    <content type="html">&lt;p&gt;Today I made a few design tweaks to this blog. The goal is to move a bit away from the stock default octopress theme - but my design chops aren't all that great and I can't really budget the time to do a design from scratch.&lt;/p&gt;
 
 &lt;p&gt;A few simple changes and I'm OK with how it looks for now:&lt;/p&gt;
 
