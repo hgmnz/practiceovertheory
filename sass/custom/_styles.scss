@@ -22,11 +22,14 @@ body {
   > header {
     padding-top: 0.2em;
     padding-bottom: 1em;
-    background: #2b2d2f;
+    background: #f2f2f2;
+    border-bottom: 1px solid #eaeaea;
     h1 {
       #logo {
+        color: #242021;
         @extend .clearfix;
         font-family: 'Dancing Script', cursive;
+        text-shadow: 1px 0 white;
         width: 150px;
         #practice {
           float: left;
@@ -46,9 +49,6 @@ body {
         /* color: #99b2b7; */
       }
     }
-    h2 {
-      color: #e3d2cc;
-    }
   }
 }
 
@@ -62,6 +62,11 @@ body {
 h1, h2, h3, h4, h5, h6, h7, h8 {
   font-family: 'Antic', sans-serif;
   font-weight: normal;
+}
+
+/* background pattern */
+html {
+  background: image-url('dark-wood.jpg') top left !important;
 }
 
 /* entry overrides */
@@ -79,8 +84,9 @@ article {
 
 body > footer {
   @extend .clearfix;
-  background: #2b2d2f;
-  color: #f0f0f0;
+  border-top: 1px solid #eaeaea;
+  background: #f2f2f2;
+  color: #242021;
   text-shadow: none;
   border: none;
   a, a:visited, a:hover {
@@ -93,4 +99,5 @@ body > footer {
     font-size: 0.8em;
     float: right;
   }
+  padding-bottom: 0;
 }
