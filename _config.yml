@@ -9,8 +9,7 @@ author: Harold Giménez
 simple_search: http://google.com/search
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
-subscribe_rss: /atom.xml
-# RSS feeds can list your email address if you like
+subscribe_rss: http://feeds.feedburner.com/practiceovertheory
 email: harold.gimenez@gmail.com
 
 # ----------------------- #
