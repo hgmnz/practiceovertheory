@@ -133,3 +133,8 @@ aside section {
     font-size: 1.2em;
   }
 }
+
+::selection {
+  background-color: #303030;
+  color: #f1f1f1;
+}
