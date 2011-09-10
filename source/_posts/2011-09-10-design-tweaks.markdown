@@ -5,7 +5,7 @@ date: 2011-09-10 13:46
 comments: true
 ---
 
-Today I made a few design tweaks to this blog. The goals was to move a bit away from the stock default octopress theme - but my design chops aren't all that great and I can't really budget the time to do a design from scratch.
+Today I made a few design tweaks to this blog. The goal is to move a bit away from the stock default octopress theme - but my design chops aren't all that great and I can't really budget the time to do a design from scratch.
 
 A few simple changes and I'm OK with how it looks for now:
 
