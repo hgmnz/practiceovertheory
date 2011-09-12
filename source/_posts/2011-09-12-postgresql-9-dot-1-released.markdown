@@ -23,7 +23,7 @@ CREATE TABLE UNLOGGED some_stats(value int)
 
 * SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built [some nifty foreign data wrappers]( http://wiki.postgresql.org/wiki/Foreign_data_wrappers) for mysql, oracle, and even redis and couchdb. Although I'm of the mind that if you're actually using any of these databases to supplement your app's data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.
 
-* You no longer need to specify all columns on a select list from your GROUP BY clause: functionaly dependant columns are infered by the planner, so specifying a primary key is sufficient. I [talked about this before](http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/), and it's a cause of great frustration to users coming from MySQL.
+* You no longer need to specify all columns on a select list from your GROUP BY clause: functionally dependent columns are inferred by the planner, so specifying a primary key is sufficient. I [talked about this before](http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/), and it's a cause of great frustration to users coming from MySQL.
 
 There's much more in this release. Here are the [release notes](http://www.postgresql.org/docs/9.1/static/release-9-1.html).
 
