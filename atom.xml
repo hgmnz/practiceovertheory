@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-12T10:20:26-04:00</updated>
+  <updated>2011-09-12T10:22:24-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -38,7 +38,7 @@
 
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built &lt;a href=&quot;http://wiki.postgresql.org/wiki/Foreign_data_wrappers&quot;&gt;some nifty foreign data wrappers&lt;/a&gt; for mysql, oracle, and even redis and couchdb. Although I'm of the mind that if you're actually using any of these databases to supplement your app's data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;You no longer need to specify all columns on a select list from your GROUP BY clause: functionaly dependant columns are infered by the planner, so specifying a primary key is sufficient. I &lt;a href=&quot;http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/&quot;&gt;talked about this before&lt;/a&gt;, and it's a cause of great frustration to users coming from MySQL.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;You no longer need to specify all columns on a select list from your GROUP BY clause: functionally dependent columns are inferred by the planner, so specifying a primary key is sufficient. I &lt;a href=&quot;http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/&quot;&gt;talked about this before&lt;/a&gt;, and it's a cause of great frustration to users coming from MySQL.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 

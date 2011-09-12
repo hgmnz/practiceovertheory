@@ -91,7 +91,7 @@
 
 <ul>
 <li><p>SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built <a href="http://wiki.postgresql.org/wiki/Foreign_data_wrappers">some nifty foreign data wrappers</a> for mysql, oracle, and even redis and couchdb. Although I&#8217;m of the mind that if you&#8217;re actually using any of these databases to supplement your app&#8217;s data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.</p></li>
-<li><p>You no longer need to specify all columns on a select list from your GROUP BY clause: functionaly dependant columns are infered by the planner, so specifying a primary key is sufficient. I <a href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/">talked about this before</a>, and it&#8217;s a cause of great frustration to users coming from MySQL.</p></li>
+<li><p>You no longer need to specify all columns on a select list from your GROUP BY clause: functionally dependent columns are inferred by the planner, so specifying a primary key is sufficient. I <a href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/">talked about this before</a>, and it&#8217;s a cause of great frustration to users coming from MySQL.</p></li>
 </ul>
 
 
