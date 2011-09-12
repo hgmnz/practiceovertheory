@@ -74,10 +74,10 @@
 
 <div class="entry-content"><p>Version 9.1 of PostgreSQL was <a href="http://www.postgresql.org/about/news.1349">released</a> yesterday.</p>
 
-<p>Among the exiting new features there is:</p>
+<p>Among the exciting new features there is:</p>
 
 <ul>
-<li><p><code>pg_basebackup</code> - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine <a href="http://heroku.com">heroku</a> adopting this as an even faster and reliable way to sync you&#8217;re production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.</p></li>
+<li><p><code>pg_basebackup</code> - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine <a href="http://heroku.com">heroku</a> adopting this as an even faster and reliable way to sync your production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.</p></li>
 <li><p>Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing <code>SET synchronous_commit TO off</code>.</p></li>
 <li><p>The new <code>pg_stat_replication</code> view displays the replication status of all slaves from a master node.</p></li>
 <li><p>Unlogged tables. What? Postgres supports unlogged tables now? Yes, it does. They can be used for data you don&#8217;t necessarily care about, and a crash will truncate all data. They are much faster to write to and could be useful for caching data or keeping stats that can be rebuilt. You can create them like so:</p></li>

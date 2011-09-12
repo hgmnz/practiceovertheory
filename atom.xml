@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-12T09:52:59-04:00</updated>
+  <updated>2011-09-12T10:20:26-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -21,10 +21,10 @@
     <id>http://practiceovertheory.com/blog/2011/09/12/postgresql-9-dot-1-released</id>
     <content type="html">&lt;p&gt;Version 9.1 of PostgreSQL was &lt;a href=&quot;http://www.postgresql.org/about/news.1349&quot;&gt;released&lt;/a&gt; yesterday.&lt;/p&gt;
 
-&lt;p&gt;Among the exiting new features there is:&lt;/p&gt;
+&lt;p&gt;Among the exciting new features there is:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;code&gt;pg_basebackup&lt;/code&gt; - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine &lt;a href=&quot;http://heroku.com&quot;&gt;heroku&lt;/a&gt; adopting this as an even faster and reliable way to sync you're production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;pg_basebackup&lt;/code&gt; - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine &lt;a href=&quot;http://heroku.com&quot;&gt;heroku&lt;/a&gt; adopting this as an even faster and reliable way to sync your production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing &lt;code&gt;SET synchronous_commit TO off&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;The new &lt;code&gt;pg_stat_replication&lt;/code&gt; view displays the replication status of all slaves from a master node.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Unlogged tables. What? Postgres supports unlogged tables now? Yes, it does. They can be used for data you don't necessarily care about, and a crash will truncate all data. They are much faster to write to and could be useful for caching data or keeping stats that can be rebuilt. You can create them like so:&lt;/p&gt;&lt;/li&gt;
