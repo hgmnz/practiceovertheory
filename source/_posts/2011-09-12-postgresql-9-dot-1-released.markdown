@@ -7,9 +7,9 @@ comments: true
 
 Version 9.1 of PostgreSQL was [released](http://www.postgresql.org/about/news.1349) yesterday.
 
-Among the exiting new features there is:
+Among the exciting new features there is:
 
-* `pg_basebackup` - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine [heroku](http://heroku.com) adopting this as an even faster and reliable way to sync you're production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.
+* `pg_basebackup` - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine [heroku](http://heroku.com) adopting this as an even faster and reliable way to sync your production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.
 
 * Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing `SET synchronous_commit TO off`.
 
