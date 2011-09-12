@@ -57,6 +57,49 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2009/08/26/on-the-subject-of-enterprise-reporting/">On the Subject of Enterprise Reporting</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2009-08-26T20:04:12-04:00" pubdate  data-updated="true" >Aug 26<span>th</span>, 2009</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Apparently this is how reporting works in big corporate environments.</p>
+
+<ol>
+<li>We have a bunch of data, terabytes. There&#8217;s got to be something in there.</li>
+<li>After a few months of cranking, the analyst comes up with a one page report with significant statistics and a couple of charts. This is the first, alpha version of the report.</li>
+<li>Manager receives report. Loves it, since it&#8217;s the first time they can see the deficiencies in the overall system, and sees opportunities for savings, optimization, improvement.</li>
+<li>Manger passes it along to another set of managers, maybe by region, for constructive feedback.</li>
+<li>A few weeks later, all feedback is taken in, and the analyst implements all of the new requirements into the new, 40 page report.</li>
+<li>Report is sent out quarterly, where it sits on top of a pile labeled TO READ.</li>
+</ol>
+
+
+<p><img src="http://farm3.static.flickr.com/2604/3859340277_0bae706b4a.jpg" width="500" height="365" alt="On the subject of Enterprise Reporting" /></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2009/08/18/small-collection-of-useful-vim-tricks/">Small Collection of Useful Vim Tricks</a></h1>
     
     
@@ -940,52 +983,6 @@ libfloatfann.so.2.0.1</code></p></li>
 <p>Now, use ruby-gems to install the ruby-fann bindings:</p>
 
 <p><code>sudo gem install ruby-fann</code></p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/">Cannot Connect to SQL Server 2005 Express</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2007-11-28T16:09:52-05:00" pubdate  data-updated="true" >Nov 28<span>th</span>, 2007</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>(Very old news, but I keep having to go back to this)</p>
-
-<p>If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can&#8217;t connect to a MS SQL Server 2005 Express Edition installation, follow these steps:</p>
-
-<ul>
-<li><p>Launch <code>SQL Server Configuration Manager</code></p></li>
-<li><p>Click on <code>SQL Server 2005 Network Configuration</code></p></li>
-<li><p>Click on <code>Protocols for MSSERVER</code> => <code>right click on TCP/IP</code> => <code>properties</code></p></li>
-<li><p>Click on <code>Protocols</code>, make sure it is enabled</p></li>
-<li><p>Click on <code>IP Addresses</code> and make sure under each of the <code>IP1</code>, <code>IP2</code> and <code>IPAll</code>, that the port is <code>1433</code></p></li>
-<li><p>Click on <code>SQL Native Client Configuration</code></p></li>
-<li><p>Click on <code>Client protocols</code> => <code>TCP/IP</code> => right click => <code>Properties</code> => make sure the <code>port</code> is <code>1433</code></p></li>
-<li><p>Right click on <code>Alias</code> => <code>New alias</code> => <code>Alias</code>: <code>any name</code>. Port<code>:</code>1433<code>.</code>Server`: host name for the SQL Server Express instance</p></li>
-<li><p>Try to connect</p></li>
-</ul>
-
 </div>
   
   

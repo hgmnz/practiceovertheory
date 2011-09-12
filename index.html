@@ -57,6 +57,62 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2011/09/12/postgresql-9-dot-1-released/">PostgreSQL 9.1 Released</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2011-09-12T09:18:00-04:00" pubdate  data-updated="true" >Sep 12<span>th</span>, 2011</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Version 9.1 of PostgreSQL was <a href="http://www.postgresql.org/about/news.1349">released</a> yesterday.</p>
+
+<p>Among the exiting new features there is:</p>
+
+<ul>
+<li><p><code>pg_basebackup</code> - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine <a href="http://heroku.com">heroku</a> adopting this as an even faster and reliable way to sync you&#8217;re production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.</p></li>
+<li><p>Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing <code>SET synchronous_commit TO off</code>.</p></li>
+<li><p>The new <code>pg_stat_replication</code> view displays the replication status of all slaves from a master node.</p></li>
+<li><p>Unlogged tables. What? Postgres supports unlogged tables now? Yes, it does. They can be used for data you don&#8217;t necessarily care about, and a crash will truncate all data. They are much faster to write to and could be useful for caching data or keeping stats that can be rebuilt. You can create them like so:</p></li>
+</ul>
+
+
+<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">UNLOGGED</span> <span class="n">some_stats</span><span class="p">(</span><span class="n">value</span> <span class="nb">int</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure></div>
+
+
+<ul>
+<li><p>SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built <a href="http://wiki.postgresql.org/wiki/Foreign_data_wrappers">some nifty foreign data wrappers</a> for mysql, oracle, and even redis and couchdb. Although I&#8217;m of the mind that if you&#8217;re actually using any of these databases to supplement your app&#8217;s data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.</p></li>
+<li><p>You no longer need to specify all columns on a select list from your GROUP BY clause: functionaly dependant columns are infered by the planner, so specifying a primary key is sufficient. I <a href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/">talked about this before</a>, and it&#8217;s a cause of great frustration to users coming from MySQL.</p></li>
+</ul>
+
+
+<p>There&#8217;s much more in this release. Here are the <a href="http://www.postgresql.org/docs/9.1/static/release-9-1.html">release notes</a>.</p>
+
+<p>Huge thanks, Postgres hackers!</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2011/09/10/design-tweaks/">Design Tweaks</a></h1>
     
     
@@ -969,49 +1025,6 @@ ActionController::Base or any controller which inherits from it.
 
 
 <p>Rails will call to to_param method when using <code>post_url(@post)</code>, and your URLs shal become <em>slugs</em>, in SEO terms.</p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2009/08/26/on-the-subject-of-enterprise-reporting/">On the Subject of Enterprise Reporting</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2009-08-26T20:04:12-04:00" pubdate  data-updated="true" >Aug 26<span>th</span>, 2009</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Apparently this is how reporting works in big corporate environments.</p>
-
-<ol>
-<li>We have a bunch of data, terabytes. There&#8217;s got to be something in there.</li>
-<li>After a few months of cranking, the analyst comes up with a one page report with significant statistics and a couple of charts. This is the first, alpha version of the report.</li>
-<li>Manager receives report. Loves it, since it&#8217;s the first time they can see the deficiencies in the overall system, and sees opportunities for savings, optimization, improvement.</li>
-<li>Manger passes it along to another set of managers, maybe by region, for constructive feedback.</li>
-<li>A few weeks later, all feedback is taken in, and the analyst implements all of the new requirements into the new, 40 page report.</li>
-<li>Report is sent out quarterly, where it sits on top of a pile labeled TO READ.</li>
-</ol>
-
-
-<p><img src="http://farm3.static.flickr.com/2604/3859340277_0bae706b4a.jpg" width="500" height="365" alt="On the subject of Enterprise Reporting" /></p>
 </div>
   
   

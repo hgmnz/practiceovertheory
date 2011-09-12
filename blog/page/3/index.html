@@ -57,6 +57,52 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/">Cannot Connect to SQL Server 2005 Express</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2007-11-28T16:09:52-05:00" pubdate  data-updated="true" >Nov 28<span>th</span>, 2007</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>(Very old news, but I keep having to go back to this)</p>
+
+<p>If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can&#8217;t connect to a MS SQL Server 2005 Express Edition installation, follow these steps:</p>
+
+<ul>
+<li><p>Launch <code>SQL Server Configuration Manager</code></p></li>
+<li><p>Click on <code>SQL Server 2005 Network Configuration</code></p></li>
+<li><p>Click on <code>Protocols for MSSERVER</code> => <code>right click on TCP/IP</code> => <code>properties</code></p></li>
+<li><p>Click on <code>Protocols</code>, make sure it is enabled</p></li>
+<li><p>Click on <code>IP Addresses</code> and make sure under each of the <code>IP1</code>, <code>IP2</code> and <code>IPAll</code>, that the port is <code>1433</code></p></li>
+<li><p>Click on <code>SQL Native Client Configuration</code></p></li>
+<li><p>Click on <code>Client protocols</code> => <code>TCP/IP</code> => right click => <code>Properties</code> => make sure the <code>port</code> is <code>1433</code></p></li>
+<li><p>Right click on <code>Alias</code> => <code>New alias</code> => <code>Alias</code>: <code>any name</code>. Port<code>:</code>1433<code>.</code>Server`: host name for the SQL Server Express instance</p></li>
+<li><p>Try to connect</p></li>
+</ul>
+
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2007/02/11/gnupg-on-macos-x-apple-mail/">GnuPG on MacOS X (Apple Mail)</a></h1>
     
     
@@ -553,151 +599,10 @@ alternatives --config java</p>
 
   </article>
 
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2006/08/17/mysql-unique-key/">MySQL Unique Key</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2006-08-17T15:08:00-04:00" pubdate  data-updated="true" >Aug 17<span>th</span>, 2006</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>How to avoid table scans in MySQL</h4>
-
-<p>Let&#8217;s start out by showing what the table I&#8217;m referring to looks like:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-<span class='line'>12</span>
-<span class='line'>13</span>
-<span class='line'>14</span>
-<span class='line'>15</span>
-<span class='line'>16</span>
-<span class='line'>17</span>
-<span class='line'>18</span>
-<span class='line'>19</span>
-<span class='line'>20</span>
-<span class='line'>21</span>
-</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">describe</span> <span class="n">Readings</span><span class="p">;</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Field</span>          <span class="o">|</span> <span class="k">Type</span>             <span class="o">|</span> <span class="k">Null</span> <span class="o">|</span> <span class="k">Key</span> <span class="o">|</span> <span class="k">Default</span>    <span class="o">|</span> <span class="n">Extra</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">concentratorID</span> <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">unsigned</span>  <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">sensorID</span>       <span class="o">|</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="n">unsigned</span> <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0</span>          <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">channel</span>        <span class="o">|</span> <span class="nb">char</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="nb">date</span>           <span class="o">|</span> <span class="nb">date</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">0000</span><span class="o">-</span><span class="mi">00</span><span class="o">-</span><span class="mi">00</span> <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">time</span>           <span class="o">|</span> <span class="n">time</span>             <span class="o">|</span>      <span class="o">|</span> <span class="o">|</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>   <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">value</span>          <span class="o">|</span> <span class="n">double</span>           <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="k">type</span>           <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>       <span class="o">|</span>      <span class="o">|</span>     <span class="o">|</span>            <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">SWVersion</span>      <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>      <span class="o">|</span> <span class="n">YES</span>  <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>       <span class="o">|</span>       <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------------+------------------+------+-----+------------+-------+</span>
-</div><div class='line'> <span class="mi">8</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</div><div class='line'>
-</div><div class='line'> <span class="n">mysql</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">from</span> <span class="n">Readings</span><span class="p">;</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
-</div><div class='line'> <span class="o">|</span>   <span class="mi">728477</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">----------+</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Basically this table holds data for sensor readings and keeps date/time stamps for them. It contains over 700 thousand rows.
- Have a look at the query below:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">03</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">0625</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'> <span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">33</span><span class="p">.</span><span class="mi">85</span> <span class="n">sec</span><span class="p">)</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Over <em>33 Seconds!??</em> Unacceptable. What&#8217;s happening here is that MySQL has to scan the entire table in order to identify and match all of the dates and times in the WHERE clause of the query.</p>
-
-<p>For this application, we know that one sensor reading only occurs once at a given date and time, so we can create a unique key using those columns:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-<span class='line'>12</span>
-<span class='line'>13</span>
-<span class='line'>14</span>
-</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">alter</span> <span class="k">table</span> <span class="n">Readings</span> <span class="k">add</span> <span class="k">UNIQUE</span> <span class="n">report_index</span> <span class="p">(</span><span class="n">sensorID</span><span class="p">,</span> <span class="nb">date</span><span class="p">,</span> <span class="n">time</span><span class="p">);</span>
-</div><div class='line'><span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">602969</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">11</span><span class="p">.</span><span class="mi">91</span> <span class="n">sec</span><span class="p">)</span>
-</div><div class='line'><span class="n">Records</span><span class="p">:</span> <span class="mi">602969</span>  <span class="n">Duplicates</span><span class="p">:</span> <span class="mi">0</span>  <span class="n">Warnings</span><span class="p">:</span> <span class="mi">0</span>
-</div><div class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">DATE_FORMAT</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="nb">date</span><span class="p">,</span> <span class="s1">&#39;%b %D, %y&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">Date</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">as</span> <span class="n">Time</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South External&quot;</span> <span class="p">,</span> <span class="n">t2</span><span class="p">.</span><span class="n">value</span> <span class="k">as</span> <span class="ss">&quot;South Internal&quot;</span> <span class="k">FROM</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t1</span> <span class="p">,</span> <span class="n">Readings</span> <span class="k">AS</span> <span class="n">t2</span> <span class="k">WHERE</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="nb">date</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">t2</span><span class="p">.</span><span class="n">time</span> <span class="k">AND</span> <span class="n">t1</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">38</span> <span class="k">AND</span> <span class="n">t2</span><span class="p">.</span><span class="n">sensorID</span><span class="o">=</span><span class="mi">36</span> <span class="k">ORDER</span> <span class="k">BY</span> <span class="n">t1</span><span class="p">.</span><span class="nb">date</span> <span class="k">DESC</span><span class="p">,</span> <span class="n">t1</span><span class="p">.</span><span class="n">time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">5</span><span class="p">;</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'> <span class="o">|</span> <span class="nb">Date</span>         <span class="o">|</span> <span class="n">Time</span>     <span class="o">|</span> <span class="n">South</span> <span class="k">External</span> <span class="o">|</span> <span class="n">South</span> <span class="n">Internal</span> <span class="o">|</span>
-</div><div class='line'> <span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">49</span> <span class="o">|</span>          <span class="mi">20</span><span class="p">.</span><span class="mi">75</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
-</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
-</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">31</span> <span class="o">|</span>        <span class="mi">22</span><span class="p">.</span><span class="mi">6875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">4375</span> <span class="o">|</span>
-</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">22</span> <span class="o">|</span>          <span class="mi">22</span><span class="p">.</span><span class="mi">25</span> <span class="o">|</span>         <span class="mi">21</span><span class="p">.</span><span class="mi">375</span> <span class="o">|</span>
-</div><div class='line'><span class="o">|</span> <span class="n">Aug</span> <span class="mi">17</span><span class="n">th</span><span class="p">,</span> <span class="mi">06</span> <span class="o">|</span> <span class="mi">07</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">12</span> <span class="o">|</span>         <span class="mi">20</span><span class="p">.</span><span class="mi">875</span> <span class="o">|</span>        <span class="mi">21</span><span class="p">.</span><span class="mi">3125</span> <span class="o">|</span>
-</div><div class='line'><span class="o">+</span><span class="c1">--------------+----------+----------------+----------------+</span>
-</div><div class='line'><span class="mi">5</span> <span class="k">rows</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Ahhhh&#8230; much better: 0.00 seconds people!</p>
-</div>
-  
-  
-
-
-  </article>
-
 <nav role="pagination">
   <div>
+    
+      <a class="prev" href="/blog/page/4/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
