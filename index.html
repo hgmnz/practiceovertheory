@@ -57,6 +57,47 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2011-09-19T10:00:00-04:00" pubdate  data-updated="true" >Sep 19<span>th</span>, 2011</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In case you&#8217;ve missed it so far, PostgreSQL West will take place next week in San Jose, California. You <a href="https://www.postgresqlconference.org/register">should go</a>.</p>
+
+<p>This weekend I worked on the slides and content for my <a href="https://www.postgresqlconference.org/content/redis-nimble-data-bacon">Redis talk</a>. Why would I decide to speak about Redis in a PostgreSQL conference? As it turns out, we&#8217;ve had great success in using Redis to compliment our architecture, not to replace a main data store. I will speak about our experience in scaling out write heavy apps with Redis.</p>
+
+<p>I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we&#8217;ve used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.</p>
+
+<p>I hope this talk will be entertaining and informative to both DBAs and application developers.</p>
+
+<p>Additionally, on Tuesday I will be teaching a <a href="https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day">one day workshop on Ruby and Rails with a PostgreSQL focus</a>. This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.</p>
+
+<p>Hope to see you there.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2011/09/12/postgresql-9-dot-1-released/">PostgreSQL 9.1 Released</a></h1>
     
     
@@ -940,91 +981,6 @@ ActionController::Base or any controller which inherits from it.
 
 
 <p>I hope that after reading this you realize that this error is helping you as a user write better SQL. Complaining that the example query doesn&#8217;t run on PostgreSQL is like complaining that your new <a href="http://www.fender.com/products//search.php?partno=0110100747">Fender Strat</a> sucks because when you play <em>Here comes the Sun</em> the very same way you played it on your <a href="http://www.thebeatlesrockband.com/">Beatles Rock Band</a> guitar, it doesn&#8217;t sound the same. <code>/endrant</code></p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2009/08/31/three-activerecord-model-utility-methods/">Three ActiveRecord Model Utility Methods</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2009-08-31T20:40:34-04:00" pubdate  data-updated="true" >Aug 31<span>st</span>, 2009</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Lately I&#8217;ve found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. These methods leverage functionality of either Ruby by itself or Rails that will become helpful in other parts of your application.</p>
-
-<p><a href="http://www.flickr.com/photos/adams_views/3096986188/"><img src="http://farm4.static.flickr.com/3057/3096986188_0599337f47.jpg" title="Visit original on Flickr"></a></p>
-
-<h3>The labeler: #to_s</h3>
-
-<p>  Defining a to_s method enables a very clean way to display a label that represents your model instance. Suppose you have a Post model. You could define a #to_s method similar to the following:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_s</span>
-</div><div class='line'>  <span class="n">title</span>
-</div><div class='line'><span class="k">end</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Now your views can simply do something like the following HAML:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-</pre></td><td class='code' width='100%'><pre><code class='haml'><div class='line'><span class="nc">.post</span>
-</div><div class='line'>  <span class="nc">.h2</span><span class="p">=</span> <span class="vi">@post</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<h3>The quantifier: #&lt;=></h3>
-
-<p>This method is useful when you consistently need to be able to respond to the question &#8220;Which of these is bigger/better/taller/fatter/purtier?&#8221;. Which metric defines the quantity is completely up to you, but what&#8217;s important is that defining this method will allow you to call the <code>Enumerable</code> goodies <code>#min</code>, <code>#max</code>, and <code>#sort</code>. For example, and following the Post model example above, you could imagine the following method definition.</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">&lt;=&gt;</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-</div><div class='line'>  <span class="n">rating</span> <span class="o">&lt;=&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">rating</span>
-</div><div class='line'><span class="k">end</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Assuming you have a <code>recent</code> named_scope that returns the latest <code>n</code> posts, you could do things like <code>Post.recent.max</code> or <code>Post.recent.sort</code>.</p>
-
-<h3>The SEOer: #to_param</h3>
-
-<p>Finally, this method is leveraged by Rails itself. You can take advantage of the fact that the :id parameter on Rails URLs can be any sequence of integers followed by any non-whitespace characters. Rails will ignore any character after the integers, and use that as the :id parameter. It is customary to use the post&#8217;s title as part of the URL. An easy way to achieve this in Rails is to define the following method on your model:</p>
-
-<div><figure role=code> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_param</span>
-</div><div class='line'>  <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">parameterize</span><span class="si">}</span><span class="s2">&quot;</span>
-</div><div class='line'><span class="k">end</span>
-</div></code></pre></td></tr></table></div></figure></div>
-
-
-<p>Rails will call to to_param method when using <code>post_url(@post)</code>, and your URLs shal become <em>slugs</em>, in SEO terms.</p>
 </div>
   
   

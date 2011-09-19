@@ -57,6 +57,77 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/">Installing FANN and Ruby-fann on Fedora Core 9</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2008-08-01T11:07:30-04:00" pubdate  data-updated="true" >Aug 1<span>st</span>, 2008</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:</p>
+
+<ul>
+<li><p>Download the source code for FANN 2.1beta from any of the mirrors found here: <a href="http://leenissen.dk/fann">http://leenissen.dk/fann</a></p></li>
+<li><p>After extracting it, run the usual:
+<code>
+./configure
+make
+sudo make install
+</code></p></li>
+<li><p>Make sure the files are present:
+<code>ls /usr/local/lib |grep fann
+libdoublefann.a
+libdoublefann.la
+libdoublefann.so
+libdoublefann.so.2
+libdoublefann.so.2.0.1
+libfann.a
+libfann.la
+libfann.so
+libfann.so.2
+libfann.so.2.0.1
+libfixedfann.a
+libfixedfann.la
+libfixedfann.so
+libfixedfann.so.2
+libfixedfann.so.2.0.1
+libfloatfann.a
+libfloatfann.la
+libfloatfann.so
+libfloatfann.so.2
+libfloatfann.so.2.0.1</code></p></li>
+</ul>
+
+
+<p>Since these libraries where <em>just</em> installed, you have to run <code>ldconfig</code> in order to cache them and create the required links. This was the gotcha:
+<code>ldconfig /usr/local/lib</code></p>
+
+<p>Now, use ruby-gems to install the ruby-fann bindings:</p>
+
+<p><code>sudo gem install ruby-fann</code></p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/">Cannot Connect to SQL Server 2005 Express</a></h1>
     
     
@@ -513,85 +584,6 @@ Allow from all
 <p>On the other hand, here is how to start services on boot using Sys V init scripts. If we want to start the apache web server for run-levels 3 and 5:</p>
 
 <p><code>/sbin/chkconfig --level 35 httpd on</code></p>
-</div>
-  
-  
-
-
-  </article>
-
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2006/08/21/installing-vanilla-tomcat-on-fedora-core/">Installing Vanilla Tomcat on Fedora Core</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-
-  
-
-
-
-<time datetime="2006-08-21T07:51:00-04:00" pubdate  data-updated="true" >Aug 21<span>st</span>, 2006</time></p>
-    
-  </header>
-
-
-  <div class="entry-content"><ol>
-<li><em>Install Sun JDK</em>
-This is quite straight forward if you follow the instructions at the unofficial fedora Faq, steps 1 through 11, located at http://www.fedorafaq.org/#java</li>
-<li><em>Compile and Install Tomcat 5</em>
-This is based on the instructions provided by the Apache foundation located <a href="http://tomcat.apache.org/tomcat-5.5-doc/setup.html">here</a>.
-
-<ol>
-<li><em>Download the tarball</em>: I downloaded the Core version 5.5.16 from <a href="http://apache.mirrormax.net/tomcat/tomcat-5/v5.5.16/bin/apache-tomcat-5.5.16.tar.gz">here</a>.</li>
-<li><em>Copy the tarball to /opt</em>: I used /opt to install it, but you can choose any other directory. /opt makes a lot of sense though!</li>
-<li><em>Untar it</em>  with the command
-<code>gunzip -c apache-tomcat-5.5.16.tar.gz |tar -xf -</code></li>
-</ol>
-</li>
-</ol>
-
-
-<p>The folder created is what Apache calls &#8220;CATALINA_HOME&#8221;, so in this case it is<code>/opt/apache-tomcat-5.5.16</code>
-1. Type the following commands to <em>build it</em>:</p>
-
-<p><highglight>$ cd /opt/apache-tomcat-5.5.16/bin/
-$ tar xvfs jsvc.tar.gz/r cd jsvc-src/
-$ chmod +x *
-$ ./configure &#8211;with-java=/usr/lib/jvm/jre-1.5.0-sun/
-$ make/r cp jsvc ..</highlight></p>
-
-<ol>
-<li><em>Smile</em></li>
-</ol>
-
-
-<p>Now you can start it by running <code>startup.sh</code> from the <code>/bin</code> directory (relative to <em>CATALINA_HOME</em>), stop it with <code>shutdown.sh</code>, dump your application into <code>webapps</code>, etc, etc, etc.</p>
-
-<p>By the way, you can have your entire system using your fresh installation of the JDK by using &#8220;alternatives&#8221;</p>
-
-<p><code>su -
-alternatives --config java</p>
-
-<p> There are 2 programs which provide 'java'.</p>
-
-<h2> Selection    Command</h2>
-
-<p> 1           /usr/lib/jvm/jre-1.4.2-gcj/bin/java
- *+ 2           /usr/lib/jvm/jre-1.5.0-sun/bin/java</p>
-
-<p> Enter to keep the current selection[+], or type selection number:</code></p>
-
-<p>At this point, type <code>2</code>, then <code>enter</code>.</p>
-
-<p>You can make it start on boot by doing <a href="http://labnotesh.wordpress.com/2006/08/21/run-commands-on-boot-for-fedora-core/">this</a>.</p>
 </div>
   
   

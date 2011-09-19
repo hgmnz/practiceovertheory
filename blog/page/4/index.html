@@ -57,6 +57,85 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2006/08/21/installing-vanilla-tomcat-on-fedora-core/">Installing Vanilla Tomcat on Fedora Core</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+
+  
+
+
+
+<time datetime="2006-08-21T07:51:00-04:00" pubdate  data-updated="true" >Aug 21<span>st</span>, 2006</time></p>
+    
+  </header>
+
+
+  <div class="entry-content"><ol>
+<li><em>Install Sun JDK</em>
+This is quite straight forward if you follow the instructions at the unofficial fedora Faq, steps 1 through 11, located at http://www.fedorafaq.org/#java</li>
+<li><em>Compile and Install Tomcat 5</em>
+This is based on the instructions provided by the Apache foundation located <a href="http://tomcat.apache.org/tomcat-5.5-doc/setup.html">here</a>.
+
+<ol>
+<li><em>Download the tarball</em>: I downloaded the Core version 5.5.16 from <a href="http://apache.mirrormax.net/tomcat/tomcat-5/v5.5.16/bin/apache-tomcat-5.5.16.tar.gz">here</a>.</li>
+<li><em>Copy the tarball to /opt</em>: I used /opt to install it, but you can choose any other directory. /opt makes a lot of sense though!</li>
+<li><em>Untar it</em>  with the command
+<code>gunzip -c apache-tomcat-5.5.16.tar.gz |tar -xf -</code></li>
+</ol>
+</li>
+</ol>
+
+
+<p>The folder created is what Apache calls &#8220;CATALINA_HOME&#8221;, so in this case it is<code>/opt/apache-tomcat-5.5.16</code>
+1. Type the following commands to <em>build it</em>:</p>
+
+<p><highglight>$ cd /opt/apache-tomcat-5.5.16/bin/
+$ tar xvfs jsvc.tar.gz/r cd jsvc-src/
+$ chmod +x *
+$ ./configure &#8211;with-java=/usr/lib/jvm/jre-1.5.0-sun/
+$ make/r cp jsvc ..</highlight></p>
+
+<ol>
+<li><em>Smile</em></li>
+</ol>
+
+
+<p>Now you can start it by running <code>startup.sh</code> from the <code>/bin</code> directory (relative to <em>CATALINA_HOME</em>), stop it with <code>shutdown.sh</code>, dump your application into <code>webapps</code>, etc, etc, etc.</p>
+
+<p>By the way, you can have your entire system using your fresh installation of the JDK by using &#8220;alternatives&#8221;</p>
+
+<p><code>su -
+alternatives --config java</p>
+
+<p> There are 2 programs which provide 'java'.</p>
+
+<h2> Selection    Command</h2>
+
+<p> 1           /usr/lib/jvm/jre-1.4.2-gcj/bin/java
+ *+ 2           /usr/lib/jvm/jre-1.5.0-sun/bin/java</p>
+
+<p> Enter to keep the current selection[+], or type selection number:</code></p>
+
+<p>At this point, type <code>2</code>, then <code>enter</code>.</p>
+
+<p>You can make it start on boot by doing <a href="http://labnotesh.wordpress.com/2006/08/21/run-commands-on-boot-for-fedora-core/">this</a>.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2006/08/17/mysql-unique-key/">MySQL Unique Key</a></h1>
     
     

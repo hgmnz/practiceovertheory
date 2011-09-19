@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-12T10:22:24-04:00</updated>
+  <updated>2011-09-19T10:31:50-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -13,6 +13,25 @@
     
   </author>
 
+  
+  <entry>
+    <title>Redis Talk at PostgreSQL Conf West</title>
+    <link href="http://practiceovertheory.com/blog/2011/09/19/redis-talk-at-postgresql-conf-west/"/>
+    <updated>2011-09-19T10:00:00-04:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/19/redis-talk-at-postgresql-conf-west</id>
+    <content type="html">&lt;p&gt;In case you've missed it so far, PostgreSQL West will take place next week in San Jose, California. You &lt;a href=&quot;https://www.postgresqlconference.org/register&quot;&gt;should go&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This weekend I worked on the slides and content for my &lt;a href=&quot;https://www.postgresqlconference.org/content/redis-nimble-data-bacon&quot;&gt;Redis talk&lt;/a&gt;. Why would I decide to speak about Redis in a PostgreSQL conference? As it turns out, we've had great success in using Redis to compliment our architecture, not to replace a main data store. I will speak about our experience in scaling out write heavy apps with Redis.&lt;/p&gt;
+
+&lt;p&gt;I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we've used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.&lt;/p&gt;
+
+&lt;p&gt;I hope this talk will be entertaining and informative to both DBAs and application developers.&lt;/p&gt;
+
+&lt;p&gt;Additionally, on Tuesday I will be teaching a &lt;a href=&quot;https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day&quot;&gt;one day workshop on Ruby and Rails with a PostgreSQL focus&lt;/a&gt;. This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.&lt;/p&gt;
+
+&lt;p&gt;Hope to see you there.&lt;/p&gt;
+</content>
+  </entry>
   
   <entry>
     <title>PostgreSQL 9.1 Released</title>
@@ -1440,55 +1459,6 @@ set directory=~/.vim_backups//&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
 
 
 
-</content>
-  </entry>
-  
-  <entry>
-    <title>Installing FANN and ruby-fann on Fedora Core 9</title>
-    <link href="http://practiceovertheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/"/>
-    <updated>2008-08-01T11:07:30-04:00</updated>
-    <id>http://practiceovertheory.com/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9</id>
-    <content type="html">&lt;p&gt;As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Download the source code for FANN 2.1beta from any of the mirrors found here: &lt;a href=&quot;http://leenissen.dk/fann&quot;&gt;http://leenissen.dk/fann&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;After extracting it, run the usual:
-&lt;code&gt;
-./configure
-make
-sudo make install
-&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Make sure the files are present:
-&lt;code&gt;ls /usr/local/lib |grep fann
-libdoublefann.a
-libdoublefann.la
-libdoublefann.so
-libdoublefann.so.2
-libdoublefann.so.2.0.1
-libfann.a
-libfann.la
-libfann.so
-libfann.so.2
-libfann.so.2.0.1
-libfixedfann.a
-libfixedfann.la
-libfixedfann.so
-libfixedfann.so.2
-libfixedfann.so.2.0.1
-libfloatfann.a
-libfloatfann.la
-libfloatfann.so
-libfloatfann.so.2
-libfloatfann.so.2.0.1&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Since these libraries where &lt;em&gt;just&lt;/em&gt; installed, you have to run &lt;code&gt;ldconfig&lt;/code&gt; in order to cache them and create the required links. This was the gotcha:
-&lt;code&gt;ldconfig /usr/local/lib&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, use ruby-gems to install the ruby-fann bindings:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;sudo gem install ruby-fann&lt;/code&gt;&lt;/p&gt;
 </content>
   </entry>
   
