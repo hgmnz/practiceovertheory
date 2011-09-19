@@ -4,7 +4,7 @@
   <title>Practice Over Theory</title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2011-09-19T10:31:50-04:00</updated>
+  <updated>2011-09-19T10:48:47-04:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name>Harold Giménez</name>
@@ -25,7 +25,7 @@
 
 &lt;p&gt;I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we've used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.&lt;/p&gt;
 
-&lt;p&gt;I hope this talk will be entertaining and informative to both DBAs and application developers.&lt;/p&gt;
+&lt;p&gt;I hope this talk will be entertaining and informative to both DBAs and application developers. I will be sharing the slides here and on &lt;a href=&quot;http://twitter.com/hgimenez&quot;&gt;twitter&lt;/a&gt; afterwards, so stay tuned.&lt;/p&gt;
 
 &lt;p&gt;Additionally, on Tuesday I will be teaching a &lt;a href=&quot;https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day&quot;&gt;one day workshop on Ruby and Rails with a PostgreSQL focus&lt;/a&gt;. This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.&lt;/p&gt;
 
