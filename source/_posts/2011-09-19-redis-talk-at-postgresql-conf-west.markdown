@@ -10,7 +10,7 @@ This weekend I worked on the slides and content for my [Redis talk](https://www.
 
 I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we've used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.
 
-I hope this talk will be entertaining and informative to both DBAs and application developers.
+I hope this talk will be entertaining and informative to both DBAs and application developers. I will be sharing the slides here and on [twitter](http://twitter.com/hgimenez) afterwards, so stay tuned.
 
 Additionally, on Tuesday I will be teaching a [one day workshop on Ruby and Rails with a PostgreSQL focus](https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day). This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.
 
