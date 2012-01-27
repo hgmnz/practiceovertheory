@@ -56,10 +56,10 @@ It sat idle for periods of time and the connection was left active. All in all,
 a great setup.
 
 If this is something you'll do often, you might as well add a more permanent
-configuration to ~/.ssh/config. For example, you may add:
+configuration to <code>~/.ssh/config</code>. For example, you might add:
 
 {% codeblock ~/.ssh/config on your machine %}
-Host tunel_to_jane
+Host tunnel_to_jane
   Hostname saturn
   LocalForward 9999:localhost:1235
   User saturn_user
@@ -70,19 +70,19 @@ Host jane
   Port 9999
 {% endcodeblock %}
 
-Then you'd do, on one terminal, <code>ssh tunel_to_jane</code>, and on the
+Then you'd do, on one terminal, <code>ssh tunnel_to_jane</code>, and on the
 other <code>ssh jane</code>.
 
-and Jane may add:
+And Jane might add:
 
 {% codeblock ~/.ssh/config on Jane's machine %}
-Host tunel_from_you
+Host tunnel_from_you
   Hostname saturn
   RemoteForward 1235:localhost:22
   User saturn_user
 {% endcodeblock %}
 
-And she'd just do, <code>ssh tunel_from_you</code>
+And she'd just do, <code>ssh tunnel_from_you</code>
 
 This can be used not ony for remote pairing, but rather to forward <em>any</em>
 traffic on a port, over an SSH encrypted channel, to a remote host. For more
