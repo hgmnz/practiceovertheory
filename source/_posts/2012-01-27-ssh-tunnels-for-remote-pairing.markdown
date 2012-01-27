@@ -25,7 +25,8 @@ This kind of Internet Tube is called a Tunnel. Since we're using SSH to do the
 traffic encryption and forwarding, it's an SSH Tunnel. Yes, that's somewhat made
 up, but sounds legit!
 
-As it turns out, setting up a tunnel is fairly simple. For example, let's set up a tunnel between you and Jane using a remote server saturn.
+As it turns out, setting up a tunnel is fairly simple. For example, let's set
+up a tunnel between you and Jane using a remote server saturn.
 
 1. You: Open up a shell and forward traffic to your local port 9999 over to
    Saturn's port 1235:
@@ -58,7 +59,7 @@ If this is something you'll do often, you might as well add a more permanent
 configuration to ~/.ssh/config. For example, you may add:
 
 {% codeblock ~/.ssh/config on your machine %}
-Host pair_with_jane
+Host tunel_to_jane
   Hostname saturn
   LocalForward 9999:localhost:1235
   User saturn_user
@@ -66,20 +67,23 @@ Host pair_with_jane
 Host jane
   Hostname jane
   User jane_user
+  Port 9999
 {% endcodeblock %}
 
-Then you'd do, on one terminal, <code>ssh pair_with_jane</code>, and on the
+Then you'd do, on one terminal, <code>ssh tunel_to_jane</code>, and on the
 other <code>ssh jane</code>.
 
 and Jane may add:
 
 {% codeblock ~/.ssh/config on Jane's machine %}
-Host pair_with_you
+Host tunel_from_you
   Hostname saturn
   RemoteForward 1235:localhost:22
   User saturn_user
 {% endcodeblock %}
 
-And she'd just do, <code>ssh pair_with_you</code>
+And she'd just do, <code>ssh tunel_from_you</code>
 
-For more, see ssh_config(5) and ssh(1), and happy pairing!
+This can be used not ony for remote pairing, but rather to forward <em>any</em>
+traffic on a port, over an SSH encrypted channel, to a remote host. For more
+see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!
