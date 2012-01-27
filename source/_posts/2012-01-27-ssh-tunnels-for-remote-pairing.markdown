@@ -25,6 +25,8 @@ This kind of Internet Tube is called a Tunnel. Since we're using SSH to do the
 traffic encryption and forwarding, it's an SSH Tunnel. Yes, that's somewhat made
 up, but sounds legit!
 
+<img src="http://doctorwatson.info/images/lolcats/1111%20internet%20tube%20cat.jpg" />
+
 As it turns out, setting up a tunnel is fairly simple. For example, let's set
 up a tunnel between you and Jane using a remote server saturn.
 
