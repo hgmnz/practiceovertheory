@@ -21,3 +21,5 @@ Other talks worth mentioning included [Mike Burns](http://twitter.com/mikeburns)
 Oh, and there was a dude at the afterparty with a heroku shirt. Here's a photo.
 
 <img src="https://p.twimg.com/Ak2HPjpCIAAyY7y.jpg:large" />
+
+Overall a great event; thanks to organizers [thoughtbot](http://thoughtbot.com) and [Greenhorn Connect](http://greenhornconnect.com/) and drinkup sponsors [hashrocket](http://hashrocket) and [github](http://github.com).
