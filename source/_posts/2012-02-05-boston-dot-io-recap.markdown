@@ -16,7 +16,7 @@ Hopefully the talk gave a good taste of what you can do with Postgres and SQL. I
 <blockquote class="twitter-tweet"><p>boston.io talk ready to go. SQL, do you speak it? After this you will!</p>&mdash; Harold Giménez (@hgimenez) <a href="https://twitter.com/hgimenez/status/165804224481988608" data-datetime="2012-02-04T14:29:42+00:00">February 4, 2012</a></blockquote>
 <script src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-Other talks worth mentioning included [Mike Burns](http://twitter.com/mikeburns)' classic UNIX talk. This time around he used curl, sed and grep to automate a SQL injection attack on a hilarious page he staged for this purpose. [Erik Michaels-Ober's](http://twitter.com/sferik) talk was also great and surely inspired a few students to put code out there for the world to see. So many great talks altogether though, by people like [Nick Quaranto](http://twitter.com/qrush) on TDD, [Ben Orenstein](http://twitter.com/r00k), [Bryan Lyles](http://twitter.com/bryanl) on OOP and [more](http://boston.io/schedule).
+Other talks worth mentioning included [Mike Burns](http://twitter.com/mikeburns)' classic UNIX talk. This time around he used curl, sed and grep to automate a SQL injection attack on a hilarious page he staged for this purpose. [Erik Michaels-Ober's](http://twitter.com/sferik) talk was also great and surely inspired a few students to put code out there for the world to see. So many great talks altogether though, by people like [Nick Quaranto](http://twitter.com/qrush) on TDD, [Ben Orenstein](http://twitter.com/r00k) on vim, [Bryan Lyles](http://twitter.com/bryanl) on OOP and [more](http://boston.io/schedule).
 
 Oh, and there was a dude at the afterparty with a heroku shirt. Here's a photo.
 
