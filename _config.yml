@@ -47,13 +47,13 @@ default_asides: [asides/github.html, asides/twitter.html]
 # ----------------------- #
 
 # Github repositories
-github_user: hgimenez
+github_user: hgmnz
 github_repo_count: 4
 github_show_profile_link: true
 github_skip_forks: true
 
 # Twitter
-twitter_user: hgimenez
+twitter_user: hgmnz
 twitter_tweet_count: 4
 twitter_show_replies: false
 twitter_follow_button: true
