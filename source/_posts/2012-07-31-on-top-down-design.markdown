@@ -12,11 +12,11 @@ Some developers like writing tests first, letting your tests drive the implement
 
 You can write software from the bottom up, where you are forced to figure out what the data model and base objects should be and how it is to support all known use cases. This is hard, particularly in this day and age where software requirements are unpredictable and are meant to change very rapidly - at least in the fun industries.
 
-You can also write software from the top down. In this case you let the outer shell of your software dictated what the inner layers need. For example, start all the way on the user interactions via some sketches and HTML/CSS in a web app. Or think through the CLI that you want. [Readme driven development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html) can help with this, too.
+You can also write software from the top down. In this case you let the outer shell of your software dictate what the inner layers need. For example, start all the way on the user interactions via some sketches and HTML/CSS in a web app. Or think through the CLI that you want. [Readme driven development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html) can help with this, too.
 
 Outside-in development puts you in a great position to practice top-down design.
 
-The advantage of Outside-In development is twofold. Not only are you left with acceptance tests that will catch regressions and help refactor later. But also, *the top layers of your software becomes a client of the code you are about to write, helping define its interface* in a similar way that practicing TDD for your unit tests help guide the design of software component at a very granular level.
+The advantage of Outside-in development is twofold. Not only are you left with acceptance tests that will catch regressions and help refactor later. But also, *the top layers of your software becomes a client of the code you are about to write, helping define its interface* in a similar way that practicing TDD for your unit tests help guide the design of software component at a very granular level.
 
 These practices will help you define internal APIs that feel good faster, because you will notice cumbersome interfaces sooner, and are therefore given the opportunity to fix them when they have the least possible number of dependencies.
 
