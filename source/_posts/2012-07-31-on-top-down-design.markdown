@@ -8,9 +8,9 @@ categories:
 
 There are many strategies for writing software.
 
-Some like writing tests first, letting your tests drive the implementation, essentially becoming the first clients of your software. Others like writing production code first and kind of figure out how it works, and then they apply some tests after the fact. I am convinced that writing tests in this way is far less effective, but this is not an article on the merits of TDD. Others don't like writing tests at all, so it's a varying scale.
+Some developers like writing tests first, letting your tests drive the implementation, essentially becoming the first clients of your software. Others like writing production code first and kind of figure out how it works, and then they apply some tests after the fact. I am convinced that writing tests in this way is far less effective, but this is not an article on the merits of TDD. Others don't like writing tests at all, so it's a varying scale.
 
-You can write software from the bottom up, where you are forced figure out what the data model should be and how it is to support all known use cases. This is hard, particularly in this day and age where software requirements are unpredictable and are meant to change very rapidly - at least in the fun industries.
+You can write software from the bottom up, where you are forced to figure out what the data model and base objects should be and how it is to support all known use cases. This is hard, particularly in this day and age where software requirements are unpredictable and are meant to change very rapidly - at least in the fun industries.
 
 You can also write software from the top down. In this case you let the outer shell of your software dictated what the inner layers need. For example, start all the way on the user interactions via some sketches and HTML/CSS in a web app. Or think through the CLI that you want. Readme driven development can help with this, too.
 
