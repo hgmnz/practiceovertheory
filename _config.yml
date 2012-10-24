@@ -64,8 +64,5 @@ twitter_tweet_button: true
 google_plus_one: true
 google_plus_one_size: medium
 
-# Disqus Comments
-# disqus_short_name: hgimenez
-
 # Google Analytics
 google_analytics_tracking_id: UA-25569034-1
