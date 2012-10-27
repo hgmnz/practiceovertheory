@@ -178,8 +178,8 @@ looks like so:
 {% endcodeblock %}
 
 The fernet token expires every minute by default. I decided to update it
-every 29 seconds instead so that it has a chance to update at least twice
-before it has a chance to hold and use an expired token.
+every 29 seconds instead so that it can be updated at least twice
+before it has a chance to hold and use an expired token against a remote API.
 
 In this app, the server side is used for one thing only: user authentication.
 The way it works is that when a request is made, the sinatra app performs oauth
