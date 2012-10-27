@@ -137,7 +137,9 @@ token, such as the email address or some user identifier that can be used for
 auditing and whitelisting.  *All of the above data token generation and
 verification has been extracted to a handy little gem called 
 [fernet](http://github.com/hgmnz/fernet)*.
-{" Do not reimplement this, just use fernet. "}
+{" Do not reimplement this, just use fernet. "} In addition to HMAC signature,
+fernet also makes it easy to encrypt the message's payloads, which opens it up
+for other interesting use cases.
 {% endpullquote %}
 
 
