@@ -125,10 +125,9 @@ token, such as the email address or some user identifier that can be used for
 auditing and whitelisting.
 
 *All of the above data token generation and verification has been extracted to
-a handy little gem called [fernet](http://github.com/hgmnz/fernet). Don't
-reimplement this, just use fernet.*
+a handy little gem called [fernet](http://github.com/hgmnz/fernet)*. {"Don't
+reimplement this, just use fernet."}
 
-{" Don't reimplement this, just use fernet. "}
 
 The `authenticate!` method must be invoked before serving any request. This
 means that the auth token must be included on every request the client makes.
