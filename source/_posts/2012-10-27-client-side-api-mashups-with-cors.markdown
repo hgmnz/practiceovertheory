@@ -167,7 +167,7 @@ looks like so:
 
 {% codeblock lang:javascript %}
 <script type="text/javascript">
-  App.authToken       = "<%= auth_token %>; //bootstrap an initial value
+  App.authToken = "<%= auth_token %>"; //bootstrap an initial value
   App.refresh_auth_token = function() {
     $.getJSON('/auth_token', function(data) {
       App.authToken = data.token; //request updated values
@@ -176,6 +176,9 @@ looks like so:
   window.setInterval(App.refresh_auth_token, 29000); //every 29 seconds
 </script>
 {% endcodeblock %}
+
+The `/auth_token` server side endpoint simply responds with a new valid
+`token`.
 
 The fernet token expires every minute by default. I decided to update it
 every 29 seconds instead so that it can be updated at least twice
