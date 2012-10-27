@@ -52,29 +52,33 @@ There are more headers that allow you to whitelist and otherwise control access 
 
 Thus, a Sinatra app acting as the remote end of the system can respond to pre-flight OPTIONS requests like so:
 
-    options '*' do
-      headers 'Access-Control-Allow-Origin'  => 'https://your.site.com',
-              'Access-Control-Allow-Headers' => 'x-your-header',
-              'Access-Control-Max-Age'       => '2592000'
-    end
+{% codeblock lang:ruby %}
+options '*' do
+  headers 'Access-Control-Allow-Origin'  => 'https://your.site.com',
+          'Access-Control-Allow-Headers' => 'x-your-header',
+          'Access-Control-Max-Age'       => '2592000'
+end
+{% endcodeblock %}
 
 Inclusion of the Allow Origin and Allow Headers headers is also necessary on responses to any other remote XHR requests. We can extract the headers directive to a helper and use it on both pre-flight and other requests:
 
-    options '*' do
-      cors_headers
-      headers 'Access-Control-Max-Age' => '2592000'
-    end
+{% codeblock lang:ruby %}
+options '*' do
+  cors_headers
+  headers 'Access-Control-Max-Age' => '2592000'
+end
 
-    post '/resources' do
-      cors_headers
-      # do_work
-    end
+post '/resources' do
+  cors_headers
+  # do_work
+end
 
-    private
-    def cors_headers
-      headers 'Access-Control-Allow-Origin'  => 'https://your.site.com',
-              'Access-Control-Allow-Headers' => 'x-your-header'
-    end
+private
+def cors_headers
+  headers 'Access-Control-Allow-Origin'  => 'https://your.site.com',
+          'Access-Control-Allow-Headers' => 'x-your-header'
+end
+{% endcodeblock %}
 
 And just like that, browsers can now issue XHR requests against remote APIs. Of
 course, there is no authentication in place yet.
@@ -89,44 +93,49 @@ both parties. Finally, we append this signature to the JSON document and we
 base64 encode it to make it safe to send over the wire. Here's an example
 implementation:
 
-    require 'openssl'
-    require 'json'
-    require 'base64'
-    def auth_token
-      data      = { issued_at: Time.now }
-      secret    = ENV['AUTH_SECRET']
-      signature = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(data), secret)
-      Base64.urlsafe_encode64(JSON.dump(data.merge(signature: signature)))
-    end
+{% codeblock lang:ruby %}
+require 'openssl'
+require 'json'
+require 'base64'
+def auth_token
+  data      = { issued_at: Time.now }
+  secret    = ENV['AUTH_SECRET']
+  signature = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(data), secret)
+  Base64.urlsafe_encode64(JSON.dump(data.merge(signature: signature)))
+end
+{% endcodeblock %}
 
 This token is used on the API server to authenticate requests. The client can
 be made to send a custom header, let's call it X_APP_AUTH_TOKEN, which it must
 be able to reconstruct the token from the JSON data, and then validate that the
 request is recent enough. For example in a Sinatra application:
 
-    def not_authorized!
-      throw(:halt, [401, "Not authorized\n"])
-    end
+{% codeblock lang:ruby %}
+def not_authorized!
+  throw(:halt, [401, "Not authorized\n"])
+end
 
-    def authenticate!
-      token           = request.env["HTTP_X_APP_AUTH_TOKEN"] or not_authorized!
-      token_data      = JSON.parse(Base64.decode64(token))
-      received_sig    = token_data.delete('signature')
-      regenerated_mac = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(token_data), ENV['AUTH_SECRET'])
+def authenticate!
+  token           = request.env["HTTP_X_APP_AUTH_TOKEN"] or not_authorized!
+  token_data      = JSON.parse(Base64.decode64(token))
+  received_sig    = token_data.delete('signature')
+  regenerated_mac = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(token_data), ENV['AUTH_SECRET'])
 
-      if regenerated_mac != received_sig || Time.parse(token_data['issued_at']) > Time.now - 2*60
-        not_authorized!
-      end
-    end
+  if regenerated_mac != received_sig || Time.parse(token_data['issued_at']) > Time.now - 2*60
+    not_authorized!
+  end
+end
+{% endcodeblock %}
 
+{% pullquote %}
 In the above code, we consider a token invalid if it was issued more than 2
 minutes ago. Real applications will probably include more data in the auth
 token, such as the email address or some user identifier that can be used for
-auditing and whitelisting.
-
-*All of the above data token generation and verification has been extracted to
-a handy little gem called [fernet](http://github.com/hgmnz/fernet)*. {"Don't
-reimplement this, just use fernet."}
+auditing and whitelisting.  *All of the above data token generation and
+verification has been extracted to a handy little gem called 
+[fernet](http://github.com/hgmnz/fernet)*. {"Don't reimplement this,
+just use fernet."}
+{% endpullquote %}
 
 
 The `authenticate!` method must be invoked before serving any request. This
@@ -135,15 +144,19 @@ There are many ways of doing this. One approach, if you're using JQuery to back
 Backbone.sync(), is to use its $.ajax beforeSend hook to include the header, as
 can be seen in the following coffeescript two-liner:
 
-    $.ajaxSetup beforeSend: (jqXHR, settings) ->
-      jqXHR.setRequestHeader "x-yobuko-auth-token", YourApp.authToken
+{% codeblock lang:javascript %}
+$.ajaxSetup beforeSend: (jqXHR, settings) ->
+  jqXHR.setRequestHeader "x-yobuko-auth-token", YourApp.authToken
+{% endcodeblock %}
 
 YourApp.authToken can come from a number of places. I decided to bootstrap it
 when the page is originally served, something like:
 
-    <script type="text/javascript">
-      YourApp.authToken = "<%= auth_token %>";
-    </script>
+{% codeblock lang:javascript %}
+<script type="text/javascript">
+  YourApp.authToken = "<%= auth_token %>";
+</script>
+{% endcodeblock %}
 
 In addition to that, it should be updated in an interval, so that on a single
 page app, that doesn't request any page refreshes, the auth token is always
@@ -152,15 +165,17 @@ fresh and subsequent API requests can be made.
 The final client side code that provides the auth token and keeps it updated
 looks like so:
 
-    <script type="text/javascript">
-      App.authToken       = "<%= auth_token %>; //bootstrap an initial value
-      App.refresh_auth_token = function() {
-        $.getJSON('/auth_token', function(data) {
-          App.authToken = data.token; //request updated values
-        })
-      };
-      window.setInterval(Oki.refresh_auth_token, 29000); //every 29 seconds
-    </script>
+{% codeblock lang:javascript %}
+<script type="text/javascript">
+  App.authToken       = "<%= auth_token %>; //bootstrap an initial value
+  App.refresh_auth_token = function() {
+    $.getJSON('/auth_token', function(data) {
+      App.authToken = data.token; //request updated values
+    })
+  };
+  window.setInterval(Oki.refresh_auth_token, 29000); //every 29 seconds
+</script>
+{% endcodeblock %}
 
 The fernet token expires every minute by default. I decided to update it
 every 29 seconds instead so that it has a chance to update at least twice
