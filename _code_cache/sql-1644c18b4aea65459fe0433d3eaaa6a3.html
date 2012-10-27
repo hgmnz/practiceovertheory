@@ -1,0 +1,6 @@
+<div class="highlight"><pre><span class="k">select</span> <span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="k">count</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+  <span class="k">from</span> <span class="n">items</span>
+  <span class="k">inner</span> <span class="k">join</span> <span class="n">categories</span>
+    <span class="k">on</span> <span class="n">items</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">categories</span><span class="p">.</span><span class="n">item_id</span>
+  <span class="k">group</span> <span class="k">by</span> <span class="n">id</span><span class="p">,</span> <span class="n">name</span>
+</pre></div>

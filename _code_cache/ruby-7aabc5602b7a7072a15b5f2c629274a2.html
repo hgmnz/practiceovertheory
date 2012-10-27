@@ -1,0 +1,10 @@
+<div class="highlight"><pre><span class="nb">require</span> <span class="s1">&#39;openssl&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;base64&#39;</span>
+<span class="k">def</span> <span class="nf">auth_token</span>
+  <span class="n">data</span>      <span class="o">=</span> <span class="p">{</span> <span class="n">issued_at</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
+  <span class="n">secret</span>    <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span>
+  <span class="n">signature</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">secret</span><span class="p">)</span>
+  <span class="no">Base64</span><span class="o">.</span><span class="n">urlsafe_encode64</span><span class="p">(</span><span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">signature</span><span class="p">:</span> <span class="n">signature</span><span class="p">)))</span>
+<span class="k">end</span>
+</pre></div>

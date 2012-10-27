@@ -1,0 +1,11 @@
+<div class="highlight"><pre><span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;tasks-list&quot;</span><span class="nt">&gt;</span>
+  <span class="err">&lt;</span>% @user_story.tasks.each do |t| %&gt;
+    <span class="nt">&lt;li</span> <span class="na">id=</span><span class="s">&quot;task_&lt;%= t.id -%&gt;&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;name&quot;</span><span class="nt">&gt;</span>
+        <span class="err">&lt;</span>%= t.name -%&gt;
+      <span class="nt">&lt;/span&gt;</span>
+      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;handle&quot;</span><span class="nt">&gt;</span>[handle]<span class="nt">&lt;span&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+  <span class="err">&lt;</span>% end %&gt;
+<span class="nt">&lt;ul&gt;</span>
+</pre></div>

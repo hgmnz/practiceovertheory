@@ -1,0 +1,14 @@
+<div class="highlight"><pre><span class="n">describe</span> <span class="no">Triviality</span> <span class="k">do</span>
+  <span class="n">describe</span> <span class="s1">&#39;#alphabet&#39;</span> <span class="k">do</span>
+
+    <span class="n">let</span><span class="p">(</span><span class="ss">:triviality</span><span class="p">)</span> <span class="p">{</span> <span class="no">Triviality</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+
+    <span class="n">it</span> <span class="s1">&#39;yields all letters of the alphabet&#39;</span> <span class="k">do</span>
+      <span class="n">expectation</span> <span class="o">=</span> <span class="n">triviality</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:alphabet</span><span class="p">)</span>
+      <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">letter</span><span class="o">|</span> <span class="n">expectation</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="n">letter</span><span class="p">)</span> <span class="p">}</span>
+      <span class="n">triviality</span><span class="o">.</span><span class="n">alphabet</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="k">end</span>
+
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>

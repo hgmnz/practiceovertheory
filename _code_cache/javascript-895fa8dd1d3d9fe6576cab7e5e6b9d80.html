@@ -1,0 +1,8 @@
+<div class="highlight"><pre><span class="c1">//in application.js (possibly)</span>
+<span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#foo&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span> 
+    <span class="c1">//handle the click</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="c1">//cancel the browser&#39;s traditional event.</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>

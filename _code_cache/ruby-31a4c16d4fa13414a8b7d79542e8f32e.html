@@ -1,0 +1,26 @@
+<div class="highlight"><pre><span class="k">module</span> <span class="nn">NumberPercentageExtension</span>
+  <span class="k">module</span> <span class="nn">InstanceMethods</span>
+    <span class="no">ENGLISH_VALUE</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="sx">%w| zero one two three four five six seven eight nine ten eleven</span>
+<span class="sx">          twelve thirteen fourteen fifteen sixteen seventeen eighteen</span>
+<span class="sx">          nineteen |</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span> <span class="p">}</span>
+      <span class="sx">%w| zero ten twenty thirty forty fifty sixty seventy eighty</span>
+<span class="sx">          ninety|</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="mi">10</span> <span class="p">}</span>
+    <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="s1">&#39;hundred&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="k">def</span> <span class="nf">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+      <span class="n">tokens</span> <span class="o">=</span> <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">tokens</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span>
+      <span class="n">is_percent</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">[-</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;percent&#39;</span>
+      <span class="n">tokens</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">collect</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">is_percent</span> <span class="o">&amp;&amp;=</span> <span class="no">ENGLISH_VALUE</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="p">}</span>
+      <span class="k">return</span> <span class="n">is_percent</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+        <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">sum</span> <span class="o">*</span> <span class="nb">self</span> <span class="o">/</span> <span class="mi">100</span><span class="o">.</span><span class="n">to_f</span>
+      <span class="k">else</span>
+        <span class="k">super</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>

@@ -1,0 +1,15 @@
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">not_authorized!</span>
+  <span class="kp">throw</span><span class="p">(</span><span class="ss">:halt</span><span class="p">,</span> <span class="o">[</span><span class="mi">401</span><span class="p">,</span> <span class="s2">&quot;Not authorized</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">authenticate!</span>
+  <span class="n">token</span>           <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s2">&quot;HTTP_X_APP_AUTH_TOKEN&quot;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">not_authorized!</span>
+  <span class="n">token_data</span>      <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Base64</span><span class="o">.</span><span class="n">decode64</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="n">received_sig</span>    <span class="o">=</span> <span class="n">token_data</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;signature&#39;</span><span class="p">)</span>
+  <span class="n">regenerated_mac</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">token_data</span><span class="p">),</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">regenerated_mac</span> <span class="o">!=</span> <span class="n">received_sig</span> <span class="o">||</span> <span class="no">Time</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">token_data</span><span class="o">[</span><span class="s1">&#39;issued_at&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">&gt;</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="mi">60</span>
+    <span class="n">not_authorized!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>

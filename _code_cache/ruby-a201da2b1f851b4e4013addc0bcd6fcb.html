@@ -1,0 +1,27 @@
+<div class="highlight"><pre><span class="o">&lt;</span><span class="sx">% content_for </span><span class="ss">:javascript</span> <span class="k">do</span> <span class="sx">%&gt;</span>
+
+<span class="sx">  &lt;% javascript_tag do %&gt;</span>
+     <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span>
+        <span class="p">{</span>
+          <span class="n">axis</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> 
+          <span class="n">dropOnEmpty</span><span class="ss">:false</span><span class="p">,</span> 
+          <span class="n">handle</span><span class="p">:</span> <span class="s1">&#39;.handle&#39;</span><span class="p">,</span> 
+          <span class="n">cursor</span><span class="p">:</span> <span class="s1">&#39;crosshair&#39;</span><span class="p">,</span>
+          <span class="n">items</span><span class="p">:</span> <span class="s1">&#39;li&#39;</span><span class="p">,</span>
+          <span class="n">opacity</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="p">,</span>
+          <span class="n">scroll</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+          <span class="n">update</span><span class="p">:</span> <span class="n">function</span><span class="p">(){</span>
+            <span class="vg">$.</span><span class="n">ajax</span><span class="p">({</span>
+                <span class="n">type</span><span class="p">:</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span> 
+                <span class="n">data</span><span class="p">:</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;id=&lt;%=@user_story.id-%&gt;&#39;</span><span class="p">,</span> 
+                <span class="n">dataType</span><span class="p">:</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span> 
+                <span class="n">complete</span><span class="p">:</span> <span class="n">function</span><span class="p">(</span><span class="n">request</span><span class="p">){</span>
+                    <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">effect</span><span class="p">(</span><span class="s1">&#39;highlight&#39;</span><span class="p">);</span>
+                  <span class="p">},</span>
+                <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;/user_stories/prioritize_tasks&#39;</span><span class="p">})</span>
+            <span class="p">}</span>
+          <span class="p">})</span>
+    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+<span class="sx">  </span>
+<span class="sx">&lt;% end %&gt;</span>
+</pre></div>
