@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>PostgreSQL, Rails, and why you should care - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">PostgreSQL, Rails, and Why You Should Care</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-08-03T09:59:46-07:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance, efficiency, feature set, configurability, and seamless integration in your Rails projects.</p>
+
+<h3>PostgreSQL Features</h3>
+
+<p>PostgreSQL supports all of the features you would expect from an open source RDMS, including many that are found in commercial databases (Oracle, DB2, SQL Server) such as:</p>
+
+<ul>
+<li>The basics: <a href="http://www.postgresql.org/docs/8.4/static/sql-createview.html">views</a>, <a href="http://www.postgresql.org/docs/8.4/static/triggers.html">triggers</a>, <a href="http://www.postgresql.org/docs/8.4/static/indexes.html">indexes</a>, <a href="http://www.postgresql.org/docs/8.4/static/ddl-constraints.html#DDL-CONSTRAINTS-FK">foreign keys</a>, ACIDity, <a href="http://www.postgresql.org/docs/8.4/static/transaction-iso.html">transactions</a>, <a href="http://www.postgresql.org/docs/8.4/static/geqo-pg-intro.html">query optimization</a>, comprehensive SQL support and <a href="http://www.postgresql.org/docs/8.4/static/datatype.html">data types</a>, <a href="http://www.postgresql.org/docs/current/static/routine-vacuuming.html">autovacuum</a> (keeps your table statistics up to date).</li>
+<li>The not so basics: Features that may not be seen on other DBMSes include reverse, partial and expression indexes, table partitioning, table inheritance, cursors, data domains, user-defined operators, arrays and regular expressions.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/xplang.html">Procedural Languages</a>: analogous to Oracle&#8217;s PL/SQL or SQL Server&#8217;s T/SQL, PostgreSQL supports internal procedural languages for when you need to get down and dirty with the data. Additionally, it supports a wide range of languages <a href="http://raa.ruby-lang.org/project/pl-ruby/">including <em>Ruby</em></a>.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/rules.html">Rules</a>, which pretty much allow you to rewrite an incoming query. A typical use of Rules is to implement updatable views.</li>
+<li><a href="http://www.postgresql.org/docs/current/static/mvcc-intro.html">Multi-Version Concurrency Control</a>: MVCC is how PostgreSQL (and other DBMSes) deal with concurrency and table locking. In practical terms, it allows for database reads while the data is being writen.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/wal-intro.html">Write-Ahead-Log</a>: the WAL is the mechanism by which PostgreSQL writes transactions to the log before they are written to the database. This increases reliability in the unlikely event of a database crash, as there will be a transaction log by which to rebuild the database&#8217;s state. PostgreSQL includes many configuration parameters to <a href="http://www.postgresql.org/docs/8.4/static/wal-configuration.html">tweak the behavior of the WAL</a>.</li>
+<li>PostgreSQL scales up by efficiently using multi-core servers. It also sport an <a href="http://www.postgresql.org/docs/8.3/static/libpq-async.html">asynchronous processing API</a>. Subselects are fast, you can refer to tmp tables more than once in a query and it can use more than one index per query, making it suitable for data warehousing applications as well.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/tsearch2.html">tsearch2</a>, which is PostgreSQL&#8217;s highly efficient full text search component. If you are committed to PostgreSQL, this is a very high performant search engine for PostgreSQL (as an alternative to <a href="http://lucene.apache.org/solr/">solr</a> or <a href="http://www.sphinxsearch.com/">sphinx</a>, for instance), with the added benefit that you&#8217;re not running a separate daemon or search service.</li>
+<li><a href="http://postgis.refractions.net/">PostGIS</a> for geospacial objects.</li>
+<li><a href="http://pgcluster.projects.postgresql.org/">There</a> <a href="http://slony1.projects.postgresql.org/">are</a> <a href="http://sourceforge.net/projects/dbbalancer">many</a> <a href="http://pgpool.projects.postgresql.org/">replication</a> <a href="http://pg-comparator.projects.postgresql.org/">options</a>, although non of them are built into the core. This will <a href="http://archives.postgresql.org/pgsql-hackers/2008-05/msg00913.php">change very soon</a>, though.</li>
+<li>You can tweak its brains out: open up postgresql.conf, and you&#8217;ll find many configuration options that can be tweaked to your application load and server capabilities. If you&#8217;re like me, this is lots of fun. I will say, however, that it will take time to understand many of the options and how they affect each other.</li>
+<li>Excellent <a href="http://www.postgresql.org/docs/8.4/interactive/index.html">documentation</a>, which not only goes through the basics of setting up and using PostgreSQL, but really gets into the details of the inner workings of the system. This is an invaluable resource, not only for day-to-day development but also for tweaking the database&#8217;s configuration files.</li>
+<li>Much more in the <a href="http://www.postgresql.org/docs/8.4/interactive/contrib.html">contrib</a> packages.</li>
+</ul>
+
+
+<h3>PostgreSQL License</h3>
+
+<p>PostgreSQL is <a href="http://www.postgresql.org/about/licence">released under a BSD License</a>, and as such it is truly an Open Source Project. There are many contributors to the project, both individuals who donate their time as well as companies that improve the codebase (such as <a href="http://www.enterprisedb.com/">EnterpriseDB</a> and <a href="http://www.commandprompt.com/">Command Prompt</a>). If you are looking for the PostgreSQL gatekeeper, you&#8217;ll be chasing your tail: There&#8217;s no such thing. It is truly &#8220;Free Software&#8221;.</p>
+
+<h3>So, what is it? MySQL or PostgreSQL?</h3>
+
+<p>Historically, MySQL was built with performance in mind, whereas PostgreSQL was built with features in mind. The ease of use of MySQL earned it the popularity seen on most open source web application developers. Since then, however, two things have happened: PostgreSQL has become much faster and efficient, and MySQL has become more feature-rich. In my mind, the performance or feature argument is no longer valid for web applications. Both databases have their strengths and weaknesses and as you work out an expertise on either one of them it will become a moot point. Some of the lacking MySQL features are of interest only to DBAs, not web app developers, although this may be a consideration for larger shops and deployments.</p>
+
+<p>One of the major reasons for trying out PostgreSQL, regardless of it&#8217;s feature set, is it&#8217;s <em>license and community</em>. This can&#8217;t be more true these days, when MySQL AB was consumed by Sun Microsystems, which in turn recently got acquired by Oracle. While I doubt that the product itself may die off, the fact that the copyright to the code, and the direction of the database system itself may and will be dictated by a company like Oracle is a deal breaker for me. At this point it is hard to tell if this is good or bad for MySQL and the community around it, but it definitely shows turmoil in the MySQL ecosystem. Note that I am not implying that Oracle sees MySQL as a threat to Oracle DB. In fact, I believe that MySQL satisfies a completely different niche.</p>
+
+<p>On the other hand, PostgreSQL is a community effort along the same lines as the Ruby and Rails communities. This makes it a more attractive option as the direction of the project is community driven, immune to corporate politics and revenue motives.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-08-03T09:59:46-07:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2009/08/03/postgresql-rails-and-why-you-should-care/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/" title="Previous Post: Attach non image files in Rails with paperclip">&laquo; Attach non image files in Rails with paperclip</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/08/06/sortable-lists-with-jquery-in-rails/" title="Next Post: Sortable lists with JQuery in Rails">Sortable lists with JQuery in Rails &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>New domain name, new blog engine - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself with &#8220;Awesomeful&#8221; any more. On the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2011/09/06/new-domain-name/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">New Domain Name, New Blog Engine</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-06T21:58:00-07:00" pubdate data-updated="true">Sep 6<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself with &#8220;Awesomeful&#8221; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so <a href="http://twitter.com/hgimenez">hit me up</a> if you&#8217;re interested - I&#8217;m talking to you mister <code>whois awesomeful.com</code>.</p>
+
+<p>Welcome to the new blog: <em>Practice Over Theory</em>. I hope that the new name and engine inspire me to post more often.</p>
+
+<p>Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a <a href="http://octopress.org/docs/deploying/">really weird method</a> of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It&#8217;s backed by jekyll and has a few nice addons, the most useful of which is it&#8217;s code highlighting theme which is based on Solarized.</p>
+
+<p>Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</div><div class='line'>
+</div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2&#39;</span>
+</div><div class='line'>            <span class="p">}</span><span class="o">.</span><span class="n">freeze</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">get</span> <span class="s1">&#39;/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">path</span><span class="o">|</span>
+</div><div class='line'>  <span class="n">one_year_in_seconds</span> <span class="o">=</span> <span class="mi">31536000</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Cache-Control&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;public, max-age=</span><span class="si">#{</span><span class="n">one_year_in_seconds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Expires&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty neat, huh? The syntax highlighting, I mean.</p>
+
+<p>Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a <code>HTTP 301 Moved Permanently</code>. The interesting bit is the HTTP caching employed. Heroku&#8217;s (awesome) varnish servers will remember that response for one year. Try it <a href="http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care">here</a>.</p>
+
+<p>[1] it&#8217;s a hash!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-06T21:58:00-07:00" pubdate data-updated="true">Sep 6<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2011/09/06/new-domain-name/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2011/09/06/new-domain-name/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/02/15/machine-learning-who-s-the-boss/" title="Previous Post: Machine Learning - Who's the Boss?">&laquo; Machine Learning - Who's the Boss?</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/09/07/you-should-work-for-these-guys/" title="Next Post: You Should Work for These Guys">You Should Work for These Guys &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

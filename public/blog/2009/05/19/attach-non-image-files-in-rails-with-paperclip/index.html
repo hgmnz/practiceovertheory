@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Attach non image files in Rails with paperclip - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Attach Non Image Files in Rails With Paperclip</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-05-19T15:40:10-07:00" pubdate data-updated="true">May 19<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Processor.html">create her own post-processing code</a> (such as OCR or others), and provides callbacks for before and after post-processing.This post does not cover getting started with paperclip. There are plenty of other posts that cover that. The intent is to get you up and running on using paperclip to attach non-image files.</p>
+
+<p>Out of the box, the default post processor invoked upon upload is the <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Thumbnail.html">Paperclip::Thumbnail</a> processor. This processor creates thumbnails of an image based on the styles hash passed to the <code>has_attached_file</code> method. If you want to upload word documents, excel files, and other non-image data, the Thumbnail processor will fail, and the attachment will not succeed. This processor does not check if the file itself is an image, and tries to call ImageMagick&#8217;s identify command on the file anyways.</p>
+
+<p>Paperclip makes solving this extremely simple: prevent the post processing from happening when the file is not an image. Just like on <code>ActiveRecord</code> callbacks, you can return false on paperclip&#8217;s <code class="inline_code">before_post_process</code> callback to avoid the processing from happening in the first place.</p>
+
+<p>One possible solution is to put the following in whatever model you&#8217;re using paperclip on:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">before_post_process</span> <span class="ss">:image?</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">image?</span>
+</div><div class='line'>  <span class="o">!</span><span class="p">(</span><span class="n">data_content_type</span> <span class="o">=~</span> <span class="sr">/^image.*/</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>In this case, we&#8217;ve created an image? method which returns true if the content type starts with the string image (as in &#8216;image/png&#8217;, &#8216;image/jpeg&#8217;, etc). What&#8217;s neat about this is that this same method can be used in your views to either render an <code>image_tag</code>, or something else such as an icon or the file&#8217;s name, depending on whether the file is an image.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-05-19T15:40:10-07:00" pubdate data-updated="true">May 19<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/" title="Previous Post: Really silly percentage calculation in Ruby">&laquo; Really silly percentage calculation in Ruby</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/08/03/postgresql-rails-and-why-you-should-care/" title="Next Post: PostgreSQL, Rails, and why you should care">PostgreSQL, Rails, and why you should care &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

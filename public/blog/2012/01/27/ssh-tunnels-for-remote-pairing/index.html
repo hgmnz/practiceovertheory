@@ -1,0 +1,389 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>SSH Tunnels for Remote Pairing - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="Yesterday was a good day. @pvh and I paired for a few
+hours, even though we&#8217;re at opposite coasts. Here&#8217;s what you need: A server &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">SSH Tunnels for Remote Pairing</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-27T08:51:00-08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Yesterday was a good day. <a href="http://twitter.com/pvh">@pvh</a> and I paired for a few
+hours, even though we&#8217;re at opposite coasts.</p>
+
+<p>Here&#8217;s what you need:</p>
+
+<ul>
+<li>A server somewhere that both pairs have access to. We used an EC2 instance.
+We&#8217;ll use it to meet up and create the tunnel.</li>
+<li>SSH client libs - your should already have this unless you&#8217;re on windows in
+which case you probably want PuTTY.</li>
+<li>Skype for audio.</li>
+</ul>
+
+
+<p>As you know, The Internet is made of nodes connected by Tubes. Unfortunately,
+there is no tube from your machine to your pair&#8217;s machine. What we&#8217;ll do here is
+use a third node that has tubes to both of your machines to relay traffic
+through, in essence creating an Internet Tube from your machine to your pair&#8217;s.
+This kind of Internet Tube is called a Tunnel. Since we&#8217;re using SSH to do the
+traffic encryption and forwarding, it&#8217;s an SSH Tunnel. Yes, that&#8217;s somewhat made
+up, but sounds legit!</p>
+
+<p><img src="http://doctorwatson.info/images/lolcats/1111%20internet%20tube%20cat.jpg" /></p>
+
+<p>As it turns out, setting up a tunnel is fairly simple. For example, let&#8217;s set
+up a tunnel between you and Jane using a remote server saturn.</p>
+
+<ol>
+<li>You: Open up a shell and forward traffic to your local port 9999 over to
+Saturn&#8217;s port 1235:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -L 9999:locahost:1235 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Jane: Open up a shell and forward traffic from saturn&#8217;s port 1235 to her port
+22</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -R 1235:localhost:22 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>You: Open up another shell, and ssh into your local port 9999 specifying a
+username on Jane&#8217;s machine.</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh jane_user@jane -p 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And you&#8217;re good to go. Create a shared screen session, open up $EDITOR, use
+skype, google hangouts, face time or whatever for audio and start ping ponging.</p>
+
+<p>The latency was surprisingly minimal. We left this tunnel open most of the day.
+It sat idle for periods of time and the connection was left active. All in all,
+a great setup.</p>
+
+<p>If this is something you&#8217;ll do often, you might as well add a more permanent
+configuration to <code>~/.ssh/config</code>. For example, you might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on your machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_to_jane
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  LocalForward 9999:localhost:1235
+</div><div class='line'>  User saturn_user
+</div><div class='line'>
+</div><div class='line'>Host jane
+</div><div class='line'>  Hostname jane
+</div><div class='line'>  User jane_user
+</div><div class='line'>  Port 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Then you&#8217;d do, on one terminal, <code>ssh tunnel_to_jane</code>, and on the
+other <code>ssh jane</code>.</p>
+
+<p>And Jane might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on Jane&#8217;s machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_from_you
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  RemoteForward 1235:localhost:22
+</div><div class='line'>  User saturn_user</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And she&#8217;d just do, <code>ssh tunnel_from_you</code></p>
+
+<p>This can be used not ony for remote pairing, but rather to forward <em>any</em>
+traffic on a port, over an SSH encrypted channel, to a remote host. For more
+see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-27T08:51:00-08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2012/01/27/ssh-tunnels-for-remote-pairing/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2012/01/27/ssh-tunnels-for-remote-pairing/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/" title="Previous Post: Redis Talk at PostgreSQL Conf West">&laquo; Redis Talk at PostgreSQL Conf West</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/02/05/boston-dot-io-recap/" title="Next Post: Boston.io Recap">Boston.io Recap &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

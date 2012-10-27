@@ -1,0 +1,870 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/page/3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/08/03/postgresql-rails-and-why-you-should-care/">PostgreSQL, Rails, and Why You Should Care</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-08-03T09:59:46-07:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MySQL is the most popular RDBMS used to back Ruby on Rails applications. However, there are many reasons to try out PostgreSQL. It offers performance, efficiency, feature set, configurability, and seamless integration in your Rails projects.</p>
+
+<h3>PostgreSQL Features</h3>
+
+<p>PostgreSQL supports all of the features you would expect from an open source RDMS, including many that are found in commercial databases (Oracle, DB2, SQL Server) such as:</p>
+
+<ul>
+<li>The basics: <a href="http://www.postgresql.org/docs/8.4/static/sql-createview.html">views</a>, <a href="http://www.postgresql.org/docs/8.4/static/triggers.html">triggers</a>, <a href="http://www.postgresql.org/docs/8.4/static/indexes.html">indexes</a>, <a href="http://www.postgresql.org/docs/8.4/static/ddl-constraints.html#DDL-CONSTRAINTS-FK">foreign keys</a>, ACIDity, <a href="http://www.postgresql.org/docs/8.4/static/transaction-iso.html">transactions</a>, <a href="http://www.postgresql.org/docs/8.4/static/geqo-pg-intro.html">query optimization</a>, comprehensive SQL support and <a href="http://www.postgresql.org/docs/8.4/static/datatype.html">data types</a>, <a href="http://www.postgresql.org/docs/current/static/routine-vacuuming.html">autovacuum</a> (keeps your table statistics up to date).</li>
+<li>The not so basics: Features that may not be seen on other DBMSes include reverse, partial and expression indexes, table partitioning, table inheritance, cursors, data domains, user-defined operators, arrays and regular expressions.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/xplang.html">Procedural Languages</a>: analogous to Oracle&#8217;s PL/SQL or SQL Server&#8217;s T/SQL, PostgreSQL supports internal procedural languages for when you need to get down and dirty with the data. Additionally, it supports a wide range of languages <a href="http://raa.ruby-lang.org/project/pl-ruby/">including <em>Ruby</em></a>.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/rules.html">Rules</a>, which pretty much allow you to rewrite an incoming query. A typical use of Rules is to implement updatable views.</li>
+<li><a href="http://www.postgresql.org/docs/current/static/mvcc-intro.html">Multi-Version Concurrency Control</a>: MVCC is how PostgreSQL (and other DBMSes) deal with concurrency and table locking. In practical terms, it allows for database reads while the data is being writen.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/wal-intro.html">Write-Ahead-Log</a>: the WAL is the mechanism by which PostgreSQL writes transactions to the log before they are written to the database. This increases reliability in the unlikely event of a database crash, as there will be a transaction log by which to rebuild the database&#8217;s state. PostgreSQL includes many configuration parameters to <a href="http://www.postgresql.org/docs/8.4/static/wal-configuration.html">tweak the behavior of the WAL</a>.</li>
+<li>PostgreSQL scales up by efficiently using multi-core servers. It also sport an <a href="http://www.postgresql.org/docs/8.3/static/libpq-async.html">asynchronous processing API</a>. Subselects are fast, you can refer to tmp tables more than once in a query and it can use more than one index per query, making it suitable for data warehousing applications as well.</li>
+<li><a href="http://www.postgresql.org/docs/8.4/static/tsearch2.html">tsearch2</a>, which is PostgreSQL&#8217;s highly efficient full text search component. If you are committed to PostgreSQL, this is a very high performant search engine for PostgreSQL (as an alternative to <a href="http://lucene.apache.org/solr/">solr</a> or <a href="http://www.sphinxsearch.com/">sphinx</a>, for instance), with the added benefit that you&#8217;re not running a separate daemon or search service.</li>
+<li><a href="http://postgis.refractions.net/">PostGIS</a> for geospacial objects.</li>
+<li><a href="http://pgcluster.projects.postgresql.org/">There</a> <a href="http://slony1.projects.postgresql.org/">are</a> <a href="http://sourceforge.net/projects/dbbalancer">many</a> <a href="http://pgpool.projects.postgresql.org/">replication</a> <a href="http://pg-comparator.projects.postgresql.org/">options</a>, although non of them are built into the core. This will <a href="http://archives.postgresql.org/pgsql-hackers/2008-05/msg00913.php">change very soon</a>, though.</li>
+<li>You can tweak its brains out: open up postgresql.conf, and you&#8217;ll find many configuration options that can be tweaked to your application load and server capabilities. If you&#8217;re like me, this is lots of fun. I will say, however, that it will take time to understand many of the options and how they affect each other.</li>
+<li>Excellent <a href="http://www.postgresql.org/docs/8.4/interactive/index.html">documentation</a>, which not only goes through the basics of setting up and using PostgreSQL, but really gets into the details of the inner workings of the system. This is an invaluable resource, not only for day-to-day development but also for tweaking the database&#8217;s configuration files.</li>
+<li>Much more in the <a href="http://www.postgresql.org/docs/8.4/interactive/contrib.html">contrib</a> packages.</li>
+</ul>
+
+
+<h3>PostgreSQL License</h3>
+
+<p>PostgreSQL is <a href="http://www.postgresql.org/about/licence">released under a BSD License</a>, and as such it is truly an Open Source Project. There are many contributors to the project, both individuals who donate their time as well as companies that improve the codebase (such as <a href="http://www.enterprisedb.com/">EnterpriseDB</a> and <a href="http://www.commandprompt.com/">Command Prompt</a>). If you are looking for the PostgreSQL gatekeeper, you&#8217;ll be chasing your tail: There&#8217;s no such thing. It is truly &#8220;Free Software&#8221;.</p>
+
+<h3>So, what is it? MySQL or PostgreSQL?</h3>
+
+<p>Historically, MySQL was built with performance in mind, whereas PostgreSQL was built with features in mind. The ease of use of MySQL earned it the popularity seen on most open source web application developers. Since then, however, two things have happened: PostgreSQL has become much faster and efficient, and MySQL has become more feature-rich. In my mind, the performance or feature argument is no longer valid for web applications. Both databases have their strengths and weaknesses and as you work out an expertise on either one of them it will become a moot point. Some of the lacking MySQL features are of interest only to DBAs, not web app developers, although this may be a consideration for larger shops and deployments.</p>
+
+<p>One of the major reasons for trying out PostgreSQL, regardless of it&#8217;s feature set, is it&#8217;s <em>license and community</em>. This can&#8217;t be more true these days, when MySQL AB was consumed by Sun Microsystems, which in turn recently got acquired by Oracle. While I doubt that the product itself may die off, the fact that the copyright to the code, and the direction of the database system itself may and will be dictated by a company like Oracle is a deal breaker for me. At this point it is hard to tell if this is good or bad for MySQL and the community around it, but it definitely shows turmoil in the MySQL ecosystem. Note that I am not implying that Oracle sees MySQL as a threat to Oracle DB. In fact, I believe that MySQL satisfies a completely different niche.</p>
+
+<p>On the other hand, PostgreSQL is a community effort along the same lines as the Ruby and Rails communities. This makes it a more attractive option as the direction of the project is community driven, immune to corporate politics and revenue motives.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/">Attach Non Image Files in Rails With Paperclip</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-05-19T15:40:10-07:00" pubdate data-updated="true">May 19<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Paperclip has pretty much become the standard when it comes to attaching files to models in Rails. It has a very easy to use API, allows the user to <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Processor.html">create her own post-processing code</a> (such as OCR or others), and provides callbacks for before and after post-processing.This post does not cover getting started with paperclip. There are plenty of other posts that cover that. The intent is to get you up and running on using paperclip to attach non-image files.</p>
+
+<p>Out of the box, the default post processor invoked upon upload is the <a href="http://dev.thoughtbot.com/paperclip/classes/Paperclip/Thumbnail.html">Paperclip::Thumbnail</a> processor. This processor creates thumbnails of an image based on the styles hash passed to the <code>has_attached_file</code> method. If you want to upload word documents, excel files, and other non-image data, the Thumbnail processor will fail, and the attachment will not succeed. This processor does not check if the file itself is an image, and tries to call ImageMagick&#8217;s identify command on the file anyways.</p>
+
+<p>Paperclip makes solving this extremely simple: prevent the post processing from happening when the file is not an image. Just like on <code>ActiveRecord</code> callbacks, you can return false on paperclip&#8217;s <code class="inline_code">before_post_process</code> callback to avoid the processing from happening in the first place.</p>
+
+<p>One possible solution is to put the following in whatever model you&#8217;re using paperclip on:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">before_post_process</span> <span class="ss">:image?</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">image?</span>
+</div><div class='line'>  <span class="o">!</span><span class="p">(</span><span class="n">data_content_type</span> <span class="o">=~</span> <span class="sr">/^image.*/</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>In this case, we&#8217;ve created an image? method which returns true if the content type starts with the string image (as in &#8216;image/png&#8217;, &#8216;image/jpeg&#8217;, etc). What&#8217;s neat about this is that this same method can be used in your views to either render an <code>image_tag</code>, or something else such as an icon or the file&#8217;s name, depending on whether the file is an image.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/">Really Silly Percentage Calculation in Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-03-22T12:56:07-07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Here&#8217;s a silly way to calculate percentages of numbers in a Ruby project or Rails app.</p>
+
+<p>The end result of this is having created a few methods for Ruby numeric classes that allow you to calculate percentages:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="o">.</span><span class="mi">456</span><span class="o">.</span><span class="n">five_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">1728</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">100</span><span class="o">.</span><span class="mi">46</span><span class="o">.</span><span class="n">seven_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">7</span><span class="o">.</span><span class="mo">0322</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">95</span><span class="o">.</span><span class="n">fifty_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">47</span><span class="o">.</span><span class="mi">5</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>To accomplish this, we&#8217;ll use use meta programming to add the methods to the Fixnum and Float classes.</p>
+
+<p>First, create a way to translate numbers in English to numeric values. This was taken from a thread at <a href="http://www.ruby-forum.com/topic/132735#591799">ruby-forum</a>.</p>
+
+<p>Then, we&#8217;ll make use of Ruby&#8217;s <code>method_missing</code> to find out if this is a <code>*_percent</code> method and act accordingly. The <code>percent_method?</code> method returns <code>true</code> if it is, <code>false</code> if it ain&#8217;t.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">module</span> <span class="nn">NumberPercentageExtension</span>
+</div><div class='line'>  <span class="k">module</span> <span class="nn">InstanceMethods</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span> <span class="o">=</span> <span class="p">{}</span>
+</div><div class='line'>      <span class="sx">%w| zero one two three four five six seven eight nine ten eleven</span>
+</div><div class='line'><span class="sx">          twelve thirteen fourteen fifteen sixteen seventeen eighteen</span>
+</div><div class='line'><span class="sx">          nineteen |</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span> <span class="p">}</span>
+</div><div class='line'>      <span class="sx">%w| zero ten twenty thirty forty fifty sixty seventy eighty</span>
+</div><div class='line'><span class="sx">          ninety|</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="mi">10</span> <span class="p">}</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="s1">&#39;hundred&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="mi">100</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>      <span class="n">tokens</span> <span class="o">=</span> <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">tokens</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</div><div class='line'>      <span class="n">is_percent</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">[-</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;percent&#39;</span>
+</div><div class='line'>      <span class="n">tokens</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">collect</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">is_percent</span> <span class="o">&amp;&amp;=</span> <span class="no">ENGLISH_VALUE</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="p">}</span>
+</div><div class='line'>      <span class="k">return</span> <span class="n">is_percent</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>        <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">sum</span> <span class="o">*</span> <span class="nb">self</span> <span class="o">/</span> <span class="mi">100</span><span class="o">.</span><span class="n">to_f</span>
+</div><div class='line'>      <span class="k">else</span>
+</div><div class='line'>        <span class="k">super</span>
+</div><div class='line'>      <span class="k">end</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p> We also want <code>respond_to?</code> to be aware of the new *_percent methods, so we include that as well.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">return</span> <span class="kp">true</span> <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">super</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p> Finally, include the module in <code>Numeric</code>:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="no">Numeric</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</div><div class='line'>  <span class="kp">include</span> <span class="no">InstanceMethods</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The full code listing can be found in <a href="http://gist.github.com/83258">this gist</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/12/21/flash-messages-rails-helper-plugin/">Flash Messages Rails Helper Plugin</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-12-21T00:45:48-08:00" pubdate data-updated="true">Dec 21<span>st</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I just pushed my first <a href="http://github.com/hgimenez/sexy_flash">Rails plugin</a> to github(http://github.com) .</p>
+
+<p>This is dead simple: it provides a helper for showing flash messages on your Rails apps with scriptaculous appear/fade effects.</p>
+
+<p><a href="http://github.com/hgimenez/sexy_flash">The readme</a></p>
+
+<p>To install it:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">ruby</span> <span class="n">script</span><span class="o">/</span><span class="n">plugin</span> <span class="n">install</span> <span class="n">git</span><span class="ss">:/</span><span class="o">/</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">hgimenez</span><span class="o">/</span><span class="n">sexy_flash</span><span class="o">.</span><span class="n">git</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/08/01/installing-fann-and-ruby-fann-on-fedora-core-9/">Installing FANN and Ruby-fann on Fedora Core 9</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-08-01T08:07:30-07:00" pubdate data-updated="true">Aug 1<span>st</span>, 2008</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As of this writing, the ruby-fann library requires FANN 2.1.  Since that version of FANN is still in beta, it is not available from the yum repositories yet (as far as I know). Compiling the source is trivial, however:</p>
+
+<ul>
+<li><p>Download the source code for FANN 2.1beta from any of the mirrors found here: <a href="http://leenissen.dk/fann">http://leenissen.dk/fann</a></p></li>
+<li><p>After extracting it, run the usual:
+<code>
+./configure
+make
+sudo make install
+</code></p></li>
+<li><p>Make sure the files are present:
+<code>ls /usr/local/lib |grep fann
+libdoublefann.a
+libdoublefann.la
+libdoublefann.so
+libdoublefann.so.2
+libdoublefann.so.2.0.1
+libfann.a
+libfann.la
+libfann.so
+libfann.so.2
+libfann.so.2.0.1
+libfixedfann.a
+libfixedfann.la
+libfixedfann.so
+libfixedfann.so.2
+libfixedfann.so.2.0.1
+libfloatfann.a
+libfloatfann.la
+libfloatfann.so
+libfloatfann.so.2
+libfloatfann.so.2.0.1</code></p></li>
+</ul>
+
+
+<p>Since these libraries where <em>just</em> installed, you have to run <code>ldconfig</code> in order to cache them and create the required links. This was the gotcha:
+<code>ldconfig /usr/local/lib</code></p>
+
+<p>Now, use ruby-gems to install the ruby-fann bindings:</p>
+
+<p><code>sudo gem install ruby-fann</code></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2007/11/28/cannot-connect-to-sql-server-2005-express/">Cannot Connect to SQL Server 2005 Express</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-11-28T13:09:52-08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2007</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>(Very old news, but I keep having to go back to this)</p>
+
+<p>If your SQL client (ie: SQL Server Mangement Studio, Toad, Embarcadero, etc) can&#8217;t connect to a MS SQL Server 2005 Express Edition installation, follow these steps:</p>
+
+<ul>
+<li><p>Launch <code>SQL Server Configuration Manager</code></p></li>
+<li><p>Click on <code>SQL Server 2005 Network Configuration</code></p></li>
+<li><p>Click on <code>Protocols for MSSERVER</code> => <code>right click on TCP/IP</code> => <code>properties</code></p></li>
+<li><p>Click on <code>Protocols</code>, make sure it is enabled</p></li>
+<li><p>Click on <code>IP Addresses</code> and make sure under each of the <code>IP1</code>, <code>IP2</code> and <code>IPAll</code>, that the port is <code>1433</code></p></li>
+<li><p>Click on <code>SQL Native Client Configuration</code></p></li>
+<li><p>Click on <code>Client protocols</code> => <code>TCP/IP</code> => right click => <code>Properties</code> => make sure the <code>port</code> is <code>1433</code></p></li>
+<li><p>Right click on <code>Alias</code> => <code>New alias</code> => <code>Alias</code>: <code>any name</code>. Port<code>:</code>1433<code>.</code>Server`: host name for the SQL Server Express instance</p></li>
+<li><p>Try to connect</p></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2007/02/11/gnupg-on-macos-x-apple-mail/">GnuPG on MacOS X (Apple Mail)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-02-11T16:48:21-08:00" pubdate data-updated="true">Feb 11<span>th</span>, 2007</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li><p>Install GnuPG. <a href="http://macgpg.sourceforge.net/">http://macgpg.sourceforge.net/</a></p></li>
+<li><p>Create a key pair:
+<strong> Open terminal and type: <code>gpg --gen-key</code>
+</strong> Follow on screen instructions.
+** Choose a key length of 4096, and an expiration of 0 (never expires). Be patient, generating the keys took about an hour.</p></li>
+<li><p>Install GPGPreferences. http://macgpg.sourceforge.net/</p></li>
+<li><p>Go to System Preferences, and open GnuPG (located at the bottom under &#8220;Other&#8221;). Go to the keyserver tab, and check: <code>"Automatically retrieve keys from server while verifying".</code>/r <code>"Include subkeys".</code></p></li>
+<li><p>Install GPG Keychain access. http://macgpg.sourceforge.net/. Open it up after the key has been generated (step 2). Import other&#8217;s keys for people you will exchanged signed messages with.</p></li>
+<li><p>Install GnuPGMail plugin. http://www.sente.ch/software/GPGMail/English.lproj/GPGMail.html
+Open Mail, and go to preferences (Apple + ,). Defaults are fine.</p></li>
+<li><p>Sign and send an email.</p></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/15/stop-spam-on-sendmail/">Stop Spam on Sendmail</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-09-15T19:50:44-07:00" pubdate data-updated="true">Sep 15<span>th</span>, 2006</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Lately the number of spam messages has grown very rapidly on my organization&#8217;s sendmail server. There&#8217;s a few things you can do. Here are two which helped considerably:</p>
+
+<ol>
+<li><p><strong>Deny access to the domain</strong>: You can add the domain name to <code>/etc/mail/access</code> followed by the word <code>REJECT</code>. After editing the access file, you have to run <code>make</code> on the <code>/etc/mail</code> directory.</p></li>
+<li><p><strong>Use online spam blacklists</strong>: There are many of these lists, such as <a href="http://www.spamhaus.org/rokso/index.lasso">Spamhaus ROKSO</a>, <a href="http://www.spamcop.net/">Spamcop</a>, or the <a href="http://www.ordb.org/">Open Relay Database</a>. These are organizations that basically provide a list of spammers. Many thanks to all of you!.
+To use their lists on sendmail, add the following lines to your <code>/etc/mail/sendmail.mc</code> file before the <code>MAILER</code> lines:</p></li>
+</ol>
+
+
+<p><code>FEATURE(<code>dnsbl',</code>relays.ordb.org&#8217;, <code>Rejected - see http://ordb.org/')dnl
+FEATURE(</code>dnsbl&#8217;,<code>bl.spamcop.net',</code>Rejected - see http://spamcop.net/&#8217;)dnl
+FEATURE(<code>dnsbl',</code>sbl.spamhaus.org&#8217;,<code>Rejected - see http://www.spamhaus.org/')dnl&lt;/code&gt;
+After editing sendmail.mc, you have to rebuild sendmail.cf. Here's how I did it:
+&lt;code&gt;$ cp /etc/mail/sendmail.mc .
+$ m4 ../m4/cf.m4 sendmail.mc &gt; sendmail.cf
+$ cp /etc/mail/sendmail.cf /etc/mail/sendmail.cf.BAK
+$ cp sendmail.cf /etc/mail/sendmail.cf
+$ cp: overwrite</code>/etc/mail/sendmail.cf&#8217;? y
+$ /etc/rc.d/init.d/sendmail restart
+</code></p>
+
+<p>Any more ideas to stop spammers? I honestly do not understand why these people keep spamming. Problems man, serious problems! Don&#8217;t they realize that there is no way people will read their emails, not to mention buy their products or fall for their scams? Or will they?</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/">How to Use Java&#039;s URLEncoder.encode() Method</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-09-07T20:15:39-07:00" pubdate data-updated="true">Sep 7<span>th</span>, 2006</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For the lazy readers, here&#8217;s how to use it:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='java'><div class='line'><span class="n">String</span> <span class="n">encodedString</span> <span class="o">=</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the key&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the value with any type of character such as @, ñ, or even ç!&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">);</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>When <a href="http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/">POSTing to a URL</a>, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.</p>
+
+<p>Lookin at the <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html">javadocs for URLEncoder</a>, we find that <em>normal</em> alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.</p>
+
+<p>The server expects something like <code>key1=value1&amp;key2=value2</code>. The <code>=</code> and <code>&amp;</code> signs must be sent <strong>as is</strong>, without encoding. The <code>URLEncoder.encode</code> method is not &#8220;smart&#8221; enough to know that <code>=</code> and <code>&amp;</code> are to be used as part of the URL. Of course, it isn&#8217;t fair to assume that&#8230;</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/">Setting Up Httpd as a Proxy for Tomcat</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-09-05T13:57:18-07:00" pubdate data-updated="true">Sep 5<span>th</span>, 2006</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After installing Tomcat, the default port for the http requests it listens to is 8080.</p>
+
+<p>If your server is also running Apache&#8217;s httpd along with Tomcat, this solution makes them happily work together. It takes two steps:</p>
+
+<ol>
+<li>In httpd&#8217;s configuration file (httpd.conf - located in /etc/httpd/conf/httpd.conf on a Fedora Core installation), add the following lines (let&#8217;s assume your hostname is example.com).
+<code>ProxyPass               /       http://example.com:8080/
+ProxyPassReverse        /       http://example.com:8080/</code></li>
+</ol>
+
+
+<p>These lines say &#8220;redirect all trafic from / (on the httpd server) to http://example.com:8080/ (on Tomcat)&#8221;.</p>
+
+<ol>
+<li>Change the following lines to look like these (doing a search for mod_proxy will take you there).
+<code><IfModule mod_proxy.c>
+ProxyRequests Off
+<Proxy *>
+Order allow,deny
+Allow from all
+</Proxy></code></li>
+</ol>
+
+
+<p>I did this a while ago, so if this doesn&#8217;t work for you please let me know ;)</p>
+
+<p>Another way of integrating tomcat and httpd is by using httpd&#8217;s mod_jk. You can easily <a href="http://www.google.com/search?q=tomcat%20httpd%20mod_jk">google it.</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/4/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We&#8217;re hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

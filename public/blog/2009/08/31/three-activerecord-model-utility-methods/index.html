@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Three ActiveRecord model utility methods - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="Lately I&#8217;ve found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Three ActiveRecord Model Utility Methods</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-08-31T17:40:34-07:00" pubdate data-updated="true">Aug 31<span>st</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Lately I&#8217;ve found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. These methods leverage functionality of either Ruby by itself or Rails that will become helpful in other parts of your application.</p>
+
+<p><a href="http://www.flickr.com/photos/adams_views/3096986188/"><img src="http://farm4.static.flickr.com/3057/3096986188_0599337f47.jpg" title="Visit original on Flickr"></a></p>
+
+<h3>The labeler: #to_s</h3>
+
+<p>  Defining a to_s method enables a very clean way to display a label that represents your model instance. Suppose you have a Post model. You could define a #to_s method similar to the following:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_s</span>
+</div><div class='line'>  <span class="n">title</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Now your views can simply do something like the following HAML:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='haml'><div class='line'><span class="nc">.post</span>
+</div><div class='line'>  <span class="nc">.h2</span><span class="p">=</span> <span class="vi">@post</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<h3>The quantifier: #&lt;=></h3>
+
+<p>This method is useful when you consistently need to be able to respond to the question &#8220;Which of these is bigger/better/taller/fatter/purtier?&#8221;. Which metric defines the quantity is completely up to you, but what&#8217;s important is that defining this method will allow you to call the <code>Enumerable</code> goodies <code>#min</code>, <code>#max</code>, and <code>#sort</code>. For example, and following the Post model example above, you could imagine the following method definition.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">&lt;=&gt;</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">rating</span> <span class="o">&lt;=&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">rating</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Assuming you have a <code>recent</code> named_scope that returns the latest <code>n</code> posts, you could do things like <code>Post.recent.max</code> or <code>Post.recent.sort</code>.</p>
+
+<h3>The SEOer: #to_param</h3>
+
+<p>Finally, this method is leveraged by Rails itself. You can take advantage of the fact that the :id parameter on Rails URLs can be any sequence of integers followed by any non-whitespace characters. Rails will ignore any character after the integers, and use that as the :id parameter. It is customary to use the post&#8217;s title as part of the URL. An easy way to achieve this in Rails is to define the following method on your model:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_param</span>
+</div><div class='line'>  <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">parameterize</span><span class="si">}</span><span class="s2">&quot;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Rails will call to to_param method when using <code>post_url(@post)</code>, and your URLs shal become <em>slugs</em>, in SEO terms.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-08-31T17:40:34-07:00" pubdate data-updated="true">Aug 31<span>st</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/08/26/on-the-subject-of-enterprise-reporting/" title="Previous Post: On the subject of Enterprise Reporting">&laquo; On the subject of Enterprise Reporting</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/09/23/postgresql-s-group-by/" title="Next Post: PostgreSQL's group by">PostgreSQL's group by &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

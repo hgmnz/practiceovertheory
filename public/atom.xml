@@ -1,0 +1,1675 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Practice Over Theory]]></title>
+  <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
+  <link href="http://practiceovertheory.com/"/>
+  <updated>2012-10-27T11:22:57-07:00</updated>
+  <id>http://practiceovertheory.com/</id>
+  <author>
+    <name><![CDATA[Harold Giménez]]></name>
+    <email><![CDATA[harold.gimenez@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Client Side API Mashups With CORS]]></title>
+    <link href="http://practiceovertheory.com/blog/2012/10/27/client-side-api-mashups-with-cors/"/>
+    <updated>2012-10-27T10:17:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2012/10/27/client-side-api-mashups-with-cors</id>
+    <content type="html"><![CDATA[<p>At Heroku we have APIs for pretty much everything. Need logs for an app? Is
+that database available? You just beat someone at ping pong? There&#8217;s an API for
+that. Having such rich datasets available is great. It allows us to build
+dashboards with mashups of different datasets and serve them from a web
+browser.</p>
+
+<p>Here are some of the techniques implemented in order to wire up a Backbone.js
+application speaking to remote hosts in a secure manner. We will explore
+Cross-Origin Resource Sharing (CORS) as well as HMAC based auth tokens with
+cryptographically timestamped data that an attacker wouldn&#8217;t be able to
+auto-replay. The end goal is to have an application running on a browser, and
+securely request data from an API running on a remote host.</p>
+
+<p>The first problem when issuing XHR requests across hosts will be the
+same-origin policy violation. Go ahead, issue an AJAX request against a remote
+host. The browser should fail with an error similar to the following:</p>
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>XMLHttpRequest cannot load https://some.remote.com. Origin https://your.site.com is not allowed by Access-Control-Allow-Origin</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This is where <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross Origin Resource Sharing (CORS)</a>
+ comes in.  The way it works is that the Origin (the client) will issue what&#8217;s
+called a pre-flight request, asking the server &#8220;hey, can I make a request with
+HTTP verb foo to path /bar with headers x-baz?&#8221;, to which the server responds,
+&#8220;Sure, bring it!&#8221;, or &#8220;No, you may not&#8221;. This pre-flight request is made to the
+same path as the actual request, but the HTTP <code>OPTIONS</code> verb is used instead.
+The server responds with the following headers, should the request be allowed:</p>
+
+<ul>
+<li><code>Access-Control-Allow-Origin</code>: Specifies what Origins are allowed remote XHR
+requests to be made against this server. Allowed values include a URL (eg:
+https://your.site.com), a comma separated list of URLs, or an asterisk
+indicating all origins are allowed.</li>
+<li><code>Access-Control-Allow-Headers</code>: Specifies a comma separated list of headers
+that the Origin is allowed to include in requests to this server. There are
+many reasons to include custom headers - we&#8217;ll see an example of this further
+down.</li>
+<li><code>Access-Control-Max-Age</code>: This is optional, but it allows the browser to
+cache this response for the given number of seconds, so browsers will save
+themselves the pre-flight request any subsequent times. Freely set it to a
+large number, like 30 days (2592000)</li>
+</ul>
+
+
+<p>There are more headers that allow you to whitelist and otherwise control access to the resource. Be sure to <a href="https://developer.mozilla.org/en/HTTP_access_control">read up</a> on CORS.</p>
+
+<p>Thus, a Sinatra app acting as the remote end of the system can respond to pre-flight OPTIONS requests like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Max-Age&#39;</span>       <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Inclusion of the Allow Origin and Allow Headers headers is also necessary on responses to any other remote XHR requests. We can extract the headers directive to a helper and use it on both pre-flight and other requests:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Max-Age&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">post</span> <span class="s1">&#39;/resources&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="c1"># do_work</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="kp">private</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And just like that, browsers can now issue XHR requests against remote APIs. Of
+course, there is no authentication in place yet.</p>
+
+<p>We will implement an HMAC based auth token mechanism. Both the remote server
+and your app share a secret. This secret is used to generate a token containing
+a timestamp that is used for validating token recency.</p>
+
+<p>To generate the token, we create a JSON document containing an <code>issued_at</code>
+timestamp, and we calculate its sha256 HMAC token using the secret known to
+both parties. Finally, we append this signature to the JSON document and we
+base64 encode it to make it safe to send over the wire. Here&#8217;s an example
+implementation:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;openssl&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;base64&#39;</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">auth_token</span>
+</div><div class='line'>  <span class="n">data</span>      <span class="o">=</span> <span class="p">{</span> <span class="n">issued_at</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
+</div><div class='line'>  <span class="n">secret</span>    <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span>
+</div><div class='line'>  <span class="n">signature</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">secret</span><span class="p">)</span>
+</div><div class='line'>  <span class="no">Base64</span><span class="o">.</span><span class="n">urlsafe_encode64</span><span class="p">(</span><span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">signature</span><span class="p">:</span> <span class="n">signature</span><span class="p">)))</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This token is used on the API server to authenticate requests. The client can
+be made to send a custom header, let&#8217;s call it X_APP_AUTH_TOKEN, which it must
+be able to reconstruct the token from the JSON data, and then validate that the
+request is recent enough. For example in a Sinatra application:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">not_authorized!</span>
+</div><div class='line'>  <span class="kp">throw</span><span class="p">(</span><span class="ss">:halt</span><span class="p">,</span> <span class="o">[</span><span class="mi">401</span><span class="p">,</span> <span class="s2">&quot;Not authorized</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">authenticate!</span>
+</div><div class='line'>  <span class="n">token</span>           <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s2">&quot;HTTP_X_APP_AUTH_TOKEN&quot;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="n">token_data</span>      <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Base64</span><span class="o">.</span><span class="n">decode64</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+</div><div class='line'>  <span class="n">received_sig</span>    <span class="o">=</span> <span class="n">token_data</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;signature&#39;</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">regenerated_mac</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">token_data</span><span class="p">),</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">if</span> <span class="n">regenerated_mac</span> <span class="o">!=</span> <span class="n">received_sig</span> <span class="o">||</span> <span class="no">Time</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">token_data</span><span class="o">[</span><span class="s1">&#39;issued_at&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">&gt;</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="mi">60</span>
+</div><div class='line'>    <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p><span class='pullquote-right' data-pullquote='Do not reimplement this, just use fernet.'>
+In the above code, we consider a token invalid if it was issued more than 2
+minutes ago. Real applications will probably include more data in the auth
+token, such as the email address or some user identifier that can be used for
+auditing and whitelisting.  <em>All of the above data token generation and
+verification has been extracted to a handy little gem called
+<a href="http://github.com/hgmnz/fernet">fernet</a></em>.
+Do not reimplement this, just use fernet.
+</span></p>
+
+<p>The <code>authenticate!</code> method must be invoked before serving any request. This
+means that the auth token must be included on every request the client makes.
+There are many ways of doing this. One approach, if you&#8217;re using JQuery to back
+Backbone.sync(), is to use its $.ajax beforeSend hook to include the header, as
+can be seen in the following coffeescript two-liner:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span> <span class="nx">beforeSend</span><span class="o">:</span> <span class="p">(</span><span class="nx">jqXHR</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="o">-&gt;</span>
+</div><div class='line'>  <span class="nx">jqXHR</span><span class="p">.</span><span class="nx">setRequestHeader</span> <span class="s2">&quot;x-app-auth-token&quot;</span><span class="p">,</span> <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>YourApp.authToken can come from a number of places. I decided to bootstrap it
+when the page is originally served, something like:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>In addition to that, it should be updated in an interval, so that on a single
+page app, that doesn&#8217;t request any page refreshes, the auth token is always
+fresh and subsequent API requests can be made.</p>
+
+<p>The final client side code that provides the auth token and keeps it updated
+looks like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>       <span class="o">=</span> <span class="err">&quot;</span><span class="o">&lt;%=</span> <span class="nx">auth_token</span> <span class="o">%&gt;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</div><div class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="s1">&#39;/auth_token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</div><div class='line'>      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
+</div><div class='line'>    <span class="p">})</span>
+</div><div class='line'>  <span class="p">};</span>
+</div><div class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">Oki</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The fernet token expires every minute by default. I decided to update it
+every 29 seconds instead so that it can be updated at least twice
+before it has a chance to hold and use an expired token against a remote API.</p>
+
+<p>In this app, the server side is used for one thing only: user authentication.
+The way it works is that when a request is made, the sinatra app performs oauth
+authentication against our google apps domain. Once the oauth dance has
+suceeded, the app generates a token that is handed on to the client for
+authenticating against backend, remote APIs.</p>
+
+<p>This whole setup has worked great for some months now.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[On Top-down Design]]></title>
+    <link href="http://practiceovertheory.com/blog/2012/07/31/on-top-down-design/"/>
+    <updated>2012-07-31T20:54:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2012/07/31/on-top-down-design</id>
+    <content type="html"><![CDATA[<p>There are many strategies for writing software.</p>
+
+<p>Some developers like writing tests first, letting your tests drive the implementation, essentially becoming the first clients of your software. Others like writing production code first and kind of figure out how it works, and then they apply some tests after the fact. I am convinced that writing tests in this way is far less effective, but this is not an article on the merits of TDD. Others don&#8217;t like writing tests at all, so it&#8217;s a varying scale.</p>
+
+<p>You can write software from the bottom up, where you are forced to figure out what the data model and base objects should be and how it is to support all known use cases. This is hard, particularly in this day and age where software requirements are unpredictable and are meant to change very rapidly - at least in the fun industries.</p>
+
+<p>You can also write software from the top down. In this case you let the outer shell of your software dictate what the inner layers need. For example, start all the way on the user interactions via some sketches and HTML/CSS in a web app. Or think through the CLI that you want. <a href="http://tom.preston-werner.com/2010/08/23/readme-driven-development.html">Readme driven development</a> can help with this, too.</p>
+
+<p>Outside-in development puts you in a great position to practice top-down design.</p>
+
+<p>The advantage of Outside-in development is twofold. Not only are you left with acceptance tests that will catch regressions and help refactor later. But also, <em>the top layers of your software becomes a client of the code you are about to write, helping define its interface</em> in a similar way that practicing TDD for your unit tests help guide the design of software component at a very granular level.</p>
+
+<p>These practices will help you define internal APIs that feel good faster, because you will notice cumbersome interfaces sooner, and are therefore given the opportunity to fix them when they have the least possible number of dependencies.</p>
+
+<p>I know of many developers who prefer writing no tests, or prefer a bottom-up strategy. This does not mean that their software is of poor quality, by no means. But I will observe that I can&#8217;t ship software of the quality standard that I put myself to unless I write tests first and follow outside-in methodologies. Indeed, this seems to indicate they are smarter than me.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Boston.io Recap]]></title>
+    <link href="http://practiceovertheory.com/blog/2012/02/05/boston-dot-io-recap/"/>
+    <updated>2012-02-05T10:59:00-08:00</updated>
+    <id>http://practiceovertheory.com/blog/2012/02/05/boston-dot-io-recap</id>
+    <content type="html"><![CDATA[<p>Boston.io took place yesterday at the Microsoft NERD Center. The event is aimed at students in the Greater Boston area who are interested in entrepreneurship and coding, whether that&#8217;s design, development, or ambidextrous.</p>
+
+<p>There were technical and talks on every aspect of the stack, from the metal all the way up to serving and consuming APIs and user experience design. There were also some not-so-technical talks about topics like the Boston startup scene, open source and hacker culture.</p>
+
+<p><a href="http://bostonio-postgres.herokuapp.com/#1">My talk</a> was about PostgreSQL and it focused on how to use SQL to mine data and get information out of it. I stored the twitter stream for about 24 hours prior to the conference and showed how to look at that data showcasing CTEs, Window Functions and other Postgres features. Among the insights we saw that the tweeps who post hashtags and urls the most are spam accounts. Also, the most posted URLs come from shortener services, but also surprised to see livingsocial.com among those. We found other fun facts during the talk too. It went great.</p>
+
+<p>Hopefully the talk gave a good taste of what you can do with Postgres and SQL. It was SQL heavy, but that did not come without warning</p>
+
+<blockquote class="twitter-tweet"><p>boston.io talk ready to go. SQL, do you speak it? After this you will!</p>&mdash; Harold Giménez (@hgimenez) <a href="https://twitter.com/hgimenez/status/165804224481988608" data-datetime="2012-02-04T14:29:42+00:00">February 4, 2012</a></blockquote>
+
+
+<script src="http://practiceovertheory.com//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>Other talks worth mentioning included <a href="http://twitter.com/mikeburns">Mike Burns</a>&#8217; classic UNIX talk. This time around he used curl, sed and grep to automate a SQL injection attack on a hilarious page he staged for this purpose. <a href="http://twitter.com/sferik">Erik Michaels-Ober&#8217;s</a> talk was also great and surely inspired a few students to put code out there for the world to see. So many great talks altogether though, by people like <a href="http://twitter.com/qrush">Nick Quaranto</a> on TDD, <a href="http://twitter.com/r00k">Ben Orenstein</a> on vim, <a href="http://twitter.com/bryanl">Bryan Lyles</a> on OOP and <a href="http://boston.io/schedule">more</a>.</p>
+
+<p>Oh, and there was a dude at the afterparty with a heroku shirt. Here&#8217;s a photo.</p>
+
+<p><img src="https://p.twimg.com/Ak2HPjpCIAAyY7y.jpg:large" /></p>
+
+<p>Overall a great event; thanks to organizers <a href="http://thoughtbot.com">thoughtbot</a> and <a href="http://greenhornconnect.com/">Greenhorn Connect</a> and drinkup sponsors <a href="http://hashrocket">hashrocket</a> and <a href="http://github.com">github</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[SSH Tunnels for Remote Pairing]]></title>
+    <link href="http://practiceovertheory.com/blog/2012/01/27/ssh-tunnels-for-remote-pairing/"/>
+    <updated>2012-01-27T08:51:00-08:00</updated>
+    <id>http://practiceovertheory.com/blog/2012/01/27/ssh-tunnels-for-remote-pairing</id>
+    <content type="html"><![CDATA[<p>Yesterday was a good day. <a href="http://twitter.com/pvh">@pvh</a> and I paired for a few
+hours, even though we&#8217;re at opposite coasts.</p>
+
+<p>Here&#8217;s what you need:</p>
+
+<ul>
+<li>A server somewhere that both pairs have access to. We used an EC2 instance.
+We&#8217;ll use it to meet up and create the tunnel.</li>
+<li>SSH client libs - your should already have this unless you&#8217;re on windows in
+which case you probably want PuTTY.</li>
+<li>Skype for audio.</li>
+</ul>
+
+
+<p>As you know, The Internet is made of nodes connected by Tubes. Unfortunately,
+there is no tube from your machine to your pair&#8217;s machine. What we&#8217;ll do here is
+use a third node that has tubes to both of your machines to relay traffic
+through, in essence creating an Internet Tube from your machine to your pair&#8217;s.
+This kind of Internet Tube is called a Tunnel. Since we&#8217;re using SSH to do the
+traffic encryption and forwarding, it&#8217;s an SSH Tunnel. Yes, that&#8217;s somewhat made
+up, but sounds legit!</p>
+
+<p><img src="http://doctorwatson.info/images/lolcats/1111%20internet%20tube%20cat.jpg" /></p>
+
+<p>As it turns out, setting up a tunnel is fairly simple. For example, let&#8217;s set
+up a tunnel between you and Jane using a remote server saturn.</p>
+
+<ol>
+<li>You: Open up a shell and forward traffic to your local port 9999 over to
+Saturn&#8217;s port 1235:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -L 9999:locahost:1235 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Jane: Open up a shell and forward traffic from saturn&#8217;s port 1235 to her port
+22</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -R 1235:localhost:22 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>You: Open up another shell, and ssh into your local port 9999 specifying a
+username on Jane&#8217;s machine.</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh jane_user@jane -p 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And you&#8217;re good to go. Create a shared screen session, open up $EDITOR, use
+skype, google hangouts, face time or whatever for audio and start ping ponging.</p>
+
+<p>The latency was surprisingly minimal. We left this tunnel open most of the day.
+It sat idle for periods of time and the connection was left active. All in all,
+a great setup.</p>
+
+<p>If this is something you&#8217;ll do often, you might as well add a more permanent
+configuration to <code>~/.ssh/config</code>. For example, you might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on your machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_to_jane
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  LocalForward 9999:localhost:1235
+</div><div class='line'>  User saturn_user
+</div><div class='line'>
+</div><div class='line'>Host jane
+</div><div class='line'>  Hostname jane
+</div><div class='line'>  User jane_user
+</div><div class='line'>  Port 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Then you&#8217;d do, on one terminal, <code>ssh tunnel_to_jane</code>, and on the
+other <code>ssh jane</code>.</p>
+
+<p>And Jane might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on Jane&#8217;s machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_from_you
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  RemoteForward 1235:localhost:22
+</div><div class='line'>  User saturn_user</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And she&#8217;d just do, <code>ssh tunnel_from_you</code></p>
+
+<p>This can be used not ony for remote pairing, but rather to forward <em>any</em>
+traffic on a port, over an SSH encrypted channel, to a remote host. For more
+see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Redis Talk at PostgreSQL Conf West]]></title>
+    <link href="http://practiceovertheory.com/blog/2011/09/19/redis-talk-at-postgresql-conf-west/"/>
+    <updated>2011-09-19T10:00:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/19/redis-talk-at-postgresql-conf-west</id>
+    <content type="html"><![CDATA[<p>In case you&#8217;ve missed it so far, PostgreSQL West will take place next week in San Jose, California. You <a href="https://www.postgresqlconference.org/register">should go</a>.</p>
+
+<p>This weekend I worked on the slides and content for my <a href="https://www.postgresqlconference.org/content/redis-nimble-data-bacon">Redis talk</a>. Why would I decide to speak about Redis in a PostgreSQL conference? As it turns out, we&#8217;ve had great success in using Redis to compliment our architecture, not to replace a main data store. I will speak about our experience in scaling out write heavy apps with Redis.</p>
+
+<p>I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we&#8217;ve used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.</p>
+
+<p>I hope this talk will be entertaining and informative to both DBAs and application developers. I will be sharing the slides here and on <a href="http://twitter.com/hgimenez">twitter</a> afterwards, so stay tuned.</p>
+
+<p>Additionally, on Tuesday I will be teaching a <a href="https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day">one day workshop on Ruby and Rails with a PostgreSQL focus</a>. This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.</p>
+
+<p>Hope to see you there.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[PostgreSQL 9.1 Released]]></title>
+    <link href="http://practiceovertheory.com/blog/2011/09/12/postgresql-9-dot-1-released/"/>
+    <updated>2011-09-12T09:18:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/12/postgresql-9-dot-1-released</id>
+    <content type="html"><![CDATA[<p>Version 9.1 of PostgreSQL was <a href="http://www.postgresql.org/about/news.1349">released</a> yesterday.</p>
+
+<p>Among the exciting new features there is:</p>
+
+<ul>
+<li><p><code>pg_basebackup</code> - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine <a href="http://heroku.com">heroku</a> adopting this as an even faster and reliable way to sync your production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.</p></li>
+<li><p>Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing <code>SET synchronous_commit TO off</code>.</p></li>
+<li><p>The new <code>pg_stat_replication</code> view displays the replication status of all slaves from a master node.</p></li>
+<li><p>Unlogged tables. What? Postgres supports unlogged tables now? Yes, it does. They can be used for data you don&#8217;t necessarily care about, and a crash will truncate all data. They are much faster to write to and could be useful for caching data or keeping stats that can be rebuilt. You can create them like so:</p></li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">UNLOGGED</span> <span class="n">some_stats</span><span class="p">(</span><span class="n">value</span> <span class="nb">int</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built <a href="http://wiki.postgresql.org/wiki/Foreign_data_wrappers">some nifty foreign data wrappers</a> for mysql, oracle, and even redis and couchdb. Although I&#8217;m of the mind that if you&#8217;re actually using any of these databases to supplement your app&#8217;s data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.</p></li>
+<li><p>You no longer need to specify all columns on a select list from your GROUP BY clause: functionally dependent columns are inferred by the planner, so specifying a primary key is sufficient. I <a href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/">talked about this before</a>, and it&#8217;s a cause of great frustration to users coming from MySQL.</p></li>
+</ul>
+
+
+<p>There&#8217;s much more in this release. Here are the <a href="http://www.postgresql.org/docs/9.1/static/release-9-1.html">release notes</a>.</p>
+
+<p>Huge thanks, Postgres hackers!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Design Tweaks]]></title>
+    <link href="http://practiceovertheory.com/blog/2011/09/10/design-tweaks/"/>
+    <updated>2011-09-10T13:46:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/10/design-tweaks</id>
+    <content type="html"><![CDATA[<p>Today I made a few design tweaks to this blog. The goal is to move a bit away from the stock default octopress theme - but my design chops aren&#8217;t all that great and I can&#8217;t really budget the time to do a design from scratch.</p>
+
+<p>A few simple changes and I&#8217;m OK with how it looks for now:</p>
+
+<ol>
+<li><p>I created the basic font logo that you now see on the header. This was the idea from the beginning, but I never had a chance to include it here. Commit: <a href="https://github.com/hgmnz/practiceovertheory/commit/27d0107fe1165f61cfd72f17717a674575ca4fc9">27d0107f</a>.</p></li>
+<li><p>Change the typography in the site, as the original seems a bit heavy for my taste. I started out by using a Helvetica Neue on headers, but decided to go with Antic from the Google web font service. Commits: <a href="https://github.com/hgmnz/practiceovertheory/commit/2dd8f46b46a4c848ea4debbeeeda8e9ce23fcb0a">2dd8f46b4</a> and <a href="https://github.com/hgmnz/practiceovertheory/commit/84bad437716a8c0e78b1354b0f61876e1cd9a988">84bad437</a>.</p></li>
+<li><p>I wanted something different for that dark background. Went hunting for tiles and patterns. There&#8217;s good stuff out there, but I settled for the dark wood background found <a href="http://webtreats.mysitemyway.com/8-tileable-dark-wood-texture-patterns/">here</a>. Commit: <a href="https://github.com/hgmnz/practiceovertheory/commit/9593a004317f1fdc57a386373b3210262bd029b0">9593a00431</a>. At this point, it also made sense to make the header and footer have a light background and dark font.</p></li>
+<li><p>Finally, added a gradient to the header. Commit <a href="https://github.com/hgmnz/practiceovertheory/commit/fe918b0e9681bbc9c7af21980a4c585698feaf09">fe918b0e</a></p></li>
+</ol>
+
+
+<p>I&#8217;m fine with the result for now, but will probably revisit soon. Here&#8217;s a before and after.</p>
+
+<h3>Before</h3>
+
+<p><img src="http://practiceovertheory.com/images/posts/before-resized.png" alt="Before" /></p>
+
+<h3>After</h3>
+
+<p><img src="http://practiceovertheory.com/images/posts/after-resized.png" alt="After" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[You Should Work for These Guys]]></title>
+    <link href="http://practiceovertheory.com/blog/2011/09/07/you-should-work-for-these-guys/"/>
+    <updated>2011-09-07T13:42:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/07/you-should-work-for-these-guys</id>
+    <content type="html"><![CDATA[<p>For the last few months <a href="http://thoughtbot.com">we&#8217;ve</a> been working for an awesome company on a greenfield project here in Boston/Cambridge.</p>
+
+<p>The industry: Healthcare. The goal: Improve patient&#8217;s lives by changing the way <em>the entire system</em> works. It&#8217;s exciting, and it is happening, and you can be a part of it.</p>
+
+<h3>The stack</h3>
+
+<p>Rails 3.1, Backbone.js, Coffeescript, faye, PostgreSQL, Cucumber, RSpec and Jasmine.</p>
+
+<h3>The process</h3>
+
+<p>Daily standups, TDD, code reviews via github pull requests.</p>
+
+<h3>The result</h3>
+
+<p>A highly responsive non-trivial app with a very clean code base and beautiful design.</p>
+
+<p>The future holds a mobile app, web service integrations and ongoing maintenance to the current code base.</p>
+
+<p>If you live in the Boston area, you should apply. If you don&#8217;t, you should move here. <a href="http://thoughtbot.com/jobs/iora/developer/">Right here</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[New domain name, new blog engine]]></title>
+    <link href="http://practiceovertheory.com/blog/2011/09/06/new-domain-name/"/>
+    <updated>2011-09-06T21:58:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2011/09/06/new-domain-name</id>
+    <content type="html"><![CDATA[<p>I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself with &#8220;Awesomeful&#8221; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so <a href="http://twitter.com/hgimenez">hit me up</a> if you&#8217;re interested - I&#8217;m talking to you mister <code>whois awesomeful.com</code>.</p>
+
+<p>Welcome to the new blog: <em>Practice Over Theory</em>. I hope that the new name and engine inspire me to post more often.</p>
+
+<p>Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a <a href="http://octopress.org/docs/deploying/">really weird method</a> of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It&#8217;s backed by jekyll and has a few nice addons, the most useful of which is it&#8217;s code highlighting theme which is based on Solarized.</p>
+
+<p>Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</div><div class='line'>
+</div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2&#39;</span>
+</div><div class='line'>            <span class="p">}</span><span class="o">.</span><span class="n">freeze</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">get</span> <span class="s1">&#39;/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">path</span><span class="o">|</span>
+</div><div class='line'>  <span class="n">one_year_in_seconds</span> <span class="o">=</span> <span class="mi">31536000</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Cache-Control&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;public, max-age=</span><span class="si">#{</span><span class="n">one_year_in_seconds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Expires&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty neat, huh? The syntax highlighting, I mean.</p>
+
+<p>Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a <code>HTTP 301 Moved Permanently</code>. The interesting bit is the HTTP caching employed. Heroku&#8217;s (awesome) varnish servers will remember that response for one year. Try it <a href="http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care">here</a>.</p>
+
+<p>[1] it&#8217;s a hash!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Machine Learning - Who's the Boss?]]></title>
+    <link href="http://practiceovertheory.com/blog/2010/02/15/machine-learning-who-s-the-boss/"/>
+    <updated>2010-02-15T12:48:42-08:00</updated>
+    <id>http://practiceovertheory.com/blog/2010/02/15/machine-learning-who-s-the-boss</id>
+    <content type="html"><![CDATA[<p>In the Machine Learning field, there are two types of algorithms that can be applied to a set of data to solve different kinds of problems: <em>Supervised</em> and <em>Unsupervised</em> learning algorithms. Both of these have in common that they aim to extract information or gain knowledge from the raw data that would otherwise be very hard and unpractical to do. This is because we live in very dynamic environments with changing parameters and vast amounts of data being gathered. This data hides important patterns and correlations that are sometimes impossible to deduce manually, and where computing power and smart algorithms excel. They are also heavily dependent on the quantity and quality of the input data, and as such, evolve in their output and accuracy as more and better input data becomes available.</p>
+
+<p>In this article we will walk through what constitues Supervised and Unsupervised Learning. An overview of the language and terms is presented, as well as the general workflow used for machine learning tasks.</p>
+
+<h3>Supervised Learning</h3>
+
+<p>In supervised machine learning we have a set of data points or <em>observations</em> for which we know the desired output, class, <em>target variable</em>  or <em>outcome</em>. The outcome may take one of many values called <em>classes</em> or <em>labels</em>. A classic example is that given a few thousand emails for which we know whether they are spam or ham (their labels), the idea is to create a model that is able to deduce whether new, unsean emails are spam or not. In other words, we are creating a mapping function where the inputs are the email&#8217;s sender, subject, date, time, body, attachments and other attributes, and the output is a prediction as to whether the email is spam or ham. The <em>target variable</em> is in fact providing some level of <em>supervision</em> in that it is used by the learning algorithm to adjust parameters or make decisions that will allow it to predict labels for new data. Finally of note, when the algorithm is predicting labels of observations we call it a <em>classifier</em>. Some classifiers are also capable of providing a probability of a data point belonging to class in which case it is often referred to a probabilistic model or a regression - not to be confused with a <a href="http://en.wikipedia.org/wiki/Regression_analysis#Regression_models">statistical regression model</a>.</p>
+
+<p>Lets take this as an example in supervised learning algorithms. Given the following dataset, we want to predict on new emails whether they are spam or not. In the dataset below, note that the last column, <code>Spam?</code>, contains the labels for the examples.</p>
+
+<table>
+  <thead>
+    <td><b>Subject</b></td> <td><b>Date</b></td> <td><b>Time</b></td> <td><b>Body</b></td> <td><b>Spam?</b></td>
+  </thead>
+  <tbody>
+    <tr> <td>I has the viagra for you</td> <td>03/12/1992</td> <td>12:23 pm</td> <td>Hi! I noticed that you are a software engineer <br/>so here&#8217;s the pleasure you were looking for&#8230;</td> <td>Yes</td> </tr>
+    <tr> <td>Important business</td> <td>05/29/1995</td> <td>01:24 pm</td> <td>Give me your account number and you&#8217;ll be rich. </ br> I&#8217;m totally serial</td> <td>Yes</td> </tr>
+    <tr> <td>Business Plan</td> <td>05/23/1996</td> <td>07:19 pm</td> <td>As per our conversation, here&#8217;s the business plan for our new venture </ br> Warm regards&#8230;</td> <td>No</td> </tr>
+    <tr> <td>Job Opportunity</td> <td>02/29/1998</td> <td>08:19 am</td> <td>Hi <name>!</ br>I am trying to fill a position for a PHP &#8230; </td> <td>Yes</td> </tr>
+    <tr> <td colspan="5"> [A few thousand rows ommitted] </td> </tr>
+    <tr> <td>Call mom</td> <td>05/23/2000</td> <td>02:14 pm</td> <td>Call mom. She&#8217;s been trying to reach you for a few days now</td> <td>No</td> </tr>
+  </tbody>
+</table>
+
+
+<p>A common workflow approach, and one that I&#8217;ve taken for supervised learning analysis is shown in the diagram below:</p>
+
+<p><img src="http://img.skitch.com/20100213-djhg1re7gaj83ngygcqgj1jm2d.png"></p>
+
+<p>The process is:</p>
+
+<ol>
+<li><em>Scale and prepare training data</em>: First we build input vectors that are appropriate for feeding into our supervised learning algorithm.</li>
+<li><em>Create a training set and a validation set</em> by randomly splitting the universe of data. The training set is the data that the classifier uses to learn how to classify the data, whereas the validation set is used to feed the already trained model in order to get an error rate (or other measures and techniques) that can help us identify the classifier&#8217;s performance and accuracy. Typically you will use more training data (maybe 80% of the entire universe) than validation data. Note that there is also <a href="http://en.wikipedia.org/wiki/Cross-validation_(statistics">cross-validation</a>), but that is beyond the scope of this article.</li>
+<li><em>Train the model</em>. We take the training data and we feed it into the algorithm. The end result is a model that has learned (hopefully) how to predict our outcome given new unknown data.</li>
+<li><em>Validation and tuning</em>: After we&#8217;ve created a model, we want to test its accuracy. It is critical to do this on data that the model has not seen yet - otherwise you are cheating. This is why on step 2 we separated out a subset of the data that was not used for training. We are indeed testing our model&#8217;s generalization capabilities. It is very easy to learn every single combination of input vectors and their mappings to the output as observed on the training data, and we can achieve a very low error in doing that, but how does the very same rules or mappings perform on new data that may have different input to output mappings? If the classification error of the validation set is very big compared to the training set&#8217;s, then we have to go back and adjust model parameters. The model will have essentially memorized the answers seen in the training data, loosing its generalization capabilities. This is called <a href="http://en.wikipedia.org/wiki/Overfitting"><em>overfitting</em></a>, and there are various techniques for overcoming it.</li>
+<li>Validate the model&#8217;s performance. There are numerous techniques for achieving this, such as <a href="http://en.wikipedia.org/wiki/Receiver_operating_characteristic">ROC analysis</a> and many others. The model&#8217;s accuracy can be improved by changing its structure or the underlying training data. If the model&#8217;s performance is not satisfactory, change model parameters, inputs and or scaling, go to step 3 and try again.</li>
+<li>Use the model to classify new data. In production. Profit!</li>
+</ol>
+
+
+<h3>Unsupervised Learning</h3>
+
+<p>The kinds of problems that are suited for unsupervised algorithms may seem similar, but are very different to supervised learners. Instead of trying to predict a set of known classes, we are trying to identify the patterns inherent in the data that separate like observations in one way or another. Viewed from 20 thousand feet, the main difference is that we are not providing a target variable like we did in supervised learning.</p>
+
+<p>This marks a fundamental difference in how both types of algorithms operate. On one hand, we have supervised algorithms which try to minimize the error in classifying observations, while unsupervised learning algorithms don&#8217;t have such luxuries because there are no outcomes or labels. Unsupervised algorithms try to create clusters of data that are inherently similar. In some cases we don&#8217;t necessarily know what makes them similar, but the algorithms are capable of finding these relationships between data points and group them in significant ways. While supervised algorithms aim to minimize the classification error, unsupervised algorithms aim to create groups or subsets of the data where data points belonging to a cluster are as similar to each other as possible, while making the difference between the clusters as high as possible.</p>
+
+<p>Another main difference is that in a clustering problem, the concept of &#8220;Training Set&#8221; does not apply in the same way as with supervised learners. Typically we have a dataset that is used to find the relationships in the data that buckets them in different clusters. We could of course apply the same clustering model to new data, but unless it is too unpractical to do so (perhaps for performance reasons), we will most certainly want to rerun the algorithm on new data as it will typically find new relationships within the data that may surface up given the new observations.</p>
+
+<p>As a simple example, you could imagine clustering customers by their demographics. The learning algorithm may help you discover distinct groups of customers by region, age ranges, gender and other attributes in such way that we can develop targeted marketing programs. Another example may be to cluster patients by their chronic diseases and comorbidities in such a way that targeted interventions can be developed to help manage their diseases and improve their lifestyles.</p>
+
+<p><img src="http://img.skitch.com/20100215-qm59id21fs2kr2m1r2sc5umwgw.png"></p>
+
+<p>For unsupervised learning, the process is:</p>
+
+<ol>
+<li><em>Scale and prepare raw data</em>: As with supervised learners, this step entails selecting features to feed into our algorithm, and scaling them to build a suitable data set.</li>
+<li><em>Build model</em>: We run the unsupervised algorithm on the scaled dataset to get groups of like observations.</li>
+<li><em>Validate</em>: After clustering the data, we need to verify whether it cleanly separated the data in significant ways. This includes calculating a set of statistics on the resulting clusters (such as the within group sum of squares), as well as analysis based on domain knowledge, where you may measure how certain attributes behave when aggregated by the clusters.</li>
+<li>Once we are satisfied with the clusters created there is no need to run the model with new data (although you can). Profit!</li>
+</ol>
+
+
+<h4>Step zero</h4>
+
+<p>A common step that I have not outlined above and should be performed when working on any such problem is to get a strong understanding for the characteristics of the data. This should be a combination of visual analysis (for which I prefer the excellent <a href="http://had.co.nz/ggplot2/">ggplot2</a> library) as well as some basic descriptive statistics and data profiling such as quartiles, means, standard deviation, frequencies and others. <a href="http://www.r-project.org">R</a>&#8217;s <a href="http://cran.r-project.org/web/packages/Hmisc/index.html">Hmisc</a> package has a great function for this purpose called <a href="http://lib.stat.cmu.edu/S/Harrell/help/Hmisc/html/describe.html"><code>describe</code></a>.</p>
+
+<p>I am convinced that not performing this step is a non starter for any datamining project. It will allow you to identify missing values, general distributions of data, early outlier detection, among many other characteristics that drive the selection of attributes for your models.</p>
+
+<h3>Wrapping up</h3>
+
+<p><a href="http://televixen.files.wordpress.com/2009/02/wtb.jpg"><img src="http://televixen.files.wordpress.com/2009/02/wtb.jpg"></a></p>
+
+<p>This is certainly quite a bit of info, especially if these terms are new to you. To summarize:</p>
+
+<table>
+  <thead>
+    <tr>
+      <td></td>
+      <td><b>Supervised Learning</b></td>
+      <td><b>Unsupervised Learning</b></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Objective</b></td>
+      <td>Classify or predict a class.</td>
+      <td>Find patterns inherent to the data, creating cluster of like data points. <a href="http://en.wikipedia.org/wiki/Dimension_reduction">Dimensionality Reduction</a>.</td>
+    </tr>
+    <tr>
+      <td><b>Example Implementations</b></td>
+      <td>Neural Networks (<a href="http://en.wikipedia.org/wiki/Multilayer_perceptron">Multilayer Perceptrons</a>, <a href="http://en.wikipedia.org/wiki/Radial_basis_function_network">RBF Networks</a> and others, <a href="http://en.wikipedia.org/wiki/Support_vector_machine">Support Vector Machines</a>, Decision Trees (<a href="http://en.wikipedia.org/wiki/ID3_algorithm">ID3</a>, <a href="http://en.wikipedia.org/wiki/C4.5_algorithm">C4.5</a> and others), <a href="http://en.wikipedia.org/wiki/Naive_Bayes_classifier">Naive Bayes Classifiers</a>&#8230;</td>
+      <td><a href="http://en.wikipedia.org/wiki/K-means_clustering">K-Means</a> (and variants), <a href="http://en.wikipedia.org/wiki/Cluster_analysis#Hierarchical_clustering">Hierarchical Clustering</a>, <a href="http://en.wikipedia.org/wiki/Self-organizing_map">Kohonen Self Organizing Maps</a>&#8230;</td>
+    </tr>
+    <tr>
+      <td><b>Who&#8217;s the Boss?</b></td>
+      <td>The target variable or outcome.</td>
+      <td>The relationships inherent to the data.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p>Hopefuly this article shows the main differences between Unsupervised and Supervised Learning. On followup posts we will dig into some of the specific implementations of these algorithms with examples in <a href="http://www.r-project.org">R</a> and <a href="http://ruby-lang.org">Ruby</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Experiences porting a helper plugin to Rails 3]]></title>
+    <link href="http://practiceovertheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3/"/>
+    <updated>2010-01-17T16:55:45-08:00</updated>
+    <id>http://practiceovertheory.com/blog/2010/01/17/experiences-porting-a-helper-plugin-to-rails-3</id>
+    <content type="html"><![CDATA[<p>Today I spent a few minutes porting <a href="http://github.com/hgimenez/truncate_html">truncate_html</a> to Rails 3. This gem/plugin provides you with the <code>truncate_html()</code> helper method, which is very similar to rails&#8217; <code>truncate()</code>, but it takes care of closing open html tags and other peculiarities of truncating HTML. It works by using regular expressions and does not have any dependencies. I use this gem on this blog, as well as on the <a href="http://bostonrb.org">bostonrb.org</a> site. Some other people have found it to be <a href="http://twitter.com/dolzenko/status/6428360551">useful</a>.</p>
+
+<p>One of the promises of Rails 3 is that there is an <a href="http://www.engineyard.com/blog/2010/rails-and-merb-merge-plugin-api-part-3-of-6/">API for plugin developers</a> that will allow you to hook into the right parts of Rails to add the functionality that your plugin provides. This means that you should not be mixing in or monkeypatching Rails core willy-nilly. In fact, it is now expected for you as a plugin developer to figure out how to hook into the right parts of Rails using the new API, as opposed to doing something like the following:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">ActionView</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</div><div class='line'>  <span class="kp">include</span> <span class="no">TruncateHtmlHelper</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>At this stage, there isn&#8217;t much documentation around what the API actually is. But this shouldn&#8217;t stop you from investigating and finding out. In this case, cloning the rails repo and using ack pointed me towards <a href="http://github.com/rails/rails/blob/master/actionpack/lib/action_controller/metal/helpers.rb#L6-39">actionpack/lib/action_controller/metal/helpers.rb</a>, where I found all the info I needed to remove the now outdated meta-programmed mixin technique of the dark Rails 2 days. From the docs:</p>
+
+<blockquote><pre>
+In addition to using the standard template helpers provided in the Rails framework,
+creating custom helpers to extract complicated logic or reusable functionality is strongly
+encouraged. By default, the controller will include a helper whose name matches that of
+the controller, e.g., MyController will automatically include MyHelper.
+
+Additional helpers can be specified using the helper class method in
+ActionController::Base or any controller which inherits from it.
+</pre></blockquote>
+
+
+<p>Perfect. All I need to do in this case is <a href="http://github.com/hgimenez/truncate_html/commit/5a33e52db3297a1b35af224d468636e2e68ecdc4">call the <code>helper</code> class method with my helper&#8217;s module</a>: <code>ActionController::Base.helper(TruncateHtmlHelper)</code>. A quick run through the app demonstrates however that we now need to mark strings as html_safe. Fine, let&#8217;s <a href="http://github.com/hgimenez/truncate_html/commit/7539b71f3c572f81ed890d2a9e9156ff51408e2b">do that</a>: <code> (TruncateHtml::HtmlTruncator.new(html).truncate(options)).html_safe!</code></p>
+
+<p>Finally, let&#8217;s run the test suite - and <em>facepalm</em>. The way this plugin is set up is that RSpec must be installed in the containing app for it to run the spec suite. Here&#8217;s where I ran into the first real issue with the upgrade: I have not been able to install RSpec on a Rails 3 app. I also can&#8217;t find any obvious way to do it by browsing its source code. For now I seem to be stuck in limbo land until the <a href="http://blog.davidchelimsky.net/2010/01/12/rspec-2-and-rails-3/">the RSpec/Rails 3 affair</a> is all sorted out.</p>
+
+<h3>Backward Compatibility</h3>
+
+<p>The bigger question is how to maintain backward compatibility. One way to accomplish this is to continue to maintain two git branches for Rails2 and Rails3 (master), and cherry-picking any bug fixes or enhancements from the master branch into the Rails2 branch. However, how could we manage gem bundling and distribution of two gems built for two version of Rails? I&#8217;d like to know how you are planning on maintaining backward compatibility. In this particular case, I almost don&#8217;t care for backward compatibility, and users will simply have to know that version 0.2.2 of the gem is the latest working Rails 2 version, and must install that specific version when running under Rails 2.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Spec your yields in RSpec]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/09/25/spec-your-yields-in-rspec/"/>
+    <updated>2009-09-25T17:31:37-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/09/25/spec-your-yields-in-rspec</id>
+    <content type="html"><![CDATA[<p>Message expectations in RSpec&#8217;s Mocking/Stubing framework provide means for spec&#8217;ing the yielded objects of a method. For example, consider the following spec where we expect the <code>here_i_am</code> method to <code>yield self</code>:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">describe</span> <span class="no">Triviality</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">describe</span> <span class="s1">&#39;#here_i_am&#39;</span> <span class="k">do</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:triviality</span><span class="p">)</span> <span class="p">{</span> <span class="no">Triviality</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">it</span> <span class="s1">&#39;yields self&#39;</span> <span class="k">do</span>
+</div><div class='line'>      <span class="n">triviality</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:here_i_am</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="n">triviality</span><span class="p">)</span>
+</div><div class='line'>      <span class="n">triviality</span><span class="o">.</span><span class="n">here_i_am</span> <span class="p">{</span> <span class="p">}</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Nice and easy. First we set the expectation and then we exercise the method so that the expectation is met, passing it a &#8220;no op&#8221; block - <code>{}</code>.</p>
+
+<p>Here&#8217;s the method to make it pass.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">class</span> <span class="nc">Triviality</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">here_i_am</span>
+</div><div class='line'>    <span class="k">yield</span> <span class="nb">self</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Furthermore, we can test many yielded values by chaining the <code>and_yield</code> method on the expectation. Let&#8217;s add a spec for a method  that yields many times and see how that would play out:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">describe</span> <span class="no">Triviality</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">describe</span> <span class="s1">&#39;#one_two_three&#39;</span> <span class="k">do</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:triviality</span><span class="p">)</span> <span class="p">{</span> <span class="no">Triviality</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">it</span> <span class="s1">&#39;yields the numbers 1, 2 and 3&#39;</span> <span class="k">do</span>
+</div><div class='line'>      <span class="n">triviality</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:one_two_three</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</div><div class='line'>      <span class="n">triviality</span><span class="o">.</span><span class="n">one_two_three</span> <span class="p">{</span> <span class="p">}</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And the method to make that pass:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">class</span> <span class="nc">Triviality</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">one_two_three</span>
+</div><div class='line'>    <span class="k">yield</span> <span class="mi">1</span>
+</div><div class='line'>    <span class="k">yield</span> <span class="mi">2</span>
+</div><div class='line'>    <span class="k">yield</span> <span class="mi">3</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This is kind of ugly though. What if it yields many more times, or if you just want to test that it yields all items of an array? A good example of this is the Enumerable&#8217;s <code>each</code> method. In such cases we can store the <code>MessageExpectation</code> object and call <code>and_yield</code> on it many times, in a loop. Take a look at the following example where we yield each letter of the alphabet:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">describe</span> <span class="no">Triviality</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">describe</span> <span class="s1">&#39;#alphabet&#39;</span> <span class="k">do</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:triviality</span><span class="p">)</span> <span class="p">{</span> <span class="no">Triviality</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span>
+</div><div class='line'>
+</div><div class='line'>    <span class="n">it</span> <span class="s1">&#39;yields all letters of the alphabet&#39;</span> <span class="k">do</span>
+</div><div class='line'>      <span class="n">expectation</span> <span class="o">=</span> <span class="n">triviality</span><span class="o">.</span><span class="n">should_receive</span><span class="p">(</span><span class="ss">:alphabet</span><span class="p">)</span>
+</div><div class='line'>      <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">letter</span><span class="o">|</span> <span class="n">expectation</span><span class="o">.</span><span class="n">and_yield</span><span class="p">(</span><span class="n">letter</span><span class="p">)</span> <span class="p">}</span>
+</div><div class='line'>      <span class="n">triviality</span><span class="o">.</span><span class="n">alphabet</span> <span class="p">{</span> <span class="p">}</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And finally, the method to make it pass:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">class</span> <span class="nc">Triviality</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">alphabet</span>
+</div><div class='line'>    <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="p">{</span> <span class="o">|</span><span class="n">letter</span><span class="o">|</span> <span class="k">yield</span> <span class="n">letter</span> <span class="p">}</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p><code>and_yield</code> is not only useful for message expectations. You can also use it on your <code>stubs</code>, just like you&#8217;d use <code>and_returns</code>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[An object quacks like a duck]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/09/24/an-object-quacks-like-a-duck/"/>
+    <updated>2009-09-24T18:58:19-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/09/24/an-object-quacks-like-a-duck</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve been toying around with the idea of spec&#8217;ing mixins: that a class includes a module. Suppose the following class:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">class</span> <span class="nc">FooList</span>
+</div><div class='line'>  <span class="kp">include</span> <span class="no">Enumerable</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:some_array</span>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+</div><div class='line'>    <span class="vi">@some_array</span> <span class="o">=</span> <span class="n">opts</span><span class="o">[</span><span class="ss">:the_array</span><span class="o">]</span> <span class="o">||</span> <span class="o">[]</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">each</span>
+</div><div class='line'>    <span class="vi">@some_array</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span> <span class="k">yield</span> <span class="n">item</span> <span class="p">}</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>We can test the behavior of the <code>each</code> method using RSpec, but we can also make sure that <code>FooList</code> actually acts like an <code>Enumerable</code>. Here&#8217;s a quick RSpec Matcher just for that (<code>require</code> it in your spec_helper.rb)</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Spec</span><span class="o">::</span><span class="no">Matchers</span><span class="o">.</span><span class="n">define</span> <span class="ss">:quack_like</span> <span class="k">do</span> <span class="o">|</span><span class="n">mod</span><span class="o">|</span>
+</div><div class='line'>  <span class="n">match</span> <span class="k">do</span> <span class="o">|</span><span class="n">instance</span><span class="o">|</span>
+</div><div class='line'>    <span class="n">mod</span><span class="o">.</span><span class="n">instance_methods</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">accum</span><span class="p">,</span> <span class="nb">method</span><span class="o">|</span> <span class="n">accum</span> <span class="o">&amp;&amp;</span> <span class="n">instance</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span> <span class="p">}</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">failure_message_for_should</span> <span class="k">do</span> <span class="o">|</span><span class="n">instance</span><span class="o">|</span>
+</div><div class='line'>    <span class="s2">&quot;expected the class </span><span class="si">#{</span><span class="n">instance</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to include the module </span><span class="si">#{</span><span class="n">mod</span><span class="si">}</span><span class="s2">&quot;</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">failure_message_for_should_not</span> <span class="k">do</span> <span class="o">|</span><span class="n">instance</span><span class="o">|</span>
+</div><div class='line'>    <span class="s2">&quot;expected the class </span><span class="si">#{</span><span class="n">instance</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> not to include the module </span><span class="si">#{</span><span class="n">mod</span><span class="si">}</span><span class="s2">&quot;</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">description</span> <span class="k">do</span>
+</div><div class='line'>    <span class="s2">&quot;expected the class to behave like a module by responding to all of its instance methods&quot;</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This allows us to spec some quacking:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">describe</span> <span class="no">FooList</span> <span class="k">do</span>
+</div><div class='line'>  <span class="k">def</span> <span class="nf">foo_list</span>
+</div><div class='line'>    <span class="vi">@foo_list</span> <span class="o">||=</span> <span class="no">FooList</span><span class="o">.</span><span class="n">new</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">it</span> <span class="s2">&quot;quacks like an Enumerable&quot;</span> <span class="k">do</span>
+</div><div class='line'>    <span class="n">foo_list</span><span class="o">.</span><span class="n">should</span> <span class="n">quack_like</span> <span class="no">Enumerable</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>I am still experimenting with this. In a way it is not really testing behavior, but it&#8217;s not really testing the implementation either. In other words, if every method in <code>Enumerable</code> is implemented in <code>FooList</code> and we remove the <code>include Enumerable</code> line, the spec still passes.</p>
+
+<p>I&#8217;ve discussed this over IRC with some other <a href="http://technicalpickles.com/">smart</a> <a href="http://www.enlightsolutions.com/">folks</a>, but I want more input . Do you think this is appropriate? Useless?</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[PostgreSQL's group by]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/"/>
+    <updated>2009-09-23T14:30:53-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by</id>
+    <content type="html"><![CDATA[<p>Last night I noticed a user on IRC complaint on two different channels (#heroku and #rubyonrails) claiming something along the lines of &#8220;PostgreSQL sucks: i have this code</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">named_scope</span> <span class="ss">:with_questions</span><span class="p">,</span>
+</div><div class='line'>  <span class="ss">:joins</span> <span class="o">=&gt;</span> <span class="ss">:questions</span><span class="p">,</span>
+</div><div class='line'>  <span class="ss">:group</span> <span class="o">=&gt;</span> <span class="s2">&quot;categories.id, categories.name, categories.created_at, categories.updated_at&quot;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p> because of the way postgresql handles group by. It should only be <code>"categories.id"</code>.&#8221;</p>
+
+<p>The user was surprised that this query works on MySQL. Surely, the user was getting the PostgreSQL message: <code>ERROR: column "categories.name" must appear in the group by clause or be used in an aggregate function</code>. It turns out that this is not a bug, and PostgreSQL does not suck as this user initially thought. Furthermore, I tried a similar query on MS SQL Server, and it rightfully complaints: <code>Column 'categories.name' is invalid in the select list because it is not contained in either an aggregate function or the GROUP BY clause.</code></p>
+
+<p>Let&#8217;s look at solutions.</p>
+
+<h4>Alternative Queries</h4>
+
+<p>The first thing that&#8217;s wrong about this query is that what the user really wanted was a distinct list of categories that had questions. This is the requirement. To that end, the query should look something like the following two options.</p>
+
+<ul>
+<li>Option 1: Drop the <code>join</code> and <code>group by</code>, and just use a condition checking whether a question exists for the category:</li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Category</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:conditions</span> <span class="o">=&gt;</span>
+</div><div class='line'>        <span class="s1">&#39;exists (select 1 from questions where categories.id = questions.category_id)&#39;</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>A variation of this can be achieved with the <code>in</code> operator:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Category</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:conditions</span> <span class="o">=&gt;</span>
+</div><div class='line'>        <span class="s1">&#39;clients.id in (select client_id from questions)&#39;</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Option 2: Again, drop the <code>group by</code>, and use a <code>distinct</code> instead:</li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Category</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="ss">:select</span> <span class="o">=&gt;</span> <span class="s1">&#39;distinct items.*&#39;</span><span class="p">,</span>
+</div><div class='line'>             <span class="ss">:joins</span>  <span class="o">=&gt;</span> <span class="ss">:questions</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<h4><em>Why</em> PostgreSQL doesn&#8217;t like the original query</h4>
+
+<p>The <code>group by</code> clause is used to collect data from multiple records having common values in a select statement, and project the result based on some aggregate function. It really does not make any sense to add a <code>group by</code> to a query that does not have an aggregate such as <code>sum()</code>, <code>avg()</code>, <code>min()</code>, <code>max()</code>, <code>count()</code>. There is an exception, but we&#8217;ll talk about that later.</p>
+
+<p>As an example, we could retrieve every item along with a count of categories per item:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">select</span> <span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="k">count</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">from</span> <span class="n">items</span>
+</div><div class='line'>  <span class="k">inner</span> <span class="k">join</span> <span class="n">categories</span>
+</div><div class='line'>    <span class="k">on</span> <span class="n">items</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">categories</span><span class="p">.</span><span class="n">item_id</span>
+</div><div class='line'>  <span class="k">group</span> <span class="k">by</span> <span class="n">id</span><span class="p">,</span> <span class="n">name</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that every non-aggregated column on the <code>select</code> list must appear on the <code>group by</code> list. This is necessary for PostgreSQL to know which item&#8217;s to <code>count</code> on (or <code>sum</code>, or calculate the <code>max</code> on). Let&#8217;s walk through a simplified example of what happens if we don&#8217;t include one of these columns on the <code>group by</code> list.</p>
+
+<p>Suppose the following table</p>
+
+<p><code></p>
+
+<h2>code | city</h2>
+
+<p>0    | Cambridge
+0    | Boston
+1    | Foxboro
+</code></p>
+
+<p>What happens if we run the following query:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">select</span> <span class="n">code</span><span class="p">,</span> <span class="n">city</span>
+</div><div class='line'>  <span class="k">from</span> <span class="k">table</span>
+</div><div class='line'>  <span class="k">group</span> <span class="k">by</span> <span class="n">code</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>What would you expect PostgreSQL to return for the row with a code equal to 0? Cambridge or Boston? When PostgreSQL is presented with an ambiguous query such as the above, it will stop and report an error. Some other databases may go on and make their own decision as to what to return. To me, this is a broken spec. Futhermore, the result set may be inconsistent and unpredictable across DBMSes, or even queries on the same DB.</p>
+
+<h4>Exception to the rule</h4>
+
+<p>On previous versions of PostgreSQL (pre 8.2), the query plan for a <code>group by</code> was much more efficient than a <code>select distinct</code>. In some older Rails apps, we wrote things like the following to optimize performance:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Question</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="ss">:all</span>
+</div><div class='line'>              <span class="ss">:group</span>      <span class="o">=&gt;</span> <span class="no">Question</span><span class="o">.</span><span class="n">column_names</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">),</span>
+</div><div class='line'>              <span class="ss">:conditions</span> <span class="o">=&gt;</span> <span class="s1">&#39;...&#39;</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Instead of the more natural:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="no">Question</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="ss">:all</span><span class="p">,</span>
+</div><div class='line'>              <span class="ss">:select</span>     <span class="o">=&gt;</span> <span class="s1">&#39;distinct items.*&#39;</span><span class="p">,</span>
+</div><div class='line'>              <span class="ss">:conditions</span> <span class="o">=&gt;</span> <span class="s1">&#39;...&#39;</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This was an optimization that was specific to our environment and helped us avoid the relatively poor query plan and expensive <code>Seq Scan</code> that was slowing our app down.</p>
+
+<object width="560" height="340"><param name="movie" value="http://www.youtube.com/v/XODMtOqmb9U&hl=en&fs=1&"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/XODMtOqmb9U&hl=en&fs=1&" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="560" height="340"></embed></object>
+
+
+<p>I hope that after reading this you realize that this error is helping you as a user write better SQL. Complaining that the example query doesn&#8217;t run on PostgreSQL is like complaining that your new <a href="http://www.fender.com/products//search.php?partno=0110100747">Fender Strat</a> sucks because when you play <em>Here comes the Sun</em> the very same way you played it on your <a href="http://www.thebeatlesrockband.com/">Beatles Rock Band</a> guitar, it doesn&#8217;t sound the same. <code>/endrant</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Three ActiveRecord model utility methods]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods/"/>
+    <updated>2009-08-31T17:40:34-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/31/three-activerecord-model-utility-methods</id>
+    <content type="html"><![CDATA[<p>Lately I&#8217;ve found myself implementing at least two out of three of these utility methods on most of my ActiveRecord models on my Rails apps. These methods leverage functionality of either Ruby by itself or Rails that will become helpful in other parts of your application.</p>
+
+<p><a href="http://www.flickr.com/photos/adams_views/3096986188/"><img src="http://farm4.static.flickr.com/3057/3096986188_0599337f47.jpg" title="Visit original on Flickr"></a></p>
+
+<h3>The labeler: #to_s</h3>
+
+<p>  Defining a to_s method enables a very clean way to display a label that represents your model instance. Suppose you have a Post model. You could define a #to_s method similar to the following:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_s</span>
+</div><div class='line'>  <span class="n">title</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Now your views can simply do something like the following HAML:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='haml'><div class='line'><span class="nc">.post</span>
+</div><div class='line'>  <span class="nc">.h2</span><span class="p">=</span> <span class="vi">@post</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<h3>The quantifier: #&lt;=></h3>
+
+<p>This method is useful when you consistently need to be able to respond to the question &#8220;Which of these is bigger/better/taller/fatter/purtier?&#8221;. Which metric defines the quantity is completely up to you, but what&#8217;s important is that defining this method will allow you to call the <code>Enumerable</code> goodies <code>#min</code>, <code>#max</code>, and <code>#sort</code>. For example, and following the Post model example above, you could imagine the following method definition.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">&lt;=&gt;</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">rating</span> <span class="o">&lt;=&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">rating</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Assuming you have a <code>recent</code> named_scope that returns the latest <code>n</code> posts, you could do things like <code>Post.recent.max</code> or <code>Post.recent.sort</code>.</p>
+
+<h3>The SEOer: #to_param</h3>
+
+<p>Finally, this method is leveraged by Rails itself. You can take advantage of the fact that the :id parameter on Rails URLs can be any sequence of integers followed by any non-whitespace characters. Rails will ignore any character after the integers, and use that as the :id parameter. It is customary to use the post&#8217;s title as part of the URL. An easy way to achieve this in Rails is to define the following method on your model:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">to_param</span>
+</div><div class='line'>  <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">parameterize</span><span class="si">}</span><span class="s2">&quot;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Rails will call to to_param method when using <code>post_url(@post)</code>, and your URLs shal become <em>slugs</em>, in SEO terms.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[On the subject of Enterprise Reporting]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting/"/>
+    <updated>2009-08-26T17:04:12-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/26/on-the-subject-of-enterprise-reporting</id>
+    <content type="html"><![CDATA[<p>Apparently this is how reporting works in big corporate environments.</p>
+
+<ol>
+<li>We have a bunch of data, terabytes. There&#8217;s got to be something in there.</li>
+<li>After a few months of cranking, the analyst comes up with a one page report with significant statistics and a couple of charts. This is the first, alpha version of the report.</li>
+<li>Manager receives report. Loves it, since it&#8217;s the first time they can see the deficiencies in the overall system, and sees opportunities for savings, optimization, improvement.</li>
+<li>Manger passes it along to another set of managers, maybe by region, for constructive feedback.</li>
+<li>A few weeks later, all feedback is taken in, and the analyst implements all of the new requirements into the new, 40 page report.</li>
+<li>Report is sent out quarterly, where it sits on top of a pile labeled TO READ.</li>
+</ol>
+
+
+<p><img src="http://farm3.static.flickr.com/2604/3859340277_0bae706b4a.jpg" width="500" height="365" alt="On the subject of Enterprise Reporting" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Small collection of useful vim tricks]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks/"/>
+    <updated>2009-08-18T13:44:42-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/18/small-collection-of-useful-vim-tricks</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve been using vim for the past couple of years. Vim is a cross-platform programmer&#8217;s editor that is highly customizable and has a ton of well known and not-so well known features. As time goes by, I always come across new or better ways of doing things that increase productivity. What&#8217;s most important is to force yourself to start using them so that they become part of your workflow, becoming muscle memory.</p>
+
+<p>Here&#8217;s a small collection of tips that I&#8217;ve picked up along the way:</p>
+
+<h3>Moving around files</h3>
+
+<ul>
+<li><p>I never bought into NERDTree or any of the other explorer plugins. I usually jump around using gf, using Rails.vim&#8217;s <code>:R</code>, <code>:A</code>, etc, or you can open up vim&#8217;s built in explorer using <code>:Ex</code>. <code>:Sex</code> opens it up in a split window.</p></li>
+<li><p>Use vim marks to jump around any number of files. Here&#8217;s a quick <a href="http://www.linux.com/archive/feature/54159">reference</a></p></li>
+<li><p><code>gf</code> will open the filename under the cursor. <code>Rails.vim</code> extends this by being smart about view partials. You can also use <code><C-W>gf</code> to open the file in a new tab.</p></li>
+<li><p>Use ctags. <code>C-]</code> on any method name or attribute to jump to the declaration point (or <code><C-W>-]</code> to open on a new window. Use <code><C-T></code> to come back. The tag stack is maintained. Then, <code>:ta</code> to jump to the tag. I use F5 to rebuild my ctags database:
+<code>map <silent> <F5>:!ctags -R --exclude=.svn --exclude=.git --exclude=log *<CR></code></p></li>
+<li><p>Learn how to use windows and tabs: it can really improve your work flow. I usually have multiple tabs open with different areas of the project. On each tab, I may have up to four windows open. I use tabs when it&#8217;s a different context, for example, a CSS and a view file on one tab, and a controller, cucumber feature and step definitions on another tab, each on its own windows. When working with many windows, it&#8217;s useful to quickly resize them: <code><C-W>_</code> maximizes the viewing area of the active window (for vertical windows, <code><C-W>|</code> does the same). You can come back to equally sized windows with <code><C-W>=</code>. The easiest way for me to move around tabs is using <code>gt</code> and <code>gT</code>. To move around windows, I typically use <code><C-W></code> along with one of h, j, k, l.</p></li>
+</ul>
+
+
+<h3>More efficient editing</h3>
+
+<ul>
+<li><p>Automate simple tasks with macros. <code>q{reg}<your-macro>q</code>. Then invoke it <em>n</em> times with <code>n@{reg}</code>. Learn about <a href="http://vim.wikia.com/wiki/Record_a_recursive_macro">recursive macros</a> to run it until EOF.</p></li>
+<li><p>Use your registers. Yanking (and putting) and recording macros to different registers is most useful. Use <code>:reg</code> to view contents of your registers.</p></li>
+<li><p>Quickly change text surrounded by <em>something</em> using <code>ci</code>. For example, to change a string in double quotes use <code>ci"</code>, or to change parenthesized parameters, use <code>ci(</code>.</p></li>
+<li><p>When working with large number of files, you can run the same command on all buffers/windows/tabs by using <code>:bufdo</code>/<code>:windo</code>/<code>:tabdo</code>. Such a time saver.</p></li>
+<li><p>Learn how to use vim&#8217;s substitute command with regular expressions and the grouping operators \( and \). You can morph a file at will using the matched part of the pattern and \1, \2. Throw <code>i</code> at the end of the command for interactive substitution. Here&#8217;s a <a href="http://www.geocities.com/volontir/">good vim regex guide</a></p></li>
+<li><p>Vim&#8217;s built in autocompletion rocks. Use <code><C-n></code> or <code><C-p></code> in insert mode to activate and move through the options.</p></li>
+<li><p>When moving within a file, <code>f<char></code> moves the cursor forward until the first <code><char></code>. <code>;</code> repeats the action. You can move to the second occurrence of <code><char></code> by using <code>2f<char></code>. <code>F<char></code> does the same, but backwards.</p></li>
+<li><p>Learn the different ways to enter insert mode. The ones I use the most, other than <code>i</code> are</p>
+
+<ul>
+<li><code>a</code> to enter insert mode at the next character (as opposed to i, which enters insert mode before the current character).</li>
+<li><code>A</code> to enter insert mode at the end of the line.</li>
+<li><code>I</code> to enter insert mode at the beginning of the line.</li>
+<li><code>O</code> to create a new line above the current line and enter insert mode.</li>
+<li><code>o</code> to create a new line below the current line and enter insert mode.</li>
+</ul>
+</li>
+<li><p>Block selection is magical. Use it when you want to select a vertical block or column to yank it, delete it, etc. To enter visual block select, do <code><C-q></code>. You can also insert arbitrary text before the block with <code><C-I><type your chars>Esc</code>. For example, this is very useful for inserting the same text on a set of aligned <code><li>s</code>(like adding a class=&#8221;foo&#8221; attribute) or after hash rockets or equal signs on your ruby code - yet another reason to align these properly.</p></li>
+<li><p><code>C-e</code> and <code>C-y</code>, scrolls the buffer without moving the cursor. Make it scroll three lines at a time with:
+<code> nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y></code></p></li>
+<li><p>Use <code>%</code> to jump to the matching open or closing bracket/parenthesis. Use the <a href="http://www.vim.org/scripts/script.php?script_id=39">matchit plugin</a> to have it match more than single characters, for example <code>def</code> matches <code>end</code> in Ruby code, or <code><ul></code> matches <code></ul></code> in HTML.</p></li>
+</ul>
+
+
+<h3>Other miscellanea</h3>
+
+<ul>
+<li><p>For bash style command tab completion, put <code>set wildmode=list:longest</code> on your vimrc. Then tab away when running commands on ex mode.</p></li>
+<li><p>View unprintable characters with <code>:set list</code>. Cancel out with <code>:set nolist</code></p></li>
+<li><p>Analyzing log files with vim is also a win. For example, you may be in a rails app and used <code>Rails.vim</code>&#8217;s <code>:Rlog</code> command. Now you can use the global command to surface up the specific pattern you&#8217;re looking for using <code>:g/{pattern}/p</code>, or you may remove any useless lines with <code>:g/{useless}/d</code>.</p></li>
+<li><p>When pasting something, vim will autoindent which is usually not what you want. Use <code>:set paste</code> before the paste to avoid that.</p></li>
+<li><p>Use <code>gg=G</code> to apply proper indentation to a messy source file. I define 2 space &#8220;tabs&#8221; for all file types by using <code>set tabstop=2 shiftwidth=2 expandtab</code>.</p></li>
+<li><p>Saving and reopening a vim session is easy using <code>:mksession!</code> and <code>:source</code>. I have the following two maps in my vimrc to make this even easier with F2 and F3:
+<code>map <F2> :mksession! ~/vim_session <cr> " Quick write session with F2
+map <F3> :source ~/vim_session <cr>     " And load session with F3</code></p></li>
+<li><p><code>Ctrl-L</code> to redraw the screen (to fix broken syntax highlighting). The following mapping will also remove highlighting after a search: <code>nnoremap <C-L> :nohls<CR><C-L></code>.</p></li>
+<li><p>About those darn backup files infecting your project: Keep them, but on a different location - you may come to a crash, and you&#8217;ll need them. I created a directory called ~/.vim_backups, and vim puts them there. The relevant lines are:
+<code> silent execute '!mkdir -p ~/.vim_backups'
+set backupdir=~/.vim_backups//
+set directory=~/.vim_backups//</code></p></li>
+<li><p>I usually write blog posts in Vim using markdown. I use vim&#8217;s integrated spell checking by setting <code>:set spellang=en_us</code> on my vimrc. To invoke it, use <code>:set spell</code> which will underline misspelled words, and <code>z=</code> brings up suggestions for the misspelled words under the cursor.</p></li>
+<li><p>Word wrapping is sluggish by default. I added <a href="http://github.com/hgimenez/vimfiles/blob/c07ac584cbc477a0619c435df26a590a88c3e5a2/vimrc#L72-122">these lines</a> to my .vimrc which do a few of things: <code><leader>w</code> toggles between wrap and no wrap. It adds a <code>></code> character to new lines, making it obvious that you&#8217;re on a wrapping line. It tries to wrap on word boundaries, and finally, it remaps k and j so that you&#8217;re moving up/down on visual lines, not actual lines.</p></li>
+<li><p>Use <code>set showmatch</code> and <code>set mat=5</code> on your .vimrc to blink matching parenthesis or brackets. Unobstrusive and useful.</p></li>
+</ul>
+
+
+<p>I am sure I&#8217;m missing many, but this is what I use most often. Got any tips worth sharing or even better, improvements to the above?</p>
+
+<h4>Resources</h4>
+
+<p>The following are books, tutorials or articles that I&#8217;ve found useful in learning and improving my vim workflow.</p>
+
+<ul>
+<li><a href="http://vim.runpaint.org/toc/">Vim cookbook</a></li>
+<li><a href="http://www.networkcomputing.com/unixworld/tutorial/009/009.html">The vi/ex editor</a></li>
+<li><a href="http://jerrywang.net/vi/">Vi for smarties</a></li>
+<li><a href="http://jmcpherson.org/editing.html">Efficient editing with vim</a></li>
+<li><a href="http://www.viemu.com/a-why-vi-vim.html">Why, oh WHY, do those #?@! nutheads use vi?</a></li>
+<li><a href="http://www.swaroopch.com/notes/Vim">A byte of vim</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[On the subject of e-voting]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/15/on-the-subject-of-e-voting/"/>
+    <updated>2009-08-15T18:52:37-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/15/on-the-subject-of-e-voting</id>
+    <content type="html"><![CDATA[<p>May sound bitter, but this is exactly how I feel about e-voting. Not only are there many <a href="http://en.wikipedia.org/wiki/Electronic_voting#Documented_problems">documented issues</a>, but it is just too easy to under/over count. Draw your own conclusions.</p>
+
+<p><img src="http://farm4.static.flickr.com/3516/3823734007_72df752ec3.jpg" width="500" height="294" alt="On the subject of e-voting" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[On the subject of average body weight by day of the week]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week/"/>
+    <updated>2009-08-07T20:37:34-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/07/on-the-subject-of-average-body-weight-by-day-of-the-week</id>
+    <content type="html"><![CDATA[<p>I have been diligently keeping track of my weight, every day, for the past 10 years. It&#8217;s taken significant effort but persistence&#8217;s my middle name.</p>
+
+<p>Here&#8217;s a chart of my average weight by day of the week:</p>
+
+<p><img src="http://farm3.static.flickr.com/2524/3799614914_7848ef7b10.jpg" width="500" height="351" alt="on the subject of body weight" /></a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sortable lists with JQuery in Rails]]></title>
+    <link href="http://practiceovertheory.com/blog/2009/08/06/sortable-lists-with-jquery-in-rails/"/>
+    <updated>2009-08-06T22:35:30-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2009/08/06/sortable-lists-with-jquery-in-rails</id>
+    <content type="html"><![CDATA[<p>Drag &#8216;n Drop sortable lists are a great way to provide a UI for sorting, well, lists of things. Most Rails examples <a href="http://railscasts.com/episodes/147-sortable-lists">out</a> <a href="http://blog.wyeworks.com/2009/7/27/drag-drop-sortable-lists">in</a> <a href="http://harryche2008.wordpress.com/2008/07/19/how-to-do-ajax-style-drag-n-drop-sorting-with-rails/">the</a> <a href="http://www.devarticles.com/c/a/Ruby-on-Rails/Dropping-and-Sorting-with-AJAX-and-scriptaculous/2/">wild</a> use prototype/scriptaculous and the built in Rails javascript helpers. In this walkthrough we&#8217;ll provide the same functionality using JQuery instead. We will not be using the <a href="http://api.rubyonrails.org/classes/ActionView/Helpers/ScriptaculousHelper.html#M001640">built in Rails javascript helper</a>. Instead we&#8217;ll write Unobstrusive Javascript using JQuery.</p>
+
+<p>For this example we&#8217;ll use a UserStory and a Task model:</p>
+
+<p><img src="http://yuml.me/diagram/scruffy/class/[UserStory]->[Task].&#8221; /></p>
+
+<p>The very first step is to download JQuery into your Rails app, as well as some basic setup that will make our lives easier when dealing with Unobstrusive Javascript (UJS). UJS is overlooked amongst web app developers. It&#8217;s all about separation of concerns. Remember in the late 80s and 90s when it was common to throw style right there on your HTML with things like <code>color="magenta"</code> or tags like <code><center></code>? Same thing is happening with Javascript: separate behavior from content and presentation. So instead of saying <code><a href="#" onclick="some_function()">foo</a></code>, you want to create a plain old link, and unobstrusively change the click&#8217;s behavior via javascript. The basic feel for this looks like:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="c">&lt;!-- in your view --&gt;</span>
+</div><div class='line'><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">&quot;foo&quot;</span> <span class="na">href=</span><span class="s">&quot;http://foo.info&quot;</span><span class="nt">&gt;</span>This is foo!<span class="nt">&lt;/a&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//in application.js (possibly)</span>
+</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#foo&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</div><div class='line'>    <span class="c1">//handle the click</span>
+</div><div class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="c1">//cancel the browser&#39;s traditional event.</span>
+</div><div class='line'>  <span class="p">});</span>
+</div><div class='line'><span class="p">});</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Just like we use CSS selectors to style an element, we can use JQuery selectors to describe the behavior of the element. Just like you may have <code>styles.css</code>, you may have <code>application.js</code>. This separation of behavior helps avoid cross browser inconsistencies, dry up and reuse your code, as well as provide graceful degradation to user agents that don&#8217;t even support Javascript. For instance, a form may be submitted via AJAX if the browser supports Javascript, or the traditional action may execute if it doesn&#8217;t. I&#8217;ve come to the point where looking at something like <code><a href="#" onclick='foo()'>foo</a></code> has the same effect as seeing style code in the middle of an HTML document: <em>repugnance</em>.</p>
+
+<h4>Set yourself up for JQuery</h4>
+
+<p>Head over to <a href="http://jquery.com/">the JQuery site</a> and download the minified (production) version of JQuery. The sortable() function is part of <a href="http://jqueryui.com/home">JQuery UI</a>, which you can download from <a href="http://jqueryui.com/download">here</a>. Place both under public/javascripts and include it on your layouts. Pretty standard stuff.</p>
+
+<p>Add a content block on your layout for <code>:javascript</code>. This pattern was picked up while hacking on the <a href="http://bostonrb.org">bostonrb site&#8217;s</a> <a href="http://github.com/bostonrb/bostonrb/blob/bca256689a5e381b1a8e729a9769820322f44cfa/app/views/shared/_javascripts.html.haml#L2">code</a> and I&#8217;ve stolen it for my own projects. It is a great way to throw UJS in your views. This should be at the bottom of your layout, right before the closing <code></body></code> tag (or in it&#8217;s own partial along with other javascript related stuffs):</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;html&gt;</span>
+</div><div class='line'>  <span class="nt">&lt;head&gt;&lt;title&gt;</span>My boring blog<span class="nt">&lt;/title&gt;&lt;/head&gt;</span>
+</div><div class='line'>  <span class="nt">&lt;body&gt;</span>
+</div><div class='line'>    ...
+</div><div class='line'>    yield :javascript
+</div><div class='line'>  <span class="nt">&lt;/body&gt;</span>
+</div><div class='line'><span class="nt">&lt;/html&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Having that out of the way, we need to set up jQuery&#8217;s AJAX requests. We can use <a href="http://docs.jquery.com/Ajax/jQuery.ajaxSetup">JQuery&#8217;s <code>$.ajaxSetup()</code></a> hook to set the appropriate headers. Additionally, we&#8217;ll include Rails&#8217; authenticity token on our AJAX Post requests.</p>
+
+<p>For this to work, we need to store the Rails authenticity token <em>somewhere</em>. One option is to simply store it on a javascript variable as described <a href="http://henrik.nyh.se/2008/05/rails-authenticity-token-with-jquery">here</a>. Add this to your layout:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">%= javascript_tag &quot;var AUTH_TOKEN =</span> <span class="c1">#{form_authenticity_token.inspect};&quot; if protect_against_forgery? %&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Then, throw the following on your public/javascripts/application.js file - I haven&#8217;t seen any downside to this, but leave a comment if you do.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//public/javascripts/application.js</span>
+</div><div class='line'>
+</div><div class='line'><span class="c1">// This sets up the proper header for rails to understand the request type,</span>
+</div><div class='line'><span class="c1">// and therefore properly respond to js requests (via respond_to block, for example)</span>
+</div><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span><span class="p">({</span>
+</div><div class='line'>  <span class="s1">&#39;beforeSend&#39;</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">)</span> <span class="p">{</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&quot;Accept&quot;</span><span class="p">,</span> <span class="s2">&quot;text/javascript&quot;</span><span class="p">)}</span>
+</div><div class='line'><span class="p">})</span>
+</div><div class='line'>
+</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="c1">// UJS authenticity token fix: add the authenticy_token parameter</span>
+</div><div class='line'>  <span class="c1">// expected by any Rails POST request.</span>
+</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ajaxSend</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">request</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</div><div class='line'>    <span class="c1">// do nothing if this is a GET request. Rails doesn&#39;t need</span>
+</div><div class='line'>    <span class="c1">// the authenticity token, and IE converts the request method</span>
+</div><div class='line'>    <span class="c1">// to POST, just because - with love from redmond.</span>
+</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">type</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;undefined&quot;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">?</span> <span class="s2">&quot;&amp;&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;authenticity_token=&quot;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">);</span>
+</div><div class='line'>  <span class="p">});</span>
+</div><div class='line'>
+</div><div class='line'><span class="p">});</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Having done that, let&#8217;s prep our models. Let&#8217;s assume you&#8217;ve created the <code>UserStory</code> and <code>Task</code> classes with the required <code>has_many</code> and <code>belongs_to</code> associations.</p>
+
+<h4>Models set up.</h4>
+
+<p>The models require just a few things: the acts_as_list plugin and a position attribute on the tasks table</p>
+
+<ul>
+<li>Install the <a href="http://github.com/rails/acts_as_list/tree/master">acts_as_list</a> plugin:</li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'><span class="nv">$ </span>script/plugin install git://github.com/rails/acts_as_list.git
+</div><div class='line'>Initialized empty Git repository in /Users/hgimenez/code/foo/vendor/plugins/acts_as_list/.git/
+</div><div class='line'>remote: Counting objects: 13, <span class="k">done</span>.
+</div><div class='line'>remote: Compressing objects: 100% <span class="o">(</span>9/9<span class="o">)</span>, <span class="k">done</span>.
+</div><div class='line'>remote: Total 13 <span class="o">(</span>delta 2<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
+</div><div class='line'>Unpacking objects: 100% <span class="o">(</span>13/13<span class="o">)</span>, <span class="k">done</span>.
+</div><div class='line'>From git://github.com/rails/acts_as_list
+</div><div class='line'> * branch            HEAD       -&gt; FETCH_HEAD
+</div><div class='line'><span class="err">$</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Create a position column on the tasks table with:</li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'>script/generate migration add_position_to_tasks
+</div><div class='line'>rake db:migrate
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Add <code>acts_as_list :scope => :user_story</code> to the Task model.</li>
+<li>Optionally, add <code>default_scope => 'position'</code> to the Task model.</li>
+</ul>
+
+
+<h4>View setup</h4>
+
+<p>The idea is to create an <code><ul></code> of tasks that belong to a given user story. Each <code><li></code> contains a task and we have to &#8220;stage&#8221; the element&#8217;s IDs so that when we serialize the list using JQuery, the task&#8217;s IDs are sent over to the server via an AJAX request.</p>
+
+<p>We also create a span with a class of &#8220;handle&#8221;, which is where the user can hold on to when dragging and dropping tasks around.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;tasks-list&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>  <span class="err">&lt;</span>% @user_story.tasks.each do |t| %&gt;
+</div><div class='line'>    <span class="nt">&lt;li</span> <span class="na">id=</span><span class="s">&quot;task_&lt;%= t.id -%&gt;&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;name&quot;</span><span class="nt">&gt;</span>
+</div><div class='line'>        <span class="err">&lt;</span>%= t.name -%&gt;
+</div><div class='line'>      <span class="nt">&lt;/span&gt;</span>
+</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;handle&quot;</span><span class="nt">&gt;</span>[handle]<span class="nt">&lt;span&gt;</span>
+</div><div class='line'>    <span class="nt">&lt;/li&gt;</span>
+</div><div class='line'>  <span class="err">&lt;</span>% end %&gt;
+</div><div class='line'><span class="nt">&lt;ul&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<h4>(Unobstrusive) javascript setup</h4>
+
+<p>Now we are ready to wire in the javascript on your view. At the bottom of your view, and using the <code>:javascript</code> content block created earlier, use <a href="http://docs.jquery.com/UI/Sortable">JQuery&#8217;s sortable()</a> function and attach it to the #tasks-list element:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+<span class='line'>26</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">% content_for </span><span class="ss">:javascript</span> <span class="k">do</span> <span class="sx">%&gt;</span>
+</div><div class='line'>
+</div><div class='line'><span class="sx">  &lt;% javascript_tag do %&gt;</span>
+</div><div class='line'>     <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span>
+</div><div class='line'>        <span class="p">{</span>
+</div><div class='line'>          <span class="n">axis</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">dropOnEmpty</span><span class="ss">:false</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">handle</span><span class="p">:</span> <span class="s1">&#39;.handle&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">cursor</span><span class="p">:</span> <span class="s1">&#39;crosshair&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">items</span><span class="p">:</span> <span class="s1">&#39;li&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">opacity</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">scroll</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</div><div class='line'>          <span class="n">update</span><span class="p">:</span> <span class="n">function</span><span class="p">(){</span>
+</div><div class='line'>            <span class="vg">$.</span><span class="n">ajax</span><span class="p">({</span>
+</div><div class='line'>                <span class="n">type</span><span class="p">:</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">data</span><span class="p">:</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;id=&lt;%=@user_story.id-%&gt;&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">dataType</span><span class="p">:</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span>
+</div><div class='line'>                <span class="n">complete</span><span class="p">:</span> <span class="n">function</span><span class="p">(</span><span class="n">request</span><span class="p">){</span>
+</div><div class='line'>                    <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">effect</span><span class="p">(</span><span class="s1">&#39;highlight&#39;</span><span class="p">);</span>
+</div><div class='line'>                  <span class="p">},</span>
+</div><div class='line'>                <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;/user_stories/prioritize_tasks&#39;</span><span class="p">})</span>
+</div><div class='line'>            <span class="p">}</span>
+</div><div class='line'>          <span class="p">})</span>
+</div><div class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</div><div class='line'><span class="sx">  </span>
+</div><div class='line'><span class="sx">&lt;% end %&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This is basically saying: Take the element with an ID of <code>#tasks-list</code> and make it sortable. Do an <code>HTTP POST</code> to the <code>user_stories/prioritize_tasks</code> path with the serialized tasks-lists as data. Note that we&#8217;re also appending the user_story id as a post parameter so that our controller action knows which tasks to prioritize.</p>
+
+<p>Feel free to go over the <a href="http://docs.jquery.com/UI/Sortable">sortable()</a> documentation to tweak the options.</p>
+
+<h4>Controller set up</h4>
+
+<p>The controller&#8217;s work is to take the parameters sent in from the view and to set the position attribute of each of the user story&#8217;s tasks. The parameters received in the controller look something like:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">params</span><span class="o">.</span><span class="n">inspect</span>
+</div><div class='line'> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;authenticity_token&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;9HJQs99d4vqhLwjPAdC8uSLwjPAd4OpbaJQs99dFCch8XisI=&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="o">=&gt;[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="o">]</span><span class="p">}</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>As expected, we receive the Rails authenticity token, as well as the id (the UserStory ID) and an array of task IDs (<code>params['task']</code> contains task IDs in the order specified by the user).</p>
+
+<p>Here&#8217;s the implementation of the prioritize_tasks action:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">prioritize_tasks</span>
+</div><div class='line'>  <span class="n">user_story</span> <span class="o">=</span> <span class="no">UserStory</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">tasks</span> <span class="o">=</span> <span class="n">user_story</span><span class="o">.</span><span class="n">tasks</span>
+</div><div class='line'>  <span class="n">tasks</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">task</span><span class="o">|</span>
+</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="s1">&#39;task&#39;</span><span class="o">].</span><span class="n">index</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">save</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'>  <span class="n">render</span> <span class="ss">:nothing</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<h4>Route setup</h4>
+
+<p>Almost there. The one thing that&#8217;s missing would be adding a collection route to the user_story resource for the prioritize_tasks action:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>  <span class="c1"># add the :collection option</span>
+</div><div class='line'>  <span class="n">map</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:user_story</span><span class="p">,</span> <span class="ss">:collection</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:prioritize_tasks</span> <span class="o">=&gt;</span> <span class="ss">:post</span> <span class="p">}</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This pretty much wraps it up! This process will become easier as Rails core evolves and the Javascript framework becomes easier to swap out. It is known that Rails 3&#8217;s helpers will not produce inline javascript. Instead, they will add hooks to your DOM elements in the form of HTML5&#8217;s custom data attributes which then can be used by unobstrusive javascript code to add the appropriate behavior to the DOM elements. Even though Rails will continue to ship with the Prototype/Scriptaculous frameworks by default, JQuery will be easier to plug in, and the Rails helpers that simply add data attributes to your DOM elements can be used to achieve all sorts of presentation behavior.</p>
+
+<p>Regardless of that, the closer you are to your Javascript, the better you&#8217;ll understand how the pieces play together and the more control you&#8217;ll have over the app&#8217;s client side behavior.</p>
+
+<h5>Resources</h5>
+
+<ul>
+<li><a href="http://www.railsenvy.com/2008/1/3/unobtrusive-javascript">Unobstrusive Javascript presentation</a> by Jason Seifer.</li>
+<li><a href="http://railscasts.com/episodes/136-jquery">JQuery Railscast</a></li>
+<li><a href="http://ejohn.org/blog/html-5-data-attributes/">HTML 5 data attributes</a>, an explanation by John Resig.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

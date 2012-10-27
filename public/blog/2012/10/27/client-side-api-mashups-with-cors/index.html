@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Client Side API Mashups With CORS - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="At Heroku we have APIs for pretty much everything. Need logs for an app? Is
+that database available? You just beat someone at ping pong? There&#8217; &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2012/10/27/client-side-api-mashups-with-cors/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Client Side API Mashups With CORS</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-27T10:17:00-07:00" pubdate data-updated="true">Oct 27<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>At Heroku we have APIs for pretty much everything. Need logs for an app? Is
+that database available? You just beat someone at ping pong? There&#8217;s an API for
+that. Having such rich datasets available is great. It allows us to build
+dashboards with mashups of different datasets and serve them from a web
+browser.</p>
+
+<p>Here are some of the techniques implemented in order to wire up a Backbone.js
+application speaking to remote hosts in a secure manner. We will explore
+Cross-Origin Resource Sharing (CORS) as well as HMAC based auth tokens with
+cryptographically timestamped data that an attacker wouldn&#8217;t be able to
+auto-replay. The end goal is to have an application running on a browser, and
+securely request data from an API running on a remote host.</p>
+
+<p>The first problem when issuing XHR requests across hosts will be the
+same-origin policy violation. Go ahead, issue an AJAX request against a remote
+host. The browser should fail with an error similar to the following:</p>
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>XMLHttpRequest cannot load https://some.remote.com. Origin https://your.site.com is not allowed by Access-Control-Allow-Origin</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This is where <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross Origin Resource Sharing (CORS)</a>
+ comes in.  The way it works is that the Origin (the client) will issue what&#8217;s
+called a pre-flight request, asking the server &#8220;hey, can I make a request with
+HTTP verb foo to path /bar with headers x-baz?&#8221;, to which the server responds,
+&#8220;Sure, bring it!&#8221;, or &#8220;No, you may not&#8221;. This pre-flight request is made to the
+same path as the actual request, but the HTTP <code>OPTIONS</code> verb is used instead.
+The server responds with the following headers, should the request be allowed:</p>
+
+<ul>
+<li><code>Access-Control-Allow-Origin</code>: Specifies what Origins are allowed remote XHR
+requests to be made against this server. Allowed values include a URL (eg:
+https://your.site.com), a comma separated list of URLs, or an asterisk
+indicating all origins are allowed.</li>
+<li><code>Access-Control-Allow-Headers</code>: Specifies a comma separated list of headers
+that the Origin is allowed to include in requests to this server. There are
+many reasons to include custom headers - we&#8217;ll see an example of this further
+down.</li>
+<li><code>Access-Control-Max-Age</code>: This is optional, but it allows the browser to
+cache this response for the given number of seconds, so browsers will save
+themselves the pre-flight request any subsequent times. Freely set it to a
+large number, like 30 days (2592000)</li>
+</ul>
+
+
+<p>There are more headers that allow you to whitelist and otherwise control access to the resource. Be sure to <a href="https://developer.mozilla.org/en/HTTP_access_control">read up</a> on CORS.</p>
+
+<p>Thus, a Sinatra app acting as the remote end of the system can respond to pre-flight OPTIONS requests like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Max-Age&#39;</span>       <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Inclusion of the Allow Origin and Allow Headers headers is also necessary on responses to any other remote XHR requests. We can extract the headers directive to a helper and use it on both pre-flight and other requests:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Max-Age&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">post</span> <span class="s1">&#39;/resources&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="c1"># do_work</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="kp">private</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And just like that, browsers can now issue XHR requests against remote APIs. Of
+course, there is no authentication in place yet.</p>
+
+<p>We will implement an HMAC based auth token mechanism. Both the remote server
+and your app share a secret. This secret is used to generate a token containing
+a timestamp that is used for validating token recency.</p>
+
+<p>To generate the token, we create a JSON document containing an <code>issued_at</code>
+timestamp, and we calculate its sha256 HMAC token using the secret known to
+both parties. Finally, we append this signature to the JSON document and we
+base64 encode it to make it safe to send over the wire. Here&#8217;s an example
+implementation:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;openssl&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;base64&#39;</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">auth_token</span>
+</div><div class='line'>  <span class="n">data</span>      <span class="o">=</span> <span class="p">{</span> <span class="n">issued_at</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
+</div><div class='line'>  <span class="n">secret</span>    <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span>
+</div><div class='line'>  <span class="n">signature</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">secret</span><span class="p">)</span>
+</div><div class='line'>  <span class="no">Base64</span><span class="o">.</span><span class="n">urlsafe_encode64</span><span class="p">(</span><span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">signature</span><span class="p">:</span> <span class="n">signature</span><span class="p">)))</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This token is used on the API server to authenticate requests. The client can
+be made to send a custom header, let&#8217;s call it X_APP_AUTH_TOKEN, which it must
+be able to reconstruct the token from the JSON data, and then validate that the
+request is recent enough. For example in a Sinatra application:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">not_authorized!</span>
+</div><div class='line'>  <span class="kp">throw</span><span class="p">(</span><span class="ss">:halt</span><span class="p">,</span> <span class="o">[</span><span class="mi">401</span><span class="p">,</span> <span class="s2">&quot;Not authorized</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">authenticate!</span>
+</div><div class='line'>  <span class="n">token</span>           <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s2">&quot;HTTP_X_APP_AUTH_TOKEN&quot;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="n">token_data</span>      <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Base64</span><span class="o">.</span><span class="n">decode64</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+</div><div class='line'>  <span class="n">received_sig</span>    <span class="o">=</span> <span class="n">token_data</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;signature&#39;</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">regenerated_mac</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">token_data</span><span class="p">),</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">if</span> <span class="n">regenerated_mac</span> <span class="o">!=</span> <span class="n">received_sig</span> <span class="o">||</span> <span class="no">Time</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">token_data</span><span class="o">[</span><span class="s1">&#39;issued_at&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">&gt;</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="mi">60</span>
+</div><div class='line'>    <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p><span class='pullquote-right' data-pullquote='Do not reimplement this, just use fernet.'>
+In the above code, we consider a token invalid if it was issued more than 2
+minutes ago. Real applications will probably include more data in the auth
+token, such as the email address or some user identifier that can be used for
+auditing and whitelisting.  <em>All of the above data token generation and
+verification has been extracted to a handy little gem called
+<a href="http://github.com/hgmnz/fernet">fernet</a></em>.
+Do not reimplement this, just use fernet.
+</span></p>
+
+<p>The <code>authenticate!</code> method must be invoked before serving any request. This
+means that the auth token must be included on every request the client makes.
+There are many ways of doing this. One approach, if you&#8217;re using JQuery to back
+Backbone.sync(), is to use its $.ajax beforeSend hook to include the header, as
+can be seen in the following coffeescript two-liner:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span> <span class="nx">beforeSend</span><span class="o">:</span> <span class="p">(</span><span class="nx">jqXHR</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="o">-&gt;</span>
+</div><div class='line'>  <span class="nx">jqXHR</span><span class="p">.</span><span class="nx">setRequestHeader</span> <span class="s2">&quot;x-app-auth-token&quot;</span><span class="p">,</span> <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>YourApp.authToken can come from a number of places. I decided to bootstrap it
+when the page is originally served, something like:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>In addition to that, it should be updated in an interval, so that on a single
+page app, that doesn&#8217;t request any page refreshes, the auth token is always
+fresh and subsequent API requests can be made.</p>
+
+<p>The final client side code that provides the auth token and keeps it updated
+looks like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>       <span class="o">=</span> <span class="err">&quot;</span><span class="o">&lt;%=</span> <span class="nx">auth_token</span> <span class="o">%&gt;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</div><div class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="s1">&#39;/auth_token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</div><div class='line'>      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
+</div><div class='line'>    <span class="p">})</span>
+</div><div class='line'>  <span class="p">};</span>
+</div><div class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">Oki</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The fernet token expires every minute by default. I decided to update it
+every 29 seconds instead so that it can be updated at least twice
+before it has a chance to hold and use an expired token against a remote API.</p>
+
+<p>In this app, the server side is used for one thing only: user authentication.
+The way it works is that when a request is made, the sinatra app performs oauth
+authentication against our google apps domain. Once the oauth dance has
+suceeded, the app generates a token that is handed on to the client for
+authenticating against backend, remote APIs.</p>
+
+<p>This whole setup has worked great for some months now.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-27T10:17:00-07:00" pubdate data-updated="true">Oct 27<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2012/10/27/client-side-api-mashups-with-cors/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2012/10/27/client-side-api-mashups-with-cors/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/07/31/on-top-down-design/" title="Previous Post: On Top-down Design">&laquo; On Top-down Design</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

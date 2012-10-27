@@ -1,0 +1,386 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Really silly percentage calculation in Ruby - Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="Here&#8217;s a silly way to calculate percentages of numbers in a Ruby project or Rails app. The end result of this is having created a few methods &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Really Silly Percentage Calculation in Ruby</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-03-22T12:56:07-07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Here&#8217;s a silly way to calculate percentages of numbers in a Ruby project or Rails app.</p>
+
+<p>The end result of this is having created a few methods for Ruby numeric classes that allow you to calculate percentages:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">23</span><span class="o">.</span><span class="mi">456</span><span class="o">.</span><span class="n">five_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">1</span><span class="o">.</span><span class="mi">1728</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">100</span><span class="o">.</span><span class="mi">46</span><span class="o">.</span><span class="n">seven_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">7</span><span class="o">.</span><span class="mo">0322</span>
+</div><div class='line'><span class="o">&gt;&gt;</span> <span class="mi">95</span><span class="o">.</span><span class="n">fifty_percent</span>
+</div><div class='line'><span class="o">=&gt;</span> <span class="mi">47</span><span class="o">.</span><span class="mi">5</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>To accomplish this, we&#8217;ll use use meta programming to add the methods to the Fixnum and Float classes.</p>
+
+<p>First, create a way to translate numbers in English to numeric values. This was taken from a thread at <a href="http://www.ruby-forum.com/topic/132735#591799">ruby-forum</a>.</p>
+
+<p>Then, we&#8217;ll make use of Ruby&#8217;s <code>method_missing</code> to find out if this is a <code>*_percent</code> method and act accordingly. The <code>percent_method?</code> method returns <code>true</code> if it is, <code>false</code> if it ain&#8217;t.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+<span class='line'>16</span>
+<span class='line'>17</span>
+<span class='line'>18</span>
+<span class='line'>19</span>
+<span class='line'>20</span>
+<span class='line'>21</span>
+<span class='line'>22</span>
+<span class='line'>23</span>
+<span class='line'>24</span>
+<span class='line'>25</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">module</span> <span class="nn">NumberPercentageExtension</span>
+</div><div class='line'>  <span class="k">module</span> <span class="nn">InstanceMethods</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span> <span class="o">=</span> <span class="p">{}</span>
+</div><div class='line'>      <span class="sx">%w| zero one two three four five six seven eight nine ten eleven</span>
+</div><div class='line'><span class="sx">          twelve thirteen fourteen fifteen sixteen seventeen eighteen</span>
+</div><div class='line'><span class="sx">          nineteen |</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span> <span class="p">}</span>
+</div><div class='line'>      <span class="sx">%w| zero ten twenty thirty forty fifty sixty seventy eighty</span>
+</div><div class='line'><span class="sx">          ninety|</span><span class="o">.</span><span class="n">each_with_index</span><span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="p">,</span><span class="n">i</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="mi">10</span> <span class="p">}</span>
+</div><div class='line'>    <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="s1">&#39;hundred&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="mi">100</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>      <span class="n">tokens</span> <span class="o">=</span> <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">tokens</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</div><div class='line'>      <span class="n">is_percent</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">[-</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;percent&#39;</span>
+</div><div class='line'>      <span class="n">tokens</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">collect</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">is_percent</span> <span class="o">&amp;&amp;=</span> <span class="no">ENGLISH_VALUE</span><span class="o">.</span><span class="n">has_key?</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="p">}</span>
+</div><div class='line'>      <span class="k">return</span> <span class="n">is_percent</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="nb">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</div><div class='line'>      <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>        <span class="nb">method</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="no">ENGLISH_VALUE</span><span class="o">[</span><span class="n">word</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">sum</span> <span class="o">*</span> <span class="nb">self</span> <span class="o">/</span> <span class="mi">100</span><span class="o">.</span><span class="n">to_f</span>
+</div><div class='line'>      <span class="k">else</span>
+</div><div class='line'>        <span class="k">super</span>
+</div><div class='line'>      <span class="k">end</span>
+</div><div class='line'>    <span class="k">end</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p> We also want <code>respond_to?</code> to be aware of the new *_percent methods, so we include that as well.</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">return</span> <span class="kp">true</span> <span class="k">if</span> <span class="n">percent_method?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">super</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p> Finally, include the module in <code>Numeric</code>:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>
+</div><div class='line'><span class="no">Numeric</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</div><div class='line'>  <span class="kp">include</span> <span class="no">InstanceMethods</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The full code listing can be found in <a href="http://gist.github.com/83258">this gist</a>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Harold Giménez</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-03-22T12:56:07-07:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://practiceovertheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/" data-via="hgmnz" data-counturl="http://practiceovertheory.com/blog/2009/03/22/really-silly-percentage-calculation-in-ruby/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2008/12/21/flash-messages-rails-helper-plugin/" title="Previous Post: Flash messages Rails helper plugin">&laquo; Flash messages Rails helper plugin</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/05/19/attach-non-image-files-in-rails-with-paperclip/" title="Next Post: Attach non image files in Rails with paperclip">Attach non image files in Rails with paperclip &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We're hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

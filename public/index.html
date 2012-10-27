@@ -1,0 +1,1175 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Practice Over Theory</title>
+  <meta name="author" content="Harold Giménez">
+
+  
+  <meta name="description" content="At Heroku we have APIs for pretty much everything. Need logs for an app? Is
+that database available? You just beat someone at ping pong? There&#8217; &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://practiceovertheory.com/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/practiceovertheory" rel="alternate" title="Practice Over Theory" type="application/atom+xml">
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Dancing+Script' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Antic' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><div id="feed">
+  <a href="http://feeds.feedburner.com/practiceovertheory"> <span id="feed-icon"></span></a>
+</div>
+<hgroup>
+  <h1>
+    <a href="/">
+      <div id="logo">
+        <span id="practice">practice</span>
+        <span id="over">over</span>
+        <span id="theory">theory</span>
+      </div>
+    </a>
+  </h1>
+</hgroup>
+
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/practiceovertheory" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:practiceovertheory.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-27T10:17:00-07:00" pubdate data-updated="true">Oct 27<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>At Heroku we have APIs for pretty much everything. Need logs for an app? Is
+that database available? You just beat someone at ping pong? There&#8217;s an API for
+that. Having such rich datasets available is great. It allows us to build
+dashboards with mashups of different datasets and serve them from a web
+browser.</p>
+
+<p>Here are some of the techniques implemented in order to wire up a Backbone.js
+application speaking to remote hosts in a secure manner. We will explore
+Cross-Origin Resource Sharing (CORS) as well as HMAC based auth tokens with
+cryptographically timestamped data that an attacker wouldn&#8217;t be able to
+auto-replay. The end goal is to have an application running on a browser, and
+securely request data from an API running on a remote host.</p>
+
+<p>The first problem when issuing XHR requests across hosts will be the
+same-origin policy violation. Go ahead, issue an AJAX request against a remote
+host. The browser should fail with an error similar to the following:</p>
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>XMLHttpRequest cannot load https://some.remote.com. Origin https://your.site.com is not allowed by Access-Control-Allow-Origin</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This is where <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross Origin Resource Sharing (CORS)</a>
+ comes in.  The way it works is that the Origin (the client) will issue what&#8217;s
+called a pre-flight request, asking the server &#8220;hey, can I make a request with
+HTTP verb foo to path /bar with headers x-baz?&#8221;, to which the server responds,
+&#8220;Sure, bring it!&#8221;, or &#8220;No, you may not&#8221;. This pre-flight request is made to the
+same path as the actual request, but the HTTP <code>OPTIONS</code> verb is used instead.
+The server responds with the following headers, should the request be allowed:</p>
+
+<ul>
+<li><code>Access-Control-Allow-Origin</code>: Specifies what Origins are allowed remote XHR
+requests to be made against this server. Allowed values include a URL (eg:
+https://your.site.com), a comma separated list of URLs, or an asterisk
+indicating all origins are allowed.</li>
+<li><code>Access-Control-Allow-Headers</code>: Specifies a comma separated list of headers
+that the Origin is allowed to include in requests to this server. There are
+many reasons to include custom headers - we&#8217;ll see an example of this further
+down.</li>
+<li><code>Access-Control-Max-Age</code>: This is optional, but it allows the browser to
+cache this response for the given number of seconds, so browsers will save
+themselves the pre-flight request any subsequent times. Freely set it to a
+large number, like 30 days (2592000)</li>
+</ul>
+
+
+<p>There are more headers that allow you to whitelist and otherwise control access to the resource. Be sure to <a href="https://developer.mozilla.org/en/HTTP_access_control">read up</a> on CORS.</p>
+
+<p>Thus, a Sinatra app acting as the remote end of the system can respond to pre-flight OPTIONS requests like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Max-Age&#39;</span>       <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Inclusion of the Allow Origin and Allow Headers headers is also necessary on responses to any other remote XHR requests. We can extract the headers directive to a helper and use it on both pre-flight and other requests:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">options</span> <span class="s1">&#39;*&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Max-Age&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;2592000&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">post</span> <span class="s1">&#39;/resources&#39;</span> <span class="k">do</span>
+</div><div class='line'>  <span class="n">cors_headers</span>
+</div><div class='line'>  <span class="c1"># do_work</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="kp">private</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">cors_headers</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span>  <span class="o">=&gt;</span> <span class="s1">&#39;https://your.site.com&#39;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Access-Control-Allow-Headers&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;x-your-header&#39;</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And just like that, browsers can now issue XHR requests against remote APIs. Of
+course, there is no authentication in place yet.</p>
+
+<p>We will implement an HMAC based auth token mechanism. Both the remote server
+and your app share a secret. This secret is used to generate a token containing
+a timestamp that is used for validating token recency.</p>
+
+<p>To generate the token, we create a JSON document containing an <code>issued_at</code>
+timestamp, and we calculate its sha256 HMAC token using the secret known to
+both parties. Finally, we append this signature to the JSON document and we
+base64 encode it to make it safe to send over the wire. Here&#8217;s an example
+implementation:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;openssl&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;base64&#39;</span>
+</div><div class='line'><span class="k">def</span> <span class="nf">auth_token</span>
+</div><div class='line'>  <span class="n">data</span>      <span class="o">=</span> <span class="p">{</span> <span class="n">issued_at</span><span class="p">:</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="p">}</span>
+</div><div class='line'>  <span class="n">secret</span>    <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span>
+</div><div class='line'>  <span class="n">signature</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">secret</span><span class="p">)</span>
+</div><div class='line'>  <span class="no">Base64</span><span class="o">.</span><span class="n">urlsafe_encode64</span><span class="p">(</span><span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">signature</span><span class="p">:</span> <span class="n">signature</span><span class="p">)))</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>This token is used on the API server to authenticate requests. The client can
+be made to send a custom header, let&#8217;s call it X_APP_AUTH_TOKEN, which it must
+be able to reconstruct the token from the JSON data, and then validate that the
+request is recent enough. For example in a Sinatra application:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">not_authorized!</span>
+</div><div class='line'>  <span class="kp">throw</span><span class="p">(</span><span class="ss">:halt</span><span class="p">,</span> <span class="o">[</span><span class="mi">401</span><span class="p">,</span> <span class="s2">&quot;Not authorized</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'><span class="k">end</span>
+</div><div class='line'>
+</div><div class='line'><span class="k">def</span> <span class="nf">authenticate!</span>
+</div><div class='line'>  <span class="n">token</span>           <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s2">&quot;HTTP_X_APP_AUTH_TOKEN&quot;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="n">token_data</span>      <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Base64</span><span class="o">.</span><span class="n">decode64</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+</div><div class='line'>  <span class="n">received_sig</span>    <span class="o">=</span> <span class="n">token_data</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;signature&#39;</span><span class="p">)</span>
+</div><div class='line'>  <span class="n">regenerated_mac</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">HMAC</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="no">JSON</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">token_data</span><span class="p">),</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;AUTH_SECRET&#39;</span><span class="o">]</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="k">if</span> <span class="n">regenerated_mac</span> <span class="o">!=</span> <span class="n">received_sig</span> <span class="o">||</span> <span class="no">Time</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">token_data</span><span class="o">[</span><span class="s1">&#39;issued_at&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">&gt;</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="mi">60</span>
+</div><div class='line'>    <span class="n">not_authorized!</span>
+</div><div class='line'>  <span class="k">end</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p><span class='pullquote-right' data-pullquote='Do not reimplement this, just use fernet.'>
+In the above code, we consider a token invalid if it was issued more than 2
+minutes ago. Real applications will probably include more data in the auth
+token, such as the email address or some user identifier that can be used for
+auditing and whitelisting.  <em>All of the above data token generation and
+verification has been extracted to a handy little gem called
+<a href="http://github.com/hgmnz/fernet">fernet</a></em>.
+Do not reimplement this, just use fernet.
+</span></p>
+
+<p>The <code>authenticate!</code> method must be invoked before serving any request. This
+means that the auth token must be included on every request the client makes.
+There are many ways of doing this. One approach, if you&#8217;re using JQuery to back
+Backbone.sync(), is to use its $.ajax beforeSend hook to include the header, as
+can be seen in the following coffeescript two-liner:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span> <span class="nx">beforeSend</span><span class="o">:</span> <span class="p">(</span><span class="nx">jqXHR</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="o">-&gt;</span>
+</div><div class='line'>  <span class="nx">jqXHR</span><span class="p">.</span><span class="nx">setRequestHeader</span> <span class="s2">&quot;x-app-auth-token&quot;</span><span class="p">,</span> <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>YourApp.authToken can come from a number of places. I decided to bootstrap it
+when the page is originally served, something like:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>In addition to that, it should be updated in an interval, so that on a single
+page app, that doesn&#8217;t request any page refreshes, the auth token is always
+fresh and subsequent API requests can be made.</p>
+
+<p>The final client side code that provides the auth token and keeps it updated
+looks like so:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>       <span class="o">=</span> <span class="err">&quot;</span><span class="o">&lt;%=</span> <span class="nx">auth_token</span> <span class="o">%&gt;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</div><div class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="s1">&#39;/auth_token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</div><div class='line'>      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
+</div><div class='line'>    <span class="p">})</span>
+</div><div class='line'>  <span class="p">};</span>
+</div><div class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">Oki</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
+</div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The fernet token expires every minute by default. I decided to update it
+every 29 seconds instead so that it can be updated at least twice
+before it has a chance to hold and use an expired token against a remote API.</p>
+
+<p>In this app, the server side is used for one thing only: user authentication.
+The way it works is that when a request is made, the sinatra app performs oauth
+authentication against our google apps domain. Once the oauth dance has
+suceeded, the app generates a token that is handed on to the client for
+authenticating against backend, remote APIs.</p>
+
+<p>This whole setup has worked great for some months now.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-31T20:54:00-07:00" pubdate data-updated="true">Jul 31<span>st</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>There are many strategies for writing software.</p>
+
+<p>Some developers like writing tests first, letting your tests drive the implementation, essentially becoming the first clients of your software. Others like writing production code first and kind of figure out how it works, and then they apply some tests after the fact. I am convinced that writing tests in this way is far less effective, but this is not an article on the merits of TDD. Others don&#8217;t like writing tests at all, so it&#8217;s a varying scale.</p>
+
+<p>You can write software from the bottom up, where you are forced to figure out what the data model and base objects should be and how it is to support all known use cases. This is hard, particularly in this day and age where software requirements are unpredictable and are meant to change very rapidly - at least in the fun industries.</p>
+
+<p>You can also write software from the top down. In this case you let the outer shell of your software dictate what the inner layers need. For example, start all the way on the user interactions via some sketches and HTML/CSS in a web app. Or think through the CLI that you want. <a href="http://tom.preston-werner.com/2010/08/23/readme-driven-development.html">Readme driven development</a> can help with this, too.</p>
+
+<p>Outside-in development puts you in a great position to practice top-down design.</p>
+
+<p>The advantage of Outside-in development is twofold. Not only are you left with acceptance tests that will catch regressions and help refactor later. But also, <em>the top layers of your software becomes a client of the code you are about to write, helping define its interface</em> in a similar way that practicing TDD for your unit tests help guide the design of software component at a very granular level.</p>
+
+<p>These practices will help you define internal APIs that feel good faster, because you will notice cumbersome interfaces sooner, and are therefore given the opportunity to fix them when they have the least possible number of dependencies.</p>
+
+<p>I know of many developers who prefer writing no tests, or prefer a bottom-up strategy. This does not mean that their software is of poor quality, by no means. But I will observe that I can&#8217;t ship software of the quality standard that I put myself to unless I write tests first and follow outside-in methodologies. Indeed, this seems to indicate they are smarter than me.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-05T10:59:00-08:00" pubdate data-updated="true">Feb 5<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Boston.io took place yesterday at the Microsoft NERD Center. The event is aimed at students in the Greater Boston area who are interested in entrepreneurship and coding, whether that&#8217;s design, development, or ambidextrous.</p>
+
+<p>There were technical and talks on every aspect of the stack, from the metal all the way up to serving and consuming APIs and user experience design. There were also some not-so-technical talks about topics like the Boston startup scene, open source and hacker culture.</p>
+
+<p><a href="http://bostonio-postgres.herokuapp.com/#1">My talk</a> was about PostgreSQL and it focused on how to use SQL to mine data and get information out of it. I stored the twitter stream for about 24 hours prior to the conference and showed how to look at that data showcasing CTEs, Window Functions and other Postgres features. Among the insights we saw that the tweeps who post hashtags and urls the most are spam accounts. Also, the most posted URLs come from shortener services, but also surprised to see livingsocial.com among those. We found other fun facts during the talk too. It went great.</p>
+
+<p>Hopefully the talk gave a good taste of what you can do with Postgres and SQL. It was SQL heavy, but that did not come without warning</p>
+
+<blockquote class="twitter-tweet"><p>boston.io talk ready to go. SQL, do you speak it? After this you will!</p>&mdash; Harold Giménez (@hgimenez) <a href="https://twitter.com/hgimenez/status/165804224481988608" data-datetime="2012-02-04T14:29:42+00:00">February 4, 2012</a></blockquote>
+
+
+<script src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>Other talks worth mentioning included <a href="http://twitter.com/mikeburns">Mike Burns</a>&#8217; classic UNIX talk. This time around he used curl, sed and grep to automate a SQL injection attack on a hilarious page he staged for this purpose. <a href="http://twitter.com/sferik">Erik Michaels-Ober&#8217;s</a> talk was also great and surely inspired a few students to put code out there for the world to see. So many great talks altogether though, by people like <a href="http://twitter.com/qrush">Nick Quaranto</a> on TDD, <a href="http://twitter.com/r00k">Ben Orenstein</a> on vim, <a href="http://twitter.com/bryanl">Bryan Lyles</a> on OOP and <a href="http://boston.io/schedule">more</a>.</p>
+
+<p>Oh, and there was a dude at the afterparty with a heroku shirt. Here&#8217;s a photo.</p>
+
+<p><img src="https://p.twimg.com/Ak2HPjpCIAAyY7y.jpg:large" /></p>
+
+<p>Overall a great event; thanks to organizers <a href="http://thoughtbot.com">thoughtbot</a> and <a href="http://greenhornconnect.com/">Greenhorn Connect</a> and drinkup sponsors <a href="http://hashrocket">hashrocket</a> and <a href="http://github.com">github</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-27T08:51:00-08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Yesterday was a good day. <a href="http://twitter.com/pvh">@pvh</a> and I paired for a few
+hours, even though we&#8217;re at opposite coasts.</p>
+
+<p>Here&#8217;s what you need:</p>
+
+<ul>
+<li>A server somewhere that both pairs have access to. We used an EC2 instance.
+We&#8217;ll use it to meet up and create the tunnel.</li>
+<li>SSH client libs - your should already have this unless you&#8217;re on windows in
+which case you probably want PuTTY.</li>
+<li>Skype for audio.</li>
+</ul>
+
+
+<p>As you know, The Internet is made of nodes connected by Tubes. Unfortunately,
+there is no tube from your machine to your pair&#8217;s machine. What we&#8217;ll do here is
+use a third node that has tubes to both of your machines to relay traffic
+through, in essence creating an Internet Tube from your machine to your pair&#8217;s.
+This kind of Internet Tube is called a Tunnel. Since we&#8217;re using SSH to do the
+traffic encryption and forwarding, it&#8217;s an SSH Tunnel. Yes, that&#8217;s somewhat made
+up, but sounds legit!</p>
+
+<p><img src="http://doctorwatson.info/images/lolcats/1111%20internet%20tube%20cat.jpg" /></p>
+
+<p>As it turns out, setting up a tunnel is fairly simple. For example, let&#8217;s set
+up a tunnel between you and Jane using a remote server saturn.</p>
+
+<ol>
+<li>You: Open up a shell and forward traffic to your local port 9999 over to
+Saturn&#8217;s port 1235:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -L 9999:locahost:1235 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Jane: Open up a shell and forward traffic from saturn&#8217;s port 1235 to her port
+22</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh -R 1235:localhost:22 saturn_user@saturn</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>You: Open up another shell, and ssh into your local port 9999 specifying a
+username on Jane&#8217;s machine.</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>ssh jane_user@jane -p 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And you&#8217;re good to go. Create a shared screen session, open up $EDITOR, use
+skype, google hangouts, face time or whatever for audio and start ping ponging.</p>
+
+<p>The latency was surprisingly minimal. We left this tunnel open most of the day.
+It sat idle for periods of time and the connection was left active. All in all,
+a great setup.</p>
+
+<p>If this is something you&#8217;ll do often, you might as well add a more permanent
+configuration to <code>~/.ssh/config</code>. For example, you might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on your machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_to_jane
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  LocalForward 9999:localhost:1235
+</div><div class='line'>  User saturn_user
+</div><div class='line'>
+</div><div class='line'>Host jane
+</div><div class='line'>  Hostname jane
+</div><div class='line'>  User jane_user
+</div><div class='line'>  Port 9999</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Then you&#8217;d do, on one terminal, <code>ssh tunnel_to_jane</code>, and on the
+other <code>ssh jane</code>.</p>
+
+<p>And Jane might add:</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config on Jane&#8217;s machine </span></figcaption>
+<div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class=''><div class='line'>Host tunnel_from_you
+</div><div class='line'>  Hostname saturn
+</div><div class='line'>  RemoteForward 1235:localhost:22
+</div><div class='line'>  User saturn_user</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And she&#8217;d just do, <code>ssh tunnel_from_you</code></p>
+
+<p>This can be used not ony for remote pairing, but rather to forward <em>any</em>
+traffic on a port, over an SSH encrypted channel, to a remote host. For more
+see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-19T10:00:00-07:00" pubdate data-updated="true">Sep 19<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In case you&#8217;ve missed it so far, PostgreSQL West will take place next week in San Jose, California. You <a href="https://www.postgresqlconference.org/register">should go</a>.</p>
+
+<p>This weekend I worked on the slides and content for my <a href="https://www.postgresqlconference.org/content/redis-nimble-data-bacon">Redis talk</a>. Why would I decide to speak about Redis in a PostgreSQL conference? As it turns out, we&#8217;ve had great success in using Redis to compliment our architecture, not to replace a main data store. I will speak about our experience in scaling out write heavy apps with Redis.</p>
+
+<p>I will first introduce Redis from a general perspective, and then dig into the data types it offers and the operations it can do on each data type. During the course of the talk, I will demonstrate how we&#8217;ve used certain data types to solve some rather tricky scaling problems: real use cases solving real problems.</p>
+
+<p>I hope this talk will be entertaining and informative to both DBAs and application developers. I will be sharing the slides here and on <a href="http://twitter.com/hgimenez">twitter</a> afterwards, so stay tuned.</p>
+
+<p>Additionally, on Tuesday I will be teaching a <a href="https://www.postgresqlconference.org/content/introduction-ruby-and-rails-postgresql-harold-gimenez-full-day">one day workshop on Ruby and Rails with a PostgreSQL focus</a>. This is the second time I will do this at PostgreSQL conf, the last time being at PostgreSQL conf east in New York City. The class size was small, and the feedback I received was very positive in that attendees got a good grasp of the Ruby programming language and how Rails and Postgres fit in the ecosystem. I hope this time around is even better.</p>
+
+<p>Hope to see you there.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/12/postgresql-9-dot-1-released/">PostgreSQL 9.1 Released</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-12T09:18:00-07:00" pubdate data-updated="true">Sep 12<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Version 9.1 of PostgreSQL was <a href="http://www.postgresql.org/about/news.1349">released</a> yesterday.</p>
+
+<p>Among the exciting new features there is:</p>
+
+<ul>
+<li><p><code>pg_basebackup</code> - this can be used alongside Streaming Replication to perform a backup or clone of your database. I can imagine <a href="http://heroku.com">heroku</a> adopting this as an even faster and reliable way to sync your production and staging databases, for example (when and if they upgrade to 9.1). However it can also be used to create plain old tarballs and create standalone backups.</p></li>
+<li><p>Another replication goodie: Synchronous replication. On Postgres 9.0, replication was asynchronous. By enabling synchronous replication, you are basically telling the master database to only report the transaction as committed when the slave(s) have successfully written it to its own journal. You can also control this on a specific session by doing <code>SET synchronous_commit TO off</code>.</p></li>
+<li><p>The new <code>pg_stat_replication</code> view displays the replication status of all slaves from a master node.</p></li>
+<li><p>Unlogged tables. What? Postgres supports unlogged tables now? Yes, it does. They can be used for data you don&#8217;t necessarily care about, and a crash will truncate all data. They are much faster to write to and could be useful for caching data or keeping stats that can be rebuilt. You can create them like so:</p></li>
+</ul>
+
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">UNLOGGED</span> <span class="n">some_stats</span><span class="p">(</span><span class="n">value</span> <span class="nb">int</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>SQL/MED gets the ability to define foreign tables. This is rich. It means that you can define a foreign data wrapper for a different database and access it from Postgres seamlessly. Some hackers have already built <a href="http://wiki.postgresql.org/wiki/Foreign_data_wrappers">some nifty foreign data wrappers</a> for mysql, oracle, and even redis and couchdb. Although I&#8217;m of the mind that if you&#8217;re actually using any of these databases to supplement your app&#8217;s data needs, just talk to them directly from your app. However, it may be possible to write some higher performance reports that use different data sources, and you let Postgres do the heavy lifting of munging all the data together.</p></li>
+<li><p>You no longer need to specify all columns on a select list from your GROUP BY clause: functionally dependent columns are inferred by the planner, so specifying a primary key is sufficient. I <a href="http://practiceovertheory.com/blog/2009/09/23/postgresql-s-group-by/">talked about this before</a>, and it&#8217;s a cause of great frustration to users coming from MySQL.</p></li>
+</ul>
+
+
+<p>There&#8217;s much more in this release. Here are the <a href="http://www.postgresql.org/docs/9.1/static/release-9-1.html">release notes</a>.</p>
+
+<p>Huge thanks, Postgres hackers!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/10/design-tweaks/">Design Tweaks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-10T13:46:00-07:00" pubdate data-updated="true">Sep 10<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I made a few design tweaks to this blog. The goal is to move a bit away from the stock default octopress theme - but my design chops aren&#8217;t all that great and I can&#8217;t really budget the time to do a design from scratch.</p>
+
+<p>A few simple changes and I&#8217;m OK with how it looks for now:</p>
+
+<ol>
+<li><p>I created the basic font logo that you now see on the header. This was the idea from the beginning, but I never had a chance to include it here. Commit: <a href="https://github.com/hgmnz/practiceovertheory/commit/27d0107fe1165f61cfd72f17717a674575ca4fc9">27d0107f</a>.</p></li>
+<li><p>Change the typography in the site, as the original seems a bit heavy for my taste. I started out by using a Helvetica Neue on headers, but decided to go with Antic from the Google web font service. Commits: <a href="https://github.com/hgmnz/practiceovertheory/commit/2dd8f46b46a4c848ea4debbeeeda8e9ce23fcb0a">2dd8f46b4</a> and <a href="https://github.com/hgmnz/practiceovertheory/commit/84bad437716a8c0e78b1354b0f61876e1cd9a988">84bad437</a>.</p></li>
+<li><p>I wanted something different for that dark background. Went hunting for tiles and patterns. There&#8217;s good stuff out there, but I settled for the dark wood background found <a href="http://webtreats.mysitemyway.com/8-tileable-dark-wood-texture-patterns/">here</a>. Commit: <a href="https://github.com/hgmnz/practiceovertheory/commit/9593a004317f1fdc57a386373b3210262bd029b0">9593a00431</a>. At this point, it also made sense to make the header and footer have a light background and dark font.</p></li>
+<li><p>Finally, added a gradient to the header. Commit <a href="https://github.com/hgmnz/practiceovertheory/commit/fe918b0e9681bbc9c7af21980a4c585698feaf09">fe918b0e</a></p></li>
+</ol>
+
+
+<p>I&#8217;m fine with the result for now, but will probably revisit soon. Here&#8217;s a before and after.</p>
+
+<h3>Before</h3>
+
+<p><img src="/images/posts/before-resized.png" alt="Before" /></p>
+
+<h3>After</h3>
+
+<p><img src="/images/posts/after-resized.png" alt="After" /></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/07/you-should-work-for-these-guys/">You Should Work for These Guys</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-07T13:42:00-07:00" pubdate data-updated="true">Sep 7<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For the last few months <a href="http://thoughtbot.com">we&#8217;ve</a> been working for an awesome company on a greenfield project here in Boston/Cambridge.</p>
+
+<p>The industry: Healthcare. The goal: Improve patient&#8217;s lives by changing the way <em>the entire system</em> works. It&#8217;s exciting, and it is happening, and you can be a part of it.</p>
+
+<h3>The stack</h3>
+
+<p>Rails 3.1, Backbone.js, Coffeescript, faye, PostgreSQL, Cucumber, RSpec and Jasmine.</p>
+
+<h3>The process</h3>
+
+<p>Daily standups, TDD, code reviews via github pull requests.</p>
+
+<h3>The result</h3>
+
+<p>A highly responsive non-trivial app with a very clean code base and beautiful design.</p>
+
+<p>The future holds a mobile app, web service integrations and ongoing maintenance to the current code base.</p>
+
+<p>If you live in the Boston area, you should apply. If you don&#8217;t, you should move here. <a href="http://thoughtbot.com/jobs/iora/developer/">Right here</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/06/new-domain-name/">New Domain Name, New Blog Engine</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-06T21:58:00-07:00" pubdate data-updated="true">Sep 6<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself with &#8220;Awesomeful&#8221; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so <a href="http://twitter.com/hgimenez">hit me up</a> if you&#8217;re interested - I&#8217;m talking to you mister <code>whois awesomeful.com</code>.</p>
+
+<p>Welcome to the new blog: <em>Practice Over Theory</em>. I hope that the new name and engine inspire me to post more often.</p>
+
+<p>Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a <a href="http://octopress.org/docs/deploying/">really weird method</a> of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It&#8217;s backed by jekyll and has a few nice addons, the most useful of which is it&#8217;s code highlighting theme which is based on Solarized.</p>
+
+<p>Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+<span class='line'>13</span>
+<span class='line'>14</span>
+<span class='line'>15</span>
+</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</div><div class='line'>
+</div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
+</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2&#39;</span>
+</div><div class='line'>            <span class="p">}</span><span class="o">.</span><span class="n">freeze</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">get</span> <span class="s1">&#39;/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">path</span><span class="o">|</span>
+</div><div class='line'>  <span class="n">one_year_in_seconds</span> <span class="o">=</span> <span class="mi">31536000</span>
+</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Cache-Control&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;public, max-age=</span><span class="si">#{</span><span class="n">one_year_in_seconds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</div><div class='line'>          <span class="s1">&#39;Expires&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
+</div><div class='line'>
+</div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
+</div><div class='line'><span class="k">end</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty neat, huh? The syntax highlighting, I mean.</p>
+
+<p>Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a <code>HTTP 301 Moved Permanently</code>. The interesting bit is the HTTP caching employed. Heroku&#8217;s (awesome) varnish servers will remember that response for one year. Try it <a href="http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care">here</a>.</p>
+
+<p>[1] it&#8217;s a hash!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/02/15/machine-learning-who-s-the-boss/">Machine Learning - Who&#8217;s the Boss?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-15T12:48:42-08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In the Machine Learning field, there are two types of algorithms that can be applied to a set of data to solve different kinds of problems: <em>Supervised</em> and <em>Unsupervised</em> learning algorithms. Both of these have in common that they aim to extract information or gain knowledge from the raw data that would otherwise be very hard and unpractical to do. This is because we live in very dynamic environments with changing parameters and vast amounts of data being gathered. This data hides important patterns and correlations that are sometimes impossible to deduce manually, and where computing power and smart algorithms excel. They are also heavily dependent on the quantity and quality of the input data, and as such, evolve in their output and accuracy as more and better input data becomes available.</p>
+
+<p>In this article we will walk through what constitues Supervised and Unsupervised Learning. An overview of the language and terms is presented, as well as the general workflow used for machine learning tasks.</p>
+
+<h3>Supervised Learning</h3>
+
+<p>In supervised machine learning we have a set of data points or <em>observations</em> for which we know the desired output, class, <em>target variable</em>  or <em>outcome</em>. The outcome may take one of many values called <em>classes</em> or <em>labels</em>. A classic example is that given a few thousand emails for which we know whether they are spam or ham (their labels), the idea is to create a model that is able to deduce whether new, unsean emails are spam or not. In other words, we are creating a mapping function where the inputs are the email&#8217;s sender, subject, date, time, body, attachments and other attributes, and the output is a prediction as to whether the email is spam or ham. The <em>target variable</em> is in fact providing some level of <em>supervision</em> in that it is used by the learning algorithm to adjust parameters or make decisions that will allow it to predict labels for new data. Finally of note, when the algorithm is predicting labels of observations we call it a <em>classifier</em>. Some classifiers are also capable of providing a probability of a data point belonging to class in which case it is often referred to a probabilistic model or a regression - not to be confused with a <a href="http://en.wikipedia.org/wiki/Regression_analysis#Regression_models">statistical regression model</a>.</p>
+
+<p>Lets take this as an example in supervised learning algorithms. Given the following dataset, we want to predict on new emails whether they are spam or not. In the dataset below, note that the last column, <code>Spam?</code>, contains the labels for the examples.</p>
+
+<table>
+  <thead>
+    <td><b>Subject</b></td> <td><b>Date</b></td> <td><b>Time</b></td> <td><b>Body</b></td> <td><b>Spam?</b></td>
+  </thead>
+  <tbody>
+    <tr> <td>I has the viagra for you</td> <td>03/12/1992</td> <td>12:23 pm</td> <td>Hi! I noticed that you are a software engineer <br/>so here&#8217;s the pleasure you were looking for&#8230;</td> <td>Yes</td> </tr>
+    <tr> <td>Important business</td> <td>05/29/1995</td> <td>01:24 pm</td> <td>Give me your account number and you&#8217;ll be rich. </ br> I&#8217;m totally serial</td> <td>Yes</td> </tr>
+    <tr> <td>Business Plan</td> <td>05/23/1996</td> <td>07:19 pm</td> <td>As per our conversation, here&#8217;s the business plan for our new venture </ br> Warm regards&#8230;</td> <td>No</td> </tr>
+    <tr> <td>Job Opportunity</td> <td>02/29/1998</td> <td>08:19 am</td> <td>Hi <name>!</ br>I am trying to fill a position for a PHP &#8230; </td> <td>Yes</td> </tr>
+    <tr> <td colspan="5"> [A few thousand rows ommitted] </td> </tr>
+    <tr> <td>Call mom</td> <td>05/23/2000</td> <td>02:14 pm</td> <td>Call mom. She&#8217;s been trying to reach you for a few days now</td> <td>No</td> </tr>
+  </tbody>
+</table>
+
+
+<p>A common workflow approach, and one that I&#8217;ve taken for supervised learning analysis is shown in the diagram below:</p>
+
+<p><img src="http://img.skitch.com/20100213-djhg1re7gaj83ngygcqgj1jm2d.png"></p>
+
+<p>The process is:</p>
+
+<ol>
+<li><em>Scale and prepare training data</em>: First we build input vectors that are appropriate for feeding into our supervised learning algorithm.</li>
+<li><em>Create a training set and a validation set</em> by randomly splitting the universe of data. The training set is the data that the classifier uses to learn how to classify the data, whereas the validation set is used to feed the already trained model in order to get an error rate (or other measures and techniques) that can help us identify the classifier&#8217;s performance and accuracy. Typically you will use more training data (maybe 80% of the entire universe) than validation data. Note that there is also <a href="http://en.wikipedia.org/wiki/Cross-validation_(statistics">cross-validation</a>), but that is beyond the scope of this article.</li>
+<li><em>Train the model</em>. We take the training data and we feed it into the algorithm. The end result is a model that has learned (hopefully) how to predict our outcome given new unknown data.</li>
+<li><em>Validation and tuning</em>: After we&#8217;ve created a model, we want to test its accuracy. It is critical to do this on data that the model has not seen yet - otherwise you are cheating. This is why on step 2 we separated out a subset of the data that was not used for training. We are indeed testing our model&#8217;s generalization capabilities. It is very easy to learn every single combination of input vectors and their mappings to the output as observed on the training data, and we can achieve a very low error in doing that, but how does the very same rules or mappings perform on new data that may have different input to output mappings? If the classification error of the validation set is very big compared to the training set&#8217;s, then we have to go back and adjust model parameters. The model will have essentially memorized the answers seen in the training data, loosing its generalization capabilities. This is called <a href="http://en.wikipedia.org/wiki/Overfitting"><em>overfitting</em></a>, and there are various techniques for overcoming it.</li>
+<li>Validate the model&#8217;s performance. There are numerous techniques for achieving this, such as <a href="http://en.wikipedia.org/wiki/Receiver_operating_characteristic">ROC analysis</a> and many others. The model&#8217;s accuracy can be improved by changing its structure or the underlying training data. If the model&#8217;s performance is not satisfactory, change model parameters, inputs and or scaling, go to step 3 and try again.</li>
+<li>Use the model to classify new data. In production. Profit!</li>
+</ol>
+
+
+<h3>Unsupervised Learning</h3>
+
+<p>The kinds of problems that are suited for unsupervised algorithms may seem similar, but are very different to supervised learners. Instead of trying to predict a set of known classes, we are trying to identify the patterns inherent in the data that separate like observations in one way or another. Viewed from 20 thousand feet, the main difference is that we are not providing a target variable like we did in supervised learning.</p>
+
+<p>This marks a fundamental difference in how both types of algorithms operate. On one hand, we have supervised algorithms which try to minimize the error in classifying observations, while unsupervised learning algorithms don&#8217;t have such luxuries because there are no outcomes or labels. Unsupervised algorithms try to create clusters of data that are inherently similar. In some cases we don&#8217;t necessarily know what makes them similar, but the algorithms are capable of finding these relationships between data points and group them in significant ways. While supervised algorithms aim to minimize the classification error, unsupervised algorithms aim to create groups or subsets of the data where data points belonging to a cluster are as similar to each other as possible, while making the difference between the clusters as high as possible.</p>
+
+<p>Another main difference is that in a clustering problem, the concept of &#8220;Training Set&#8221; does not apply in the same way as with supervised learners. Typically we have a dataset that is used to find the relationships in the data that buckets them in different clusters. We could of course apply the same clustering model to new data, but unless it is too unpractical to do so (perhaps for performance reasons), we will most certainly want to rerun the algorithm on new data as it will typically find new relationships within the data that may surface up given the new observations.</p>
+
+<p>As a simple example, you could imagine clustering customers by their demographics. The learning algorithm may help you discover distinct groups of customers by region, age ranges, gender and other attributes in such way that we can develop targeted marketing programs. Another example may be to cluster patients by their chronic diseases and comorbidities in such a way that targeted interventions can be developed to help manage their diseases and improve their lifestyles.</p>
+
+<p><img src="http://img.skitch.com/20100215-qm59id21fs2kr2m1r2sc5umwgw.png"></p>
+
+<p>For unsupervised learning, the process is:</p>
+
+<ol>
+<li><em>Scale and prepare raw data</em>: As with supervised learners, this step entails selecting features to feed into our algorithm, and scaling them to build a suitable data set.</li>
+<li><em>Build model</em>: We run the unsupervised algorithm on the scaled dataset to get groups of like observations.</li>
+<li><em>Validate</em>: After clustering the data, we need to verify whether it cleanly separated the data in significant ways. This includes calculating a set of statistics on the resulting clusters (such as the within group sum of squares), as well as analysis based on domain knowledge, where you may measure how certain attributes behave when aggregated by the clusters.</li>
+<li>Once we are satisfied with the clusters created there is no need to run the model with new data (although you can). Profit!</li>
+</ol>
+
+
+<h4>Step zero</h4>
+
+<p>A common step that I have not outlined above and should be performed when working on any such problem is to get a strong understanding for the characteristics of the data. This should be a combination of visual analysis (for which I prefer the excellent <a href="http://had.co.nz/ggplot2/">ggplot2</a> library) as well as some basic descriptive statistics and data profiling such as quartiles, means, standard deviation, frequencies and others. <a href="http://www.r-project.org">R</a>&#8217;s <a href="http://cran.r-project.org/web/packages/Hmisc/index.html">Hmisc</a> package has a great function for this purpose called <a href="http://lib.stat.cmu.edu/S/Harrell/help/Hmisc/html/describe.html"><code>describe</code></a>.</p>
+
+<p>I am convinced that not performing this step is a non starter for any datamining project. It will allow you to identify missing values, general distributions of data, early outlier detection, among many other characteristics that drive the selection of attributes for your models.</p>
+
+<h3>Wrapping up</h3>
+
+<p><a href="http://televixen.files.wordpress.com/2009/02/wtb.jpg"><img src="http://televixen.files.wordpress.com/2009/02/wtb.jpg"></a></p>
+
+<p>This is certainly quite a bit of info, especially if these terms are new to you. To summarize:</p>
+
+<table>
+  <thead>
+    <tr>
+      <td></td>
+      <td><b>Supervised Learning</b></td>
+      <td><b>Unsupervised Learning</b></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Objective</b></td>
+      <td>Classify or predict a class.</td>
+      <td>Find patterns inherent to the data, creating cluster of like data points. <a href="http://en.wikipedia.org/wiki/Dimension_reduction">Dimensionality Reduction</a>.</td>
+    </tr>
+    <tr>
+      <td><b>Example Implementations</b></td>
+      <td>Neural Networks (<a href="http://en.wikipedia.org/wiki/Multilayer_perceptron">Multilayer Perceptrons</a>, <a href="http://en.wikipedia.org/wiki/Radial_basis_function_network">RBF Networks</a> and others, <a href="http://en.wikipedia.org/wiki/Support_vector_machine">Support Vector Machines</a>, Decision Trees (<a href="http://en.wikipedia.org/wiki/ID3_algorithm">ID3</a>, <a href="http://en.wikipedia.org/wiki/C4.5_algorithm">C4.5</a> and others), <a href="http://en.wikipedia.org/wiki/Naive_Bayes_classifier">Naive Bayes Classifiers</a>&#8230;</td>
+      <td><a href="http://en.wikipedia.org/wiki/K-means_clustering">K-Means</a> (and variants), <a href="http://en.wikipedia.org/wiki/Cluster_analysis#Hierarchical_clustering">Hierarchical Clustering</a>, <a href="http://en.wikipedia.org/wiki/Self-organizing_map">Kohonen Self Organizing Maps</a>&#8230;</td>
+    </tr>
+    <tr>
+      <td><b>Who&#8217;s the Boss?</b></td>
+      <td>The target variable or outcome.</td>
+      <td>The relationships inherent to the data.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p>Hopefuly this article shows the main differences between Unsupervised and Supervised Learning. On followup posts we will dig into some of the specific implementations of these algorithms with examples in <a href="http://www.r-project.org">R</a> and <a href="http://ruby-lang.org">Ruby</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <p>Harold Giménez builds Postgres infrastructure at the Heroku Department of Data.</p>
+  <img alt="Heroku Postgres" src="/images/heroku-postgres.png" width="260px">
+  <p><em>We&#8217;re hiring.</em> You should <a href="http://postgres.heroku.com/">apply</a>.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/hgmnz">@hgmnz</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'hgmnz',
+            count: 4,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("hgmnz", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/hgmnz" class="twitter-follow-button" data-show-count="false">Follow @hgmnz</a>
+  
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/110441654497003669801?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/31/on-top-down-design/">On Top-down Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p class="copyright-and-license">
+  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
