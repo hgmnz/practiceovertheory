@@ -6,9 +6,6 @@ comments: true
 categories:
 ---
 
-Client Side API Mashups With CORS
----------------------------------
-
 At Heroku we have APIs for pretty much everything. Need logs for an app? Is
 that database available? You just beat someone at ping pong? There's an API for
 that. Having such rich datasets available is great. It allows us to build
@@ -30,14 +27,13 @@ host. The browser should fail with an error similar to the following:
 XMLHttpRequest cannot load https://some.remote.com. Origin https://your.site.com is not allowed by Access-Control-Allow-Origin
 ```
 
-This is where [Cross Origin Resource Sharing
-(CORS)](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) comes in.
-The way it works is that the Origin (the client) will issue what's called a
-pre-flight request, asking the server "hey, can I make a request with HTTP verb
-foo to path /bar with headers x-baz?", to which the server responds, "Sure,
-bring it!", or "No, you may not". This pre-flight request is made to the same
-path as the actual request, but the HTTP `OPTIONS` verb is used instead. The
-server responds with the following headers, should the request be allowed:
+This is where [Cross Origin Resource Sharing (CORS)](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+ comes in.  The way it works is that the Origin (the client) will issue what's
+called a pre-flight request, asking the server "hey, can I make a request with
+HTTP verb foo to path /bar with headers x-baz?", to which the server responds,
+"Sure, bring it!", or "No, you may not". This pre-flight request is made to the
+same path as the actual request, but the HTTP `OPTIONS` verb is used instead.
+The server responds with the following headers, should the request be allowed:
 
 * `Access-Control-Allow-Origin`: Specifies what Origins are allowed remote XHR
  requests to be made against this server. Allowed values include a URL (eg:
