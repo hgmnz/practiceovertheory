@@ -274,7 +274,9 @@ token, such as the email address or some user identifier that can be used for
 auditing and whitelisting.  <em>All of the above data token generation and
 verification has been extracted to a handy little gem called
 <a href="http://github.com/hgmnz/fernet">fernet</a></em>.
-Do not reimplement this, just use fernet.
+Do not reimplement this, just use fernet. In addition to HMAC signature,
+fernet also makes it easy to encrypt the message&#8217;s payloads, which opens it up
+for other interesting use cases.
 </span></p>
 
 <p>The <code>authenticate!</code> method must be invoked before serving any request. This
