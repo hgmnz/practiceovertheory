@@ -280,18 +280,18 @@ can be seen in the following coffeescript two-liner:</p>
 <figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
 <span class='line'>2</span>
 </pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span> <span class="nx">beforeSend</span><span class="o">:</span> <span class="p">(</span><span class="nx">jqXHR</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="o">-&gt;</span>
-</div><div class='line'>  <span class="nx">jqXHR</span><span class="p">.</span><span class="nx">setRequestHeader</span> <span class="s2">&quot;x-app-auth-token&quot;</span><span class="p">,</span> <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span>
+</div><div class='line'>  <span class="nx">jqXHR</span><span class="p">.</span><span class="nx">setRequestHeader</span> <span class="s2">&quot;x-app-auth-token&quot;</span><span class="p">,</span> <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>
 </div></code></pre></td></tr></table></div></figure>
 
 
-<p>YourApp.authToken can come from a number of places. I decided to bootstrap it
+<p>App.authToken can come from a number of places. I decided to bootstrap it
 when the page is originally served, something like:</p>
 
 <figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
 <span class='line'>2</span>
 <span class='line'>3</span>
 </pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</div><div class='line'>  <span class="nx">YourApp</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span>
 </div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
 </div></code></pre></td></tr></table></div></figure>
 
