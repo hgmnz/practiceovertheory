@@ -313,7 +313,7 @@ looks like so:</p>
 <span class='line'>8</span>
 <span class='line'>9</span>
 </pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
-</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>       <span class="o">=</span> <span class="err">&quot;</span><span class="o">&lt;%=</span> <span class="nx">auth_token</span> <span class="o">%&gt;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
+</div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="s2">&quot;&lt;%= auth_token %&gt;&quot;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
 </div><div class='line'>  <span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 </div><div class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="s1">&#39;/auth_token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
 </div><div class='line'>      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
@@ -323,6 +323,9 @@ looks like so:</p>
 </div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
 </div></code></pre></td></tr></table></div></figure>
 
+
+<p>The <code>/auth_token</code> server side endpoint simply responds with a new valid
+<code>token</code>.</p>
 
 <p>The fernet token expires every minute by default. I decided to update it
 every 29 seconds instead so that it can be updated at least twice
