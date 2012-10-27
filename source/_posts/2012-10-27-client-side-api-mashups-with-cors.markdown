@@ -93,39 +93,35 @@ both parties. Finally, we append this signature to the JSON document and we
 base64 encode it to make it safe to send over the wire. Here's an example
 implementation:
 
-```
-require 'openssl'
-require 'json'
-require 'base64'
-def auth_token
-  data      = { issued_at: Time.now }
-  secret    = ENV['AUTH_SECRET']
-  signature = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(data), secret)
-  Base64.urlsafe_encode64(JSON.dump(data.merge(signature: signature)))
-end
-```
+    require 'openssl'
+    require 'json'
+    require 'base64'
+    def auth_token
+      data      = { issued_at: Time.now }
+      secret    = ENV['AUTH_SECRET']
+      signature = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(data), secret)
+      Base64.urlsafe_encode64(JSON.dump(data.merge(signature: signature)))
+    end
 
 This token is used on the API server to authenticate requests. The client can
 be made to send a custom header, let's call it X_APP_AUTH_TOKEN, which it must
 be able to reconstruct the token from the JSON data, and then validate that the
 request is recent enough. For example in a Sinatra application:
 
-```
-def not_authorized!
-  throw(:halt, [401, "Not authorized\n"])
-end
+    def not_authorized!
+      throw(:halt, [401, "Not authorized\n"])
+    end
 
-def authenticate!
-  token           = request.env["HTTP_X_APP_AUTH_TOKEN"] or not_authorized!
-  token_data      = JSON.parse(Base64.decode64(token))
-  received_sig    = token_data.delete('signature')
-  regenerated_mac = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(token_data), ENV['AUTH_SECRET'])
+    def authenticate!
+      token           = request.env["HTTP_X_APP_AUTH_TOKEN"] or not_authorized!
+      token_data      = JSON.parse(Base64.decode64(token))
+      received_sig    = token_data.delete('signature')
+      regenerated_mac = OpenSSL::HMAC.hexdigest('sha256', JSON.dump(token_data), ENV['AUTH_SECRET'])
 
-  if regenerated_mac != received_sig || Time.parse(token_data['issued_at']) > Time.now - 2*60
-    not_authorized!
-  end
-end
-```
+      if regenerated_mac != received_sig || Time.parse(token_data['issued_at']) > Time.now - 2*60
+        not_authorized!
+      end
+    end
 
 In the above code, we consider a token invalid if it was issued more than 2
 minutes ago. Real applications will probably include more data in the auth
@@ -136,9 +132,7 @@ auditing and whitelisting.
 a handy little gem called [fernet](http://github.com/hgmnz/fernet). Don't
 reimplement this, just use fernet.*
 
-{% pullquote %}
-Don't reimplement this, just use fernet.
-{% endpullquote %}
+{" Don't reimplement this, just use fernet. "}
 
 The `authenticate!` method must be invoked before serving any request. This
 means that the auth token must be included on every request the client makes.
@@ -146,19 +140,15 @@ There are many ways of doing this. One approach, if you're using JQuery to back
 Backbone.sync(), is to use its $.ajax beforeSend hook to include the header, as
 can be seen in the following coffeescript two-liner:
 
-```
-$.ajaxSetup beforeSend: (jqXHR, settings) ->
-  jqXHR.setRequestHeader "x-yobuko-auth-token", YourApp.authToken
-```
+    $.ajaxSetup beforeSend: (jqXHR, settings) ->
+      jqXHR.setRequestHeader "x-yobuko-auth-token", YourApp.authToken
 
 YourApp.authToken can come from a number of places. I decided to bootstrap it
 when the page is originally served, something like:
 
-```
-<script type="text/javascript">
-  YourApp.authToken = "<%= auth_token %>";
-</script>
-```
+    <script type="text/javascript">
+      YourApp.authToken = "<%= auth_token %>";
+    </script>
 
 In addition to that, it should be updated in an interval, so that on a single
 page app, that doesn't request any page refreshes, the auth token is always
@@ -167,17 +157,15 @@ fresh and subsequent API requests can be made.
 The final client side code that provides the auth token and keeps it updated
 looks like so:
 
-```
-<script type="text/javascript">
-  App.authToken       = "<%= auth_token %>; //bootstrap an initial value
-  App.refresh_auth_token = function() {
-    $.getJSON('/auth_token', function(data) {
-      App.authToken = data.token; //request updated values
-    })
-  };
-  window.setInterval(Oki.refresh_auth_token, 29000); //every 29 seconds
-</script>
-```
+    <script type="text/javascript">
+      App.authToken       = "<%= auth_token %>; //bootstrap an initial value
+      App.refresh_auth_token = function() {
+        $.getJSON('/auth_token', function(data) {
+          App.authToken = data.token; //request updated values
+        })
+      };
+      window.setInterval(Oki.refresh_auth_token, 29000); //every 29 seconds
+    </script>
 
 The fernet token expires every minute by default. I decided to update it
 every 29 seconds instead so that it has a chance to update at least twice
