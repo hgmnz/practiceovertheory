@@ -1,0 +1,10 @@
+<div class="highlight"><pre><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span>
+  <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span>       <span class="o">=</span> <span class="err">&quot;</span><span class="o">&lt;%=</span> <span class="nx">auth_token</span> <span class="o">%&gt;</span><span class="p">;</span> <span class="c1">//bootstrap an initial value</span>
+  <span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="s1">&#39;/auth_token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
+    <span class="p">})</span>
+  <span class="p">};</span>
+  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
+<span class="o">&lt;</span><span class="err">/script&gt;</span>
+</pre></div>

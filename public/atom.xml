@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2012-10-27T11:22:57-07:00</updated>
+  <updated>2012-10-27T11:55:27-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -243,7 +243,7 @@ looks like so:</p>
 </div><div class='line'>      <span class="nx">App</span><span class="p">.</span><span class="nx">authToken</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">;</span> <span class="c1">//request updated values</span>
 </div><div class='line'>    <span class="p">})</span>
 </div><div class='line'>  <span class="p">};</span>
-</div><div class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">Oki</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
+</div><div class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">App</span><span class="p">.</span><span class="nx">refresh_auth_token</span><span class="p">,</span> <span class="mi">29000</span><span class="p">);</span> <span class="c1">//every 29 seconds</span>
 </div><div class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
 </div></code></pre></td></tr></table></div></figure>
 
