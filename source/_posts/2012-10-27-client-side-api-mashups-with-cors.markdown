@@ -53,7 +53,7 @@ There are more headers that allow you to whitelist and otherwise control access 
 Thus, a Sinatra app acting as the remote end of the system can respond to pre-flight OPTIONS requests like so:
 
 {% codeblock lang:ruby %}
-options '*' do
+options '/resources' do
   headers 'Access-Control-Allow-Origin'  => 'https://your.site.com',
           'Access-Control-Allow-Headers' => 'x-your-header',
           'Access-Control-Max-Age'       => '2592000'
@@ -63,7 +63,7 @@ end
 Inclusion of the Allow Origin and Allow Headers headers is also necessary on responses to any other remote XHR requests. We can extract the headers directive to a helper and use it on both pre-flight and other requests:
 
 {% codeblock lang:ruby %}
-options '*' do
+options '/resources' do
   cors_headers
   headers 'Access-Control-Max-Age' => '2592000'
 end
