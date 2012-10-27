@@ -173,7 +173,7 @@ looks like so:
       App.authToken = data.token; //request updated values
     })
   };
-  window.setInterval(Oki.refresh_auth_token, 29000); //every 29 seconds
+  window.setInterval(App.refresh_auth_token, 29000); //every 29 seconds
 </script>
 {% endcodeblock %}
 
