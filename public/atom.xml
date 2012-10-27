@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2012-10-27T12:13:26-07:00</updated>
+  <updated>2012-10-27T12:39:24-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -120,7 +120,10 @@ course, there is no authentication in place yet.</p>
 
 <p>We will implement an HMAC based auth token mechanism. Both the remote server
 and your app share a secret. This secret is used to generate a token containing
-a timestamp that is used for validating token recency.</p>
+a timestamp that is used for validating token recency. The HMAC digest is a
+signature that is generated with the shared secret, and it can be used to
+verify the authenticity of the entity that generated the token. It answers
+the question of whether the the client of the API request is authentic.</p>
 
 <p>To generate the token, we create a JSON document containing an <code>issued_at</code>
 timestamp, and we calculate its sha256 HMAC token using the secret known to
