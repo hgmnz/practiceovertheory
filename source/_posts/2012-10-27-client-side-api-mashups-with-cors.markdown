@@ -146,7 +146,7 @@ can be seen in the following coffeescript two-liner:
 
 {% codeblock lang:javascript %}
 $.ajaxSetup beforeSend: (jqXHR, settings) ->
-  jqXHR.setRequestHeader "x-yobuko-auth-token", YourApp.authToken
+  jqXHR.setRequestHeader "x-app-auth-token", YourApp.authToken
 {% endcodeblock %}
 
 YourApp.authToken can come from a number of places. I decided to bootstrap it
