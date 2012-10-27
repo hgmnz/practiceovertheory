@@ -134,7 +134,7 @@ token, such as the email address or some user identifier that can be used for
 auditing and whitelisting.  *All of the above data token generation and
 verification has been extracted to a handy little gem called 
 [fernet](http://github.com/hgmnz/fernet)*.
-{" Don't reimplement this, just use fernet. "}
+{" Do not reimplement this, just use [fernet](https://github.com/hgmnz/fernet). "}
 {% endpullquote %}
 
 
