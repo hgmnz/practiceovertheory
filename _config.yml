@@ -70,12 +70,8 @@ twitter_show_follower_count: false
 twitter_tweet_button: true
 
 # Google +1
-google_plus_one: false
+google_plus_one: true
 google_plus_one_size: medium
-
-
-# Google Analytics
-google_analytics_tracking_id: UA-25569034-1
 
 # Google Plus Profile
 # Hidden: No visible button, just add author information to search results
@@ -95,7 +91,7 @@ disqus_short_name:
 disqus_show_comment_count: false
 
 # Google Analytics
-google_analytics_tracking_id:
+google_analytics_tracking_id: UA-25569034-1
 
 # Facebook Like
 facebook_like: false
