@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2012-11-18T18:01:10-08:00</updated>
+  <updated>2013-07-06T11:38:54-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -12,6 +12,271 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Distributed locking in Postgres]]></title>
+    <link href="http://practiceovertheory.com/blog/2013/07/06/distributed-locking-in-postgres/"/>
+    <updated>2013-07-06T11:36:00-07:00</updated>
+    <id>http://practiceovertheory.com/blog/2013/07/06/distributed-locking-in-postgres</id>
+    <content type="html"><![CDATA[<h1>Distributed locking in Postgres</h1>
+
+<p>Postgres has a few handy primitives for dealing with distributed process level
+locking. Because these locks are atomic and handled by the database, they are
+well suited for coordinating concurrent processes&#8217; access to shared resources.</p>
+
+<p>For example, a checkout endpoint on an ecommerce site should be placed behind
+such an advisory lock, so that if the user initiates two check out processes
+consecutively, only one occurs. Even if the two requests make it to different
+web processes, the second attempt should gracefully be rolled back.</p>
+
+<p>Another example can be seen in worker processes that perform some sort of
+idempotent action in a loop, but for which only one process should be executing
+at a time. You may spin up two such processes ensuring high availability, but
+they only operate if a lock is acquired. In this way, the first process
+acquires the lock, and the second blocks until either the first one releases
+it, either because it crashed or it gracefully exited.</p>
+
+<h2>Postgres locking</h2>
+
+<p>Postgres has various functions that can be used for creating locks. The topic
+of this article is advisory locks. Explicit locks are those taken by database
+operations such as concurrent writes, and they are guaranteed to be obeyed no
+matter what. For example, one process updating a column, and another trying to
+drop the very same column.</p>
+
+<p>In the advisory lock case, the application requests a lock in order to perform
+some operation, and releases it when it&#8217;s done. It&#8217;s up to the application
+itself to obey this lock, hence the name.</p>
+
+<p>In the advisory lock family of functions, we can categorize them as:</p>
+
+<ul>
+<li><em>Session level</em>: those that affect a session or connection. When taking a
+session level lock, if a transaction fails and rolls back, the lock will
+continue to be held until it is explicitely released.</li>
+<li><em>Transaction level</em>: locks that automatically get released at the end of a
+transaction. In many cases the semantics offered by transaction level locking
+are a better fit for the underlying problem. In general, if the action being
+performed is wrapped in a transaction, this is likely the best suited locking
+scope.</li>
+</ul>
+
+
+<p>Beyond the above, locks can be blocking or non-blocking. In the blocking case,
+the request for a lock will wait until it can be obtained, whereas in the non-blocking
+case the request returns immediately but returns false.</p>
+
+<h2>Usage examples</h2>
+
+<h3>Session level</h3>
+
+<p>Let&#8217;s look at session level locks first. Opening up two psql sessions we can
+experiment with the locking semantics:</p>
+
+<figure class='code'><figcaption><span>psql session 1</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_advisory_lock</span>
+</div><div class='line'><span class="c1">------------------</span>
+</div><div class='line'>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>psql session 2</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Here, session 2 just blocks until the lock is acquired. On a third session we
+can check in pg_locks and pg_stat_activity to verify this:</p>
+
+<figure class='code'><figcaption><span>psql session 3</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+<span class='line'>12</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">select</span> <span class="n">pg_locks</span><span class="p">.</span><span class="k">granted</span><span class="p">,</span>
+</div><div class='line'>       <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">query</span><span class="p">,</span>
+</div><div class='line'>       <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">query_start</span>
+</div><div class='line'>       <span class="k">from</span> <span class="n">pg_locks</span>
+</div><div class='line'>  <span class="k">JOIN</span> <span class="n">pg_stat_activity</span>
+</div><div class='line'>    <span class="k">on</span> <span class="n">pg_locks</span><span class="p">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">pid</span>
+</div><div class='line'>  <span class="k">WHERE</span> <span class="n">pg_locks</span><span class="p">.</span><span class="n">locktype</span> <span class="o">=</span> <span class="s1">&#39;advisory&#39;</span><span class="p">;</span>
+</div><div class='line'> <span class="k">granted</span> <span class="o">|</span>            <span class="n">query</span>            <span class="o">|</span>          <span class="n">query_start</span>
+</div><div class='line'><span class="c1">---------+-----------------------------+-------------------------------</span>
+</div><div class='line'> <span class="n">t</span>       <span class="o">|</span> <span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="o">|</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">06</span> <span class="mi">10</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">31</span><span class="p">.</span><span class="mi">559991</span><span class="o">-</span><span class="mi">07</span>
+</div><div class='line'> <span class="n">f</span>       <span class="o">|</span> <span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="o">|</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">06</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">09</span><span class="p">.</span><span class="mi">412517</span><span class="o">-</span><span class="mi">07</span>
+</div><div class='line'><span class="p">(</span><span class="mi">2</span> <span class="k">rows</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&#8217;s release the lock on session 1:</p>
+
+<figure class='code'><figcaption><span>psql session 1</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">select</span> <span class="n">pg_advisory_unlock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_advisory_unlock</span>
+</div><div class='line'><span class="c1">--------------------</span>
+</div><div class='line'> <span class="n">t</span>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty much immediately after having done this, session 2 took the lock, and it
+looks like this:</p>
+
+<figure class='code'><figcaption><span>psql session 2</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_advisory_lock</span>
+</div><div class='line'><span class="c1">------------------</span>
+</div><div class='line'>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div><div class='line'>
+</div><div class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">381445</span><span class="p">.</span><span class="mi">570</span> <span class="n">ms</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>And now pg_locks shows the on lock being held</p>
+
+<figure class='code'><figcaption><span>psql session 3</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">select</span> <span class="n">pg_locks</span><span class="p">.</span><span class="k">granted</span><span class="p">,</span>
+</div><div class='line'>       <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">query</span><span class="p">,</span>
+</div><div class='line'>       <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">query_start</span>
+</div><div class='line'>       <span class="k">from</span> <span class="n">pg_locks</span>
+</div><div class='line'>  <span class="k">JOIN</span> <span class="n">pg_stat_activity</span>
+</div><div class='line'>    <span class="k">on</span> <span class="n">pg_locks</span><span class="p">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pg_stat_activity</span><span class="p">.</span><span class="n">pid</span>
+</div><div class='line'>  <span class="k">WHERE</span> <span class="n">pg_locks</span><span class="p">.</span><span class="n">locktype</span> <span class="o">=</span> <span class="s1">&#39;advisory&#39;</span><span class="p">;</span>
+</div><div class='line'> <span class="k">granted</span> <span class="o">|</span>            <span class="n">query</span>            <span class="o">|</span>          <span class="n">query_start</span>
+</div><div class='line'><span class="c1">---------+-----------------------------+-------------------------------</span>
+</div><div class='line'> <span class="n">t</span>       <span class="o">|</span> <span class="k">SELECT</span> <span class="n">pg_advisory_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="o">|</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">06</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">09</span><span class="p">.</span><span class="mi">412517</span><span class="o">-</span><span class="mi">07</span>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Because this is a session level lock, failing or rolling back any transaction
+while holding a lock does not release the lock at all. Only explicitely unlocking
+or disconnecting the client would release the lock.</p>
+
+<h3>Transaction level</h3>
+
+<p>Now let&#8217;s take a look at how transaction level locks work:</p>
+
+<figure class='code'><figcaption><span>psql session 1</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">BEGIN</span><span class="p">;</span>
+</div><div class='line'><span class="k">SELECT</span> <span class="n">pg_try_advisory_xact_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_try_advisory_xact_lock</span>
+</div><div class='line'><span class="c1">---------------------------</span>
+</div><div class='line'> <span class="n">t</span>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Note also that we&#8217;re using the <code>try</code> variant of locking functions. Instead of
+blocking on a lock to be obtained, the <code>try</code> variants return true or false
+depending on whether a lock could be obtained.</p>
+
+<p>On session 2, we can try grabbing a lock as well:</p>
+
+<figure class='code'><figcaption><span>psql session 2</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">BEGIN</span><span class="p">;</span>
+</div><div class='line'><span class="k">SELECT</span> <span class="n">pg_try_advisory_xact_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_try_advisory_xact_lock</span>
+</div><div class='line'><span class="c1">---------------------------</span>
+</div><div class='line'> <span class="n">f</span>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>It returned false, because the first session already has said lock. If we were
+to complete this transaction either by failing, a COMMIT or a ROLLBACK, then
+this lock can be acquired. Let&#8217;s try that:</p>
+
+<figure class='code'><figcaption><span>psql session 1</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">ROLLBACK</span><span class="p">;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>After exiting the transaction on one session, the other ought to be able to
+acquire it:</p>
+
+<figure class='code'><figcaption><span>psql session 2</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'> <span class="k">SELECT</span> <span class="n">pg_try_advisory_xact_lock</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</div><div class='line'> <span class="n">pg_try_advisory_xact_lock</span>
+</div><div class='line'><span class="c1">---------------------------</span>
+</div><div class='line'> <span class="n">t</span>
+</div><div class='line'><span class="p">(</span><span class="mi">1</span> <span class="k">row</span><span class="p">)</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>All postgres locking functions take an application defined key in the form of
+one 64-bit integers or two 32-bit integers. An application may create CRC
+values from higher level abstractions. For example, a suitable integer for a
+lock on user ID 4232 may be the CRC of the string &#8220;user4232&#8221;. This pattern is
+implemented in the <a href="https://github.com/ryandotsmith/lock-smith/blob/master/lib/locksmith/pg.rb#L22-L30">lock
+smith</a>
+ruby library, and works well as an easy to understand application level
+abstraction.</p>
+
+<h3>Conclusion</h3>
+
+<p>Applications in modern software development and delivery are distributed in
+nature. Distributed mutexes and locks are an important primitive to help
+ensure correctness of behavior under concurrent environments.</p>
+
+<p>Many projects and products with distributed lock managers exist such as but
+Postgres provides a lightweight mechanism that is suitable for many locking
+needs, without needing to add more dependencies to infrastructure which already
+uses Postgres.</p>
+
+<p>More information about advisory locks in postgres can be found <a href="http://www.postgresql.org/docs/9.1/static/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS">here</a> and <a href="http://www.postgresql.org/docs/9.1/static/explicit-locking.html#ADVISORY-LOCKS">here</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Client Side API Mashups With CORS]]></title>
@@ -1349,334 +1614,6 @@ set directory=~/.vim_backups//</code></p></li>
 <p>Here&#8217;s a chart of my average weight by day of the week:</p>
 
 <p><img src="http://farm3.static.flickr.com/2524/3799614914_7848ef7b10.jpg" width="500" height="351" alt="on the subject of body weight" /></a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sortable lists with JQuery in Rails]]></title>
-    <link href="http://practiceovertheory.com/blog/2009/08/06/sortable-lists-with-jquery-in-rails/"/>
-    <updated>2009-08-06T22:35:30-07:00</updated>
-    <id>http://practiceovertheory.com/blog/2009/08/06/sortable-lists-with-jquery-in-rails</id>
-    <content type="html"><![CDATA[<p>Drag &#8216;n Drop sortable lists are a great way to provide a UI for sorting, well, lists of things. Most Rails examples <a href="http://railscasts.com/episodes/147-sortable-lists">out</a> <a href="http://blog.wyeworks.com/2009/7/27/drag-drop-sortable-lists">in</a> <a href="http://harryche2008.wordpress.com/2008/07/19/how-to-do-ajax-style-drag-n-drop-sorting-with-rails/">the</a> <a href="http://www.devarticles.com/c/a/Ruby-on-Rails/Dropping-and-Sorting-with-AJAX-and-scriptaculous/2/">wild</a> use prototype/scriptaculous and the built in Rails javascript helpers. In this walkthrough we&#8217;ll provide the same functionality using JQuery instead. We will not be using the <a href="http://api.rubyonrails.org/classes/ActionView/Helpers/ScriptaculousHelper.html#M001640">built in Rails javascript helper</a>. Instead we&#8217;ll write Unobstrusive Javascript using JQuery.</p>
-
-<p>For this example we&#8217;ll use a UserStory and a Task model:</p>
-
-<p><img src="http://yuml.me/diagram/scruffy/class/[UserStory]->[Task].&#8221; /></p>
-
-<p>The very first step is to download JQuery into your Rails app, as well as some basic setup that will make our lives easier when dealing with Unobstrusive Javascript (UJS). UJS is overlooked amongst web app developers. It&#8217;s all about separation of concerns. Remember in the late 80s and 90s when it was common to throw style right there on your HTML with things like <code>color="magenta"</code> or tags like <code><center></code>? Same thing is happening with Javascript: separate behavior from content and presentation. So instead of saying <code><a href="#" onclick="some_function()">foo</a></code>, you want to create a plain old link, and unobstrusively change the click&#8217;s behavior via javascript. The basic feel for this looks like:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="c">&lt;!-- in your view --&gt;</span>
-</div><div class='line'><span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">&quot;foo&quot;</span> <span class="na">href=</span><span class="s">&quot;http://foo.info&quot;</span><span class="nt">&gt;</span>This is foo!<span class="nt">&lt;/a&gt;</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//in application.js (possibly)</span>
-</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#foo&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-</div><div class='line'>    <span class="c1">//handle the click</span>
-</div><div class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span> <span class="c1">//cancel the browser&#39;s traditional event.</span>
-</div><div class='line'>  <span class="p">});</span>
-</div><div class='line'><span class="p">});</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>Just like we use CSS selectors to style an element, we can use JQuery selectors to describe the behavior of the element. Just like you may have <code>styles.css</code>, you may have <code>application.js</code>. This separation of behavior helps avoid cross browser inconsistencies, dry up and reuse your code, as well as provide graceful degradation to user agents that don&#8217;t even support Javascript. For instance, a form may be submitted via AJAX if the browser supports Javascript, or the traditional action may execute if it doesn&#8217;t. I&#8217;ve come to the point where looking at something like <code><a href="#" onclick='foo()'>foo</a></code> has the same effect as seeing style code in the middle of an HTML document: <em>repugnance</em>.</p>
-
-<h4>Set yourself up for JQuery</h4>
-
-<p>Head over to <a href="http://jquery.com/">the JQuery site</a> and download the minified (production) version of JQuery. The sortable() function is part of <a href="http://jqueryui.com/home">JQuery UI</a>, which you can download from <a href="http://jqueryui.com/download">here</a>. Place both under public/javascripts and include it on your layouts. Pretty standard stuff.</p>
-
-<p>Add a content block on your layout for <code>:javascript</code>. This pattern was picked up while hacking on the <a href="http://bostonrb.org">bostonrb site&#8217;s</a> <a href="http://github.com/bostonrb/bostonrb/blob/bca256689a5e381b1a8e729a9769820322f44cfa/app/views/shared/_javascripts.html.haml#L2">code</a> and I&#8217;ve stolen it for my own projects. It is a great way to throw UJS in your views. This should be at the bottom of your layout, right before the closing <code></body></code> tag (or in it&#8217;s own partial along with other javascript related stuffs):</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;html&gt;</span>
-</div><div class='line'>  <span class="nt">&lt;head&gt;&lt;title&gt;</span>My boring blog<span class="nt">&lt;/title&gt;&lt;/head&gt;</span>
-</div><div class='line'>  <span class="nt">&lt;body&gt;</span>
-</div><div class='line'>    ...
-</div><div class='line'>    yield :javascript
-</div><div class='line'>  <span class="nt">&lt;/body&gt;</span>
-</div><div class='line'><span class="nt">&lt;/html&gt;</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>Having that out of the way, we need to set up jQuery&#8217;s AJAX requests. We can use <a href="http://docs.jquery.com/Ajax/jQuery.ajaxSetup">JQuery&#8217;s <code>$.ajaxSetup()</code></a> hook to set the appropriate headers. Additionally, we&#8217;ll include Rails&#8217; authenticity token on our AJAX Post requests.</p>
-
-<p>For this to work, we need to store the Rails authenticity token <em>somewhere</em>. One option is to simply store it on a javascript variable as described <a href="http://henrik.nyh.se/2008/05/rails-authenticity-token-with-jquery">here</a>. Add this to your layout:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">%= javascript_tag &quot;var AUTH_TOKEN =</span> <span class="c1">#{form_authenticity_token.inspect};&quot; if protect_against_forgery? %&gt;</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>Then, throw the following on your public/javascripts/application.js file - I haven&#8217;t seen any downside to this, but leave a comment if you do.</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-<span class='line'>12</span>
-<span class='line'>13</span>
-<span class='line'>14</span>
-<span class='line'>15</span>
-<span class='line'>16</span>
-<span class='line'>17</span>
-<span class='line'>18</span>
-<span class='line'>19</span>
-<span class='line'>20</span>
-<span class='line'>21</span>
-<span class='line'>22</span>
-<span class='line'>23</span>
-</pre></td><td class='code' width='100%'><pre><code class='javascript'><div class='line'><span class="c1">//public/javascripts/application.js</span>
-</div><div class='line'>
-</div><div class='line'><span class="c1">// This sets up the proper header for rails to understand the request type,</span>
-</div><div class='line'><span class="c1">// and therefore properly respond to js requests (via respond_to block, for example)</span>
-</div><div class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajaxSetup</span><span class="p">({</span>
-</div><div class='line'>  <span class="s1">&#39;beforeSend&#39;</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">)</span> <span class="p">{</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&quot;Accept&quot;</span><span class="p">,</span> <span class="s2">&quot;text/javascript&quot;</span><span class="p">)}</span>
-</div><div class='line'><span class="p">})</span>
-</div><div class='line'>
-</div><div class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</div><div class='line'>
-</div><div class='line'>  <span class="c1">// UJS authenticity token fix: add the authenticy_token parameter</span>
-</div><div class='line'>  <span class="c1">// expected by any Rails POST request.</span>
-</div><div class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ajaxSend</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">request</span><span class="p">,</span> <span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
-</div><div class='line'>    <span class="c1">// do nothing if this is a GET request. Rails doesn&#39;t need</span>
-</div><div class='line'>    <span class="c1">// the authenticity token, and IE converts the request method</span>
-</div><div class='line'>    <span class="c1">// to POST, just because - with love from redmond.</span>
-</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">type</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</div><div class='line'>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;undefined&quot;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">||</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
-</div><div class='line'>    <span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">+=</span> <span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">data</span> <span class="o">?</span> <span class="s2">&quot;&amp;&quot;</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;authenticity_token=&quot;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">AUTH_TOKEN</span><span class="p">);</span>
-</div><div class='line'>  <span class="p">});</span>
-</div><div class='line'>
-</div><div class='line'><span class="p">});</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>Having done that, let&#8217;s prep our models. Let&#8217;s assume you&#8217;ve created the <code>UserStory</code> and <code>Task</code> classes with the required <code>has_many</code> and <code>belongs_to</code> associations.</p>
-
-<h4>Models set up.</h4>
-
-<p>The models require just a few things: the acts_as_list plugin and a position attribute on the tasks table</p>
-
-<ul>
-<li>Install the <a href="http://github.com/rails/acts_as_list/tree/master">acts_as_list</a> plugin:</li>
-</ul>
-
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'><span class="nv">$ </span>script/plugin install git://github.com/rails/acts_as_list.git
-</div><div class='line'>Initialized empty Git repository in /Users/hgimenez/code/foo/vendor/plugins/acts_as_list/.git/
-</div><div class='line'>remote: Counting objects: 13, <span class="k">done</span>.
-</div><div class='line'>remote: Compressing objects: 100% <span class="o">(</span>9/9<span class="o">)</span>, <span class="k">done</span>.
-</div><div class='line'>remote: Total 13 <span class="o">(</span>delta 2<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
-</div><div class='line'>Unpacking objects: 100% <span class="o">(</span>13/13<span class="o">)</span>, <span class="k">done</span>.
-</div><div class='line'>From git://github.com/rails/acts_as_list
-</div><div class='line'> * branch            HEAD       -&gt; FETCH_HEAD
-</div><div class='line'><span class="err">$</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Create a position column on the tasks table with:</li>
-</ul>
-
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-</pre></td><td class='code' width='100%'><pre><code class='bash'><div class='line'>script/generate migration add_position_to_tasks
-</div><div class='line'>rake db:migrate
-</div></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Add <code>acts_as_list :scope => :user_story</code> to the Task model.</li>
-<li>Optionally, add <code>default_scope => 'position'</code> to the Task model.</li>
-</ul>
-
-
-<h4>View setup</h4>
-
-<p>The idea is to create an <code><ul></code> of tasks that belong to a given user story. Each <code><li></code> contains a task and we have to &#8220;stage&#8221; the element&#8217;s IDs so that when we serialize the list using JQuery, the task&#8217;s IDs are sent over to the server via an AJAX request.</p>
-
-<p>We also create a span with a class of &#8220;handle&#8221;, which is where the user can hold on to when dragging and dropping tasks around.</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-</pre></td><td class='code' width='100%'><pre><code class='html'><div class='line'><span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;tasks-list&quot;</span><span class="nt">&gt;</span>
-</div><div class='line'>  <span class="err">&lt;</span>% @user_story.tasks.each do |t| %&gt;
-</div><div class='line'>    <span class="nt">&lt;li</span> <span class="na">id=</span><span class="s">&quot;task_&lt;%= t.id -%&gt;&quot;</span><span class="nt">&gt;</span>
-</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;name&quot;</span><span class="nt">&gt;</span>
-</div><div class='line'>        <span class="err">&lt;</span>%= t.name -%&gt;
-</div><div class='line'>      <span class="nt">&lt;/span&gt;</span>
-</div><div class='line'>      <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;handle&quot;</span><span class="nt">&gt;</span>[handle]<span class="nt">&lt;span&gt;</span>
-</div><div class='line'>    <span class="nt">&lt;/li&gt;</span>
-</div><div class='line'>  <span class="err">&lt;</span>% end %&gt;
-</div><div class='line'><span class="nt">&lt;ul&gt;</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<h4>(Unobstrusive) javascript setup</h4>
-
-<p>Now we are ready to wire in the javascript on your view. At the bottom of your view, and using the <code>:javascript</code> content block created earlier, use <a href="http://docs.jquery.com/UI/Sortable">JQuery&#8217;s sortable()</a> function and attach it to the #tasks-list element:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-<span class='line'>12</span>
-<span class='line'>13</span>
-<span class='line'>14</span>
-<span class='line'>15</span>
-<span class='line'>16</span>
-<span class='line'>17</span>
-<span class='line'>18</span>
-<span class='line'>19</span>
-<span class='line'>20</span>
-<span class='line'>21</span>
-<span class='line'>22</span>
-<span class='line'>23</span>
-<span class='line'>24</span>
-<span class='line'>25</span>
-<span class='line'>26</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="o">&lt;</span><span class="sx">% content_for </span><span class="ss">:javascript</span> <span class="k">do</span> <span class="sx">%&gt;</span>
-</div><div class='line'>
-</div><div class='line'><span class="sx">  &lt;% javascript_tag do %&gt;</span>
-</div><div class='line'>     <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span>
-</div><div class='line'>        <span class="p">{</span>
-</div><div class='line'>          <span class="n">axis</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">dropOnEmpty</span><span class="ss">:false</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">handle</span><span class="p">:</span> <span class="s1">&#39;.handle&#39;</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">cursor</span><span class="p">:</span> <span class="s1">&#39;crosshair&#39;</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">items</span><span class="p">:</span> <span class="s1">&#39;li&#39;</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">opacity</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">scroll</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
-</div><div class='line'>          <span class="n">update</span><span class="p">:</span> <span class="n">function</span><span class="p">(){</span>
-</div><div class='line'>            <span class="vg">$.</span><span class="n">ajax</span><span class="p">({</span>
-</div><div class='line'>                <span class="n">type</span><span class="p">:</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span>
-</div><div class='line'>                <span class="n">data</span><span class="p">:</span> <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sortable</span><span class="p">(</span><span class="s1">&#39;serialize&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;id=&lt;%=@user_story.id-%&gt;&#39;</span><span class="p">,</span>
-</div><div class='line'>                <span class="n">dataType</span><span class="p">:</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span>
-</div><div class='line'>                <span class="n">complete</span><span class="p">:</span> <span class="n">function</span><span class="p">(</span><span class="n">request</span><span class="p">){</span>
-</div><div class='line'>                    <span class="err">$</span><span class="p">(</span><span class="s1">&#39;#tasks-list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">effect</span><span class="p">(</span><span class="s1">&#39;highlight&#39;</span><span class="p">);</span>
-</div><div class='line'>                  <span class="p">},</span>
-</div><div class='line'>                <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;/user_stories/prioritize_tasks&#39;</span><span class="p">})</span>
-</div><div class='line'>            <span class="p">}</span>
-</div><div class='line'>          <span class="p">})</span>
-</div><div class='line'>    <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
-</div><div class='line'><span class="sx">  </span>
-</div><div class='line'><span class="sx">&lt;% end %&gt;</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>This is basically saying: Take the element with an ID of <code>#tasks-list</code> and make it sortable. Do an <code>HTTP POST</code> to the <code>user_stories/prioritize_tasks</code> path with the serialized tasks-lists as data. Note that we&#8217;re also appending the user_story id as a post parameter so that our controller action knows which tasks to prioritize.</p>
-
-<p>Feel free to go over the <a href="http://docs.jquery.com/UI/Sortable">sortable()</a> documentation to tweak the options.</p>
-
-<h4>Controller set up</h4>
-
-<p>The controller&#8217;s work is to take the parameters sent in from the view and to set the position attribute of each of the user story&#8217;s tasks. The parameters received in the controller look something like:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="n">params</span><span class="o">.</span><span class="n">inspect</span>
-</div><div class='line'> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;authenticity_token&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;9HJQs99d4vqhLwjPAdC8uSLwjPAd4OpbaJQs99dFCch8XisI=&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="o">=&gt;</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="o">=&gt;[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="o">]</span><span class="p">}</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>As expected, we receive the Rails authenticity token, as well as the id (the UserStory ID) and an array of task IDs (<code>params['task']</code> contains task IDs in the order specified by the user).</p>
-
-<p>Here&#8217;s the implementation of the prioritize_tasks action:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="k">def</span> <span class="nf">prioritize_tasks</span>
-</div><div class='line'>  <span class="n">user_story</span> <span class="o">=</span> <span class="no">UserStory</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</div><div class='line'>  <span class="n">tasks</span> <span class="o">=</span> <span class="n">user_story</span><span class="o">.</span><span class="n">tasks</span>
-</div><div class='line'>  <span class="n">tasks</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">task</span><span class="o">|</span>
-</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="s1">&#39;task&#39;</span><span class="o">].</span><span class="n">index</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">to_s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-</div><div class='line'>    <span class="n">task</span><span class="o">.</span><span class="n">save</span>
-</div><div class='line'>  <span class="k">end</span>
-</div><div class='line'>  <span class="n">render</span> <span class="ss">:nothing</span> <span class="o">=&gt;</span> <span class="kp">true</span>
-</div><div class='line'><span class="k">end</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<h4>Route setup</h4>
-
-<p>Almost there. The one thing that&#8217;s missing would be adding a collection route to the user_story resource for the prioritize_tasks action:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'>  <span class="c1"># add the :collection option</span>
-</div><div class='line'>  <span class="n">map</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:user_story</span><span class="p">,</span> <span class="ss">:collection</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:prioritize_tasks</span> <span class="o">=&gt;</span> <span class="ss">:post</span> <span class="p">}</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>This pretty much wraps it up! This process will become easier as Rails core evolves and the Javascript framework becomes easier to swap out. It is known that Rails 3&#8217;s helpers will not produce inline javascript. Instead, they will add hooks to your DOM elements in the form of HTML5&#8217;s custom data attributes which then can be used by unobstrusive javascript code to add the appropriate behavior to the DOM elements. Even though Rails will continue to ship with the Prototype/Scriptaculous frameworks by default, JQuery will be easier to plug in, and the Rails helpers that simply add data attributes to your DOM elements can be used to achieve all sorts of presentation behavior.</p>
-
-<p>Regardless of that, the closer you are to your Javascript, the better you&#8217;ll understand how the pieces play together and the more control you&#8217;ll have over the app&#8217;s client side behavior.</p>
-
-<h5>Resources</h5>
-
-<ul>
-<li><a href="http://www.railsenvy.com/2008/1/3/unobtrusive-javascript">Unobstrusive Javascript presentation</a> by Jason Seifer.</li>
-<li><a href="http://railscasts.com/episodes/136-jquery">JQuery Railscast</a></li>
-<li><a href="http://ejohn.org/blog/html-5-data-attributes/">HTML 5 data attributes</a>, an explanation by John Resig.</li>
-</ul>
-
 ]]></content>
   </entry>
   

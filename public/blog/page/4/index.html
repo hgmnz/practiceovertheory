@@ -9,7 +9,7 @@
   <meta name="author" content="Harold Giménez">
 
   
-  <meta name="description" content="The folks at Dalsemi have removed many of the classes which would make a .tini binary unnecessarily big. I guess it&#8217;s a feature, but upgrading &hellip;">
+  <meta name="description" content="After installing Tomcat, the default port for the http requests it listens to is 8080. If your server is also running Apache&#8217;s httpd along with &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,68 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/05/setting-up-httpd-as-a-proxy-for-tomcat/">Setting Up Httpd as a Proxy for Tomcat</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-09-05T13:57:18-07:00" pubdate data-updated="true">Sep 5<span>th</span>, 2006</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After installing Tomcat, the default port for the http requests it listens to is 8080.</p>
+
+<p>If your server is also running Apache&#8217;s httpd along with Tomcat, this solution makes them happily work together. It takes two steps:</p>
+
+<ol>
+<li>In httpd&#8217;s configuration file (httpd.conf - located in /etc/httpd/conf/httpd.conf on a Fedora Core installation), add the following lines (let&#8217;s assume your hostname is example.com).
+<code>ProxyPass               /       http://example.com:8080/
+ProxyPassReverse        /       http://example.com:8080/</code></li>
+</ol>
+
+
+<p>These lines say &#8220;redirect all trafic from / (on the httpd server) to http://example.com:8080/ (on Tomcat)&#8221;.</p>
+
+<ol>
+<li>Change the following lines to look like these (doing a search for mod_proxy will take you there).
+<code><IfModule mod_proxy.c>
+ProxyRequests Off
+<Proxy *>
+Order allow,deny
+Allow from all
+</Proxy></code></li>
+</ol>
+
+
+<p>I did this a while ago, so if this doesn&#8217;t work for you please let me know ;)</p>
+
+<p>Another way of integrating tomcat and httpd is by using httpd&#8217;s mod_jk. You can easily <a href="http://www.google.com/search?q=tomcat%20httpd%20mod_jk">google it.</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -627,6 +689,10 @@ alternatives --config java</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/06/distributed-locking-in-postgres/">Distributed locking in Postgres</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/10/27/client-side-api-mashups-with-cors/">Client Side API Mashups With CORS</a>
       </li>
     
@@ -642,10 +708,6 @@ alternatives --config java</p>
         <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2011/09/19/redis-talk-at-postgresql-conf-west/">Redis Talk at PostgreSQL Conf West</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -655,7 +717,7 @@ alternatives --config java</p>
     </div>
   </div>
   <footer role="contentinfo"><p class="copyright-and-license">
-  Copyright &copy; 2006 - 2012 - Harold Giménez.
+  Copyright &copy; 2006 - 2013 - Harold Giménez.
   All original content released under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution ShareAlike license</a>. Powered by <a href="http://octopress.org">Octopress</a>.
 </p>
 
