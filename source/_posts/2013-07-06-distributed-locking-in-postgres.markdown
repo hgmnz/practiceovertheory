@@ -194,10 +194,10 @@ Applications in modern software development and delivery are distributed in
 nature. Distributed mutexes and locks are an important primitive to help
 ensure correctness of behavior under concurrent environments.
 
-Many projects and products with distributed lock managers exist such as but
-Postgres provides a lightweight mechanism that is suitable for many locking
-needs, without needing to add more dependencies to infrastructure which already
-uses Postgres.
+Many projects and products with distributed lock managers exist, but Postgres
+provides a lightweight mechanism that is suitable for many locking needs,
+without needing to add more dependencies to infrastructure which already uses
+Postgres.
 
 More information about advisory locks in postgres can be found [here](http://www.postgresql.org/docs/9.1/static/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS) and [here](http://www.postgresql.org/docs/9.1/static/explicit-locking.html#ADVISORY-LOCKS).
 
