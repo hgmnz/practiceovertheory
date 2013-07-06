@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2013-07-06T11:48:46-07:00</updated>
+  <updated>2013-07-06T11:50:30-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -159,7 +159,7 @@ looks like this:</p>
 </div></code></pre></td></tr></table></div></figure>
 
 
-<p>And now pg_locks shows the on lock being held</p>
+<p>And now pg_locks shows the one lock being held</p>
 
 <figure class='code'><figcaption><span>psql session 3</span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
 <span class='line'>2</span>

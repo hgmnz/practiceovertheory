@@ -112,7 +112,7 @@ SELECT pg_advisory_lock(1);
 Time: 381445.570 ms
 ```
 
-And now pg_locks shows the on lock being held
+And now pg_locks shows the one lock being held
 
 ```sql psql session 3
 select pg_locks.granted,
