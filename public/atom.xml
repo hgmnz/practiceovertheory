@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2013-07-06T12:09:59-07:00</updated>
+  <updated>2013-07-06T12:41:54-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -28,11 +28,11 @@ consecutively, only one occurs. Even if the two requests make it to different
 web processes, the second attempt should gracefully be rolled back.</p>
 
 <p>Another example can be seen in worker processes that perform some sort of
-idempotent action in a loop, but for which only one process should be executing
-at a time. You may spin up two such processes ensuring high availability, but
-they only operate if a lock is acquired. In this way, the first process
-acquires the lock, and the second blocks until the first one releases it,
-either because it crashed or it gracefully exited.</p>
+action in a loop or on a schedule, but for which only one process should be
+executing at a time. You may spin up two such processes ensuring high
+availability, but they only operate if a lock is acquired. In this way, the
+first process acquires the lock, and the second blocks until the first one
+releases it, either because it crashed or it gracefully exited.</p>
 
 <h2>Postgres locking</h2>
 
