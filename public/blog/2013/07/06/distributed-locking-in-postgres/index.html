@@ -9,8 +9,8 @@
   <meta name="author" content="Harold Giménez">
 
   
-  <meta name="description" content="Distributed locking in Postgres Postgres has a few handy primitives for dealing with distributed process level
-locking. Because these locks are &hellip;">
+  <meta name="description" content="Postgres has a few handy primitives for dealing with distributed process level
+locking. Because these locks are atomic and handled by the database, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -94,9 +94,7 @@ locking. Because these locks are &hellip;">
   </header>
 
 
-<div class="entry-content"><h1>Distributed locking in Postgres</h1>
-
-<p>Postgres has a few handy primitives for dealing with distributed process level
+<div class="entry-content"><p>Postgres has a few handy primitives for dealing with distributed process level
 locking. Because these locks are atomic and handled by the database, they are
 well suited for coordinating concurrent processes&#8217; access to shared resources.</p>
 

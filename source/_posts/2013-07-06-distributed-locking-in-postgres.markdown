@@ -6,9 +6,6 @@ comments: true
 categories: 
 ---
 
-Distributed locking in Postgres
-===============================
-
 Postgres has a few handy primitives for dealing with distributed process level
 locking. Because these locks are atomic and handled by the database, they are
 well suited for coordinating concurrent processes' access to shared resources.
