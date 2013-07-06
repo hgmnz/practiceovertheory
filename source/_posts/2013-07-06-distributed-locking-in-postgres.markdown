@@ -183,10 +183,11 @@ All postgres locking functions take an application defined key in the form of
 one 64-bit integers or two 32-bit integers. An application may create CRC
 values from higher level abstractions to be supplied as locking keys. For
 example, a suitable integer for a lock on user ID 4232 may be the CRC of the
-string "user4232". This pattern is implemented in the [lock
-smith](https://github.com/ryandotsmith/lock-smith/blob/master/lib/locksmith/pg.rb#L22-L30)
-ruby library, and works well as an easy to understand application level
-abstraction.
+string "user4232". This pattern is implemented in the
+[locksmith](https://github.com/ryandotsmith/lock-smith/blob/master/lib/locksmith/pg.rb#L22-L30)
+ruby library as well as python's
+[tusk](https://github.com/cyberdelia/tusk/blob/master/tusk/__init__.py#L40-L44)
+library, and works well as an easy to understand application level abstraction.
 
 ### Conclusion
 
