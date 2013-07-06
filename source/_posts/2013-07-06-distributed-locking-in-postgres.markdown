@@ -19,20 +19,23 @@ Another example can be seen in worker processes that perform some sort of
 idempotent action in a loop, but for which only one process should be executing
 at a time. You may spin up two such processes ensuring high availability, but
 they only operate if a lock is acquired. In this way, the first process
-acquires the lock, and the second blocks until either the first one releases
-it, either because it crashed or it gracefully exited.
+acquires the lock, and the second blocks until the first one releases it,
+either because it crashed or it gracefully exited.
 
 ## Postgres locking
 
 Postgres has various functions that can be used for creating locks. The topic
 of this article is advisory locks. Explicit locks are those taken by database
 operations such as concurrent writes, and they are guaranteed to be obeyed no
-matter what. For example, one process updating a column, and another trying to
-drop the very same column.
+matter what. For example, one process updating a column and another trying to
+drop the very same column, would be a situation that cannot be handled
+concurrently, and one will inevitably have to wait for the other to complete
+in order to do it's job.
 
 In the advisory lock case, the application requests a lock in order to perform
 some operation, and releases it when it's done. It's up to the application
-itself to obey this lock, hence the name.
+itself to obey this lock, hence the name. It's entirely possible for a missbehaved
+application to simply ignore the lock.
 
 In the advisory lock family of functions, we can categorize them as:
 
