@@ -196,8 +196,8 @@ ensure correctness of behavior under concurrent environments.
 
 Many projects and products with distributed lock managers exist, but Postgres
 provides a lightweight mechanism that is suitable for many locking needs,
-without needing to add more dependencies to infrastructure which already uses
-Postgres.
+without incurring the cost of additional infrastructure dependencies to an
+environment that already makes use of Postgres for data storage.
 
 More information about advisory locks in postgres can be found [here](http://www.postgresql.org/docs/9.1/static/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS) and [here](http://www.postgresql.org/docs/9.1/static/explicit-locking.html#ADVISORY-LOCKS).
 
