@@ -81,9 +81,9 @@ Breaking apart the above query, here's what happens:
    non-recursive term is executed and placed on a data structure called the _working table_.
    The working table now contains one row:
 
-         old_email         |        new_email
+                 old_email         |        new_email
          --------------------------+--------------------------
-         harold_gim@yahoo.com     | hgimenez@hotmail.com
+          harold_gim@yahoo.com     | hgimenez@hotmail.com
 
    The contents of the working table are appended to the result of the recursive
    query at this point.
@@ -92,9 +92,9 @@ Breaking apart the above query, here's what happens:
    in another data structure called an _intermediate table_. Thus, the
    intermediate table looks like so:
 
-         old_email       |        new_email
+               old_email       |        new_email
          ----------------------+--------------------------
-         hgimenez@hotmail.com | harold.gimenez@gmail.com
+          hgimenez@hotmail.com | harold.gimenez@gmail.com
 
 4. The contents of the working table are now replaced by those of the
    intermediate table, and the intermediate table is emptied.
