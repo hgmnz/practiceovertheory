@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2013-07-12T09:13:12-07:00</updated>
+  <updated>2013-07-12T09:18:59-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -121,9 +121,9 @@ the former removes dupes and the latter doesn&#8217;t. At this stage, the
 non-recursive term is executed and placed on a data structure called the <em>working table</em>.
 The working table now contains one row:</p>
 
-<pre><code>          old_email         |        new_email
-  --------------------------+--------------------------
-   harold_gim@yahoo.com     | hgimenez@hotmail.com
+<pre><code>        old_email         |        new_email
+--------------------------+--------------------------
+ harold_gim@yahoo.com     | hgimenez@hotmail.com
 </code></pre>
 
 <p>The contents of the working table are appended to the result of the recursive
@@ -133,9 +133,9 @@ substituted with the contents of the <em>working table</em>, placing the result
 in another data structure called an <em>intermediate table</em>. Thus, the
 intermediate table looks like so:</p>
 
-<pre><code>        old_email       |        new_email
-  ----------------------+--------------------------
-   hgimenez@hotmail.com | harold.gimenez@gmail.com
+<pre><code>      old_email       |        new_email
+----------------------+--------------------------
+ hgimenez@hotmail.com | harold.gimenez@gmail.com
 </code></pre></li>
 <li><p>The contents of the working table are now replaced by those of the
 intermediate table, and the intermediate table is emptied.</p></li>
