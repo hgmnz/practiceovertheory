@@ -9,7 +9,8 @@
   <meta name="author" content="Harold Giménez">
 
   
-  <meta name="description" content="After installing Tomcat, the default port for the http requests it listens to is 8080. If your server is also running Apache&#8217;s httpd along with &hellip;">
+  <meta name="description" content="For the lazy readers, here&#8217;s how to use it: 1
+String encodedString = URLEncoder.encode(&quot;the key&quot;, &quot;UTF-8&quot;) + &quot;=&quot &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +68,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/09/07/how-to-use-java-039-s-urlencoder-encode-method/">How to Use Java&#039;s URLEncoder.encode() Method</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-09-07T20:15:39-07:00" pubdate data-updated="true">Sep 7<span>th</span>, 2006</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For the lazy readers, here&#8217;s how to use it:</p>
+
+<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+</pre></td><td class='code' width='100%'><pre><code class='java'><div class='line'><span class="n">String</span> <span class="n">encodedString</span> <span class="o">=</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the key&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;=&quot;</span> <span class="o">+</span> <span class="n">URLEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">&quot;the value with any type of character such as @, ñ, or even ç!&quot;</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">);</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>When <a href="http://labnotesh.wordpress.com/2006/08/30/http-post-from-java-client/">POSTing to a URL</a>, it is necessary to encode the parameters you are sending. Not doing so correctly will likely introduce bugs in the communication as the server will not know how to deal with (decode) the recieved data.</p>
+
+<p>Lookin at the <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/net/URLEncoder.html">javadocs for URLEncoder</a>, we find that <em>normal</em> alpha-numeric characters remain the same after encoding them to UTF-8, but other characters, such as the equal sign, change.</p>
+
+<p>The server expects something like <code>key1=value1&amp;key2=value2</code>. The <code>=</code> and <code>&amp;</code> signs must be sent <strong>as is</strong>, without encoding. The <code>URLEncoder.encode</code> method is not &#8220;smart&#8221; enough to know that <code>=</code> and <code>&amp;</code> are to be used as part of the URL. Of course, it isn&#8217;t fair to assume that&#8230;</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -689,6 +737,10 @@ alternatives --config java</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/12/recursive-query-is-recursive/">RECURSIVE Query is Recursive</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/07/06/distributed-locking-in-postgres/">Distributed locking in Postgres</a>
       </li>
     
@@ -702,10 +754,6 @@ alternatives --config java</p>
     
       <li class="post">
         <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
       </li>
     
   </ul>

@@ -9,8 +9,8 @@
   <meta name="author" content="Harold Giménez">
 
   
-  <meta name="description" content="Postgres has a few handy primitives for dealing with distributed process level
-locking. Because these locks are atomic and handled by the database, &hellip;">
+  <meta name="description" content="In Postgres you have the ability to write recursive queries that refer to
+themselves. This is a very powerful construct, and among other use cases &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +68,189 @@ locking. Because these locks are atomic and handled by the database, &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/12/recursive-query-is-recursive/">RECURSIVE Query Is Recursive</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-12T08:26:00-07:00" pubdate data-updated="true">Jul 12<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In Postgres you have the ability to write recursive queries that refer to
+themselves. This is a very powerful construct, and among other use cases can
+greatly simplify fetching any type of hierarchical data, such as any data where
+an attribute refers to another row on the same table.</p>
+
+<p>For example, a graph structure where a parent identifier refers to the an ID on
+the same table. Another example can be seen on audit trail type tables,
+containing prior and new versions of some value.</p>
+
+<p>Let&#8217;s prepare an example to show showcase recursive querying in postgres.</p>
+
+<p>First, a table holding old and new email address values:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">audit_trail</span> <span class="p">(</span>
+</div><div class='line'>  <span class="n">old_email</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</div><div class='line'>  <span class="n">new_email</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span>
+</div><div class='line'><span class="p">);</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&#8217;s populate it with some data:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">audit_trail</span><span class="p">(</span><span class="n">old_email</span><span class="p">,</span> <span class="n">new_email</span><span class="p">)</span>
+</div><div class='line'>  <span class="k">VALUES</span> <span class="p">(</span><span class="s1">&#39;harold_gim@yahoo.com&#39;</span><span class="p">,</span> <span class="s1">&#39;hgimenez@hotmail.com&#39;</span><span class="p">),</span>
+</div><div class='line'>         <span class="p">(</span><span class="s1">&#39;hgimenez@hotmail.com&#39;</span><span class="p">,</span> <span class="s1">&#39;harold.gimenez@gmail.com&#39;</span><span class="p">),</span>
+</div><div class='line'>         <span class="p">(</span><span class="s1">&#39;harold.gimenez@gmail.com&#39;</span><span class="p">,</span> <span class="s1">&#39;harold@heroku.com&#39;</span><span class="p">),</span>
+</div><div class='line'>         <span class="p">(</span><span class="s1">&#39;foo@bar.com&#39;</span><span class="p">,</span> <span class="s1">&#39;bar@baz.com&#39;</span><span class="p">),</span>
+</div><div class='line'>         <span class="p">(</span><span class="s1">&#39;bar@baz.com&#39;</span><span class="p">,</span> <span class="s1">&#39;barbaz@gmail.com&#39;</span><span class="p">);</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>A query to find all my email addresses in one shot may look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+<span class='line'>6</span>
+<span class='line'>7</span>
+<span class='line'>8</span>
+<span class='line'>9</span>
+<span class='line'>10</span>
+<span class='line'>11</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'> <span class="k">WITH</span> <span class="k">RECURSIVE</span> <span class="n">all_emails</span> <span class="k">AS</span> <span class="p">(</span>
+</div><div class='line'>  <span class="k">SELECT</span>  <span class="n">old_email</span><span class="p">,</span> <span class="n">new_email</span>
+</div><div class='line'>    <span class="k">FROM</span> <span class="n">audit_trail</span>
+</div><div class='line'>    <span class="k">WHERE</span> <span class="n">old_email</span> <span class="o">=</span> <span class="s1">&#39;harold_gim@yahoo.com&#39;</span>
+</div><div class='line'>  <span class="k">UNION</span>
+</div><div class='line'>  <span class="k">SELECT</span> <span class="k">at</span><span class="p">.</span><span class="n">old_email</span><span class="p">,</span> <span class="k">at</span><span class="p">.</span><span class="n">new_email</span>
+</div><div class='line'>    <span class="k">FROM</span> <span class="n">audit_trail</span> <span class="k">at</span>
+</div><div class='line'>    <span class="k">JOIN</span> <span class="n">all_emails</span> <span class="n">a</span>
+</div><div class='line'>      <span class="k">ON</span> <span class="p">(</span><span class="k">at</span><span class="p">.</span><span class="n">old_email</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">new_email</span><span class="p">)</span>
+</div><div class='line'><span class="p">)</span>
+</div><div class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">all_emails</span><span class="p">;</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+<span class='line'>4</span>
+<span class='line'>5</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'>    <span class="n">old_email</span>         <span class="o">|</span>        <span class="n">new_email</span>
+</div><div class='line'><span class="c1">--------------------------+--------------------------</span>
+</div><div class='line'> <span class="n">harold_gim</span><span class="o">@</span><span class="n">yahoo</span><span class="p">.</span><span class="n">com</span>     <span class="o">|</span> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span>
+</div><div class='line'> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span>     <span class="o">|</span> <span class="n">harold</span><span class="p">.</span><span class="n">gimenez</span><span class="o">@</span><span class="n">gmail</span><span class="p">.</span><span class="n">com</span>
+</div><div class='line'> <span class="n">harold</span><span class="p">.</span><span class="n">gimenez</span><span class="o">@</span><span class="n">gmail</span><span class="p">.</span><span class="n">com</span> <span class="o">|</span> <span class="n">harold</span><span class="o">@</span><span class="n">heroku</span><span class="p">.</span><span class="n">com</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>A few potentially new concepts in here. First of all we have <code>WITH</code> queries,
+formally called <em>Common Table Expressions</em>. CTEs can be used as a a view, but
+they have the important property that they are performance gates: postgres is
+guaranteed to execute each CTE in a query indepently. CTEs are much more than
+a view however: they can return data from a DELETE operation that can be
+consequently operated on, they can define updatable datasets, and more to the
+point, they can be self-referential or recursive.</p>
+
+<p>Recursive CTEs are those that refer to themselves in the body, such as the
+above query. They&#8217;re not really recursive, but rather iterative, but the SQL
+standard is the law around here, so we live with it.</p>
+
+<p>Breaking apart the above query, here&#8217;s what happens:</p>
+
+<ol>
+<li><code>SELECT * FROM all_emails;</code> invokes the <code>all_emails</code> CTE.</li>
+<li><code>all_emails</code> has two parts, the non-recursive and the recursive terms,
+which are separated by the <code>UNION</code> keyword. It could also be <code>UNION ALL</code>;
+the former removes dupes and the latter doesn&#8217;t. At this stage, the
+non-recursive term is executed and placed on a data structure called the <em>working table</em>.</li>
+</ol>
+
+
+<p>The working table now contains one row:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'>    <span class="n">old_email</span>         <span class="o">|</span>        <span class="n">new_email</span>
+</div><div class='line'><span class="c1">--------------------------+--------------------------</span>
+</div><div class='line'> <span class="n">harold_gim</span><span class="o">@</span><span class="n">yahoo</span><span class="p">.</span><span class="n">com</span>     <span class="o">|</span> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<p>The contents of the working table are appended to the result of the recursive
+query at this point.</p>
+
+<ol>
+<li>Then the recursive term is executed, where the self-reference is
+substituted with the contents of the <em>working table</em>, placing the result
+in another data structure called an <em>intermediate table</em>. Thus, the
+intermediate table looks like so:</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
+<span class='line'>2</span>
+<span class='line'>3</span>
+</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'>  <span class="n">old_email</span>       <span class="o">|</span>        <span class="n">new_email</span>
+</div><div class='line'><span class="c1">----------------------+--------------------------</span>
+</div><div class='line'> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span> <span class="o">|</span> <span class="n">harold</span><span class="p">.</span><span class="n">gimenez</span><span class="o">@</span><span class="n">gmail</span><span class="p">.</span><span class="n">com</span>
+</div></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>The contents of the working table are now replaced by those of the
+intermediate table, and the intermediate table is emptied.</li>
+<li>Because the working table is not empty, steps 2 through 4 are repeated.</li>
+<li>When the working table is empty, return the query results</li>
+</ol>
+
+
+<p>Whether it&#8217;s for OLTP/application usage, or for ad-hoc reporting, Recursive
+CTEs can help optimize and simplify code required to get at the data you need.
+To learn more about other powerful operations that can be done with CTEs, see
+<a href="http://www.postgresql.org/docs/9.1/static/queries-with.html">the official postgres
+docs</a>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1118,87 +1301,6 @@ see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/09/06/new-domain-name/">New Domain Name, New Blog Engine</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-09-06T21:58:00-07:00" pubdate data-updated="true">Sep 6<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I haven&#8217;t touched my blog for a while. Part of it is that I just didn&#8217;t identify myself with &#8220;Awesomeful&#8221; any more. On the other hand, have I got a deal for you! Both awesomeful.net and awesomeful.org are for sale, so <a href="http://twitter.com/hgimenez">hit me up</a> if you&#8217;re interested - I&#8217;m talking to you mister <code>whois awesomeful.com</code>.</p>
-
-<p>Welcome to the new blog: <em>Practice Over Theory</em>. I hope that the new name and engine inspire me to post more often.</p>
-
-<p>Migrating was not a huge task at all. I decided to give octopress a try. It prescribes a <a href="http://octopress.org/docs/deploying/">really weird method</a> of deploying to github pages which involves cloning yourself into a subdirectory (!!), but now I have a pretty neat set up. It&#8217;s backed by jekyll and has a few nice addons, the most useful of which is it&#8217;s code highlighting theme which is based on Solarized.</p>
-
-<p>Speaking of code highlighting, let me show you a little rack app that redirects the old awesomeful.net posts to their new warm locations:</p>
-
-<figure class='code'> <div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-<span class='line'>4</span>
-<span class='line'>5</span>
-<span class='line'>6</span>
-<span class='line'>7</span>
-<span class='line'>8</span>
-<span class='line'>9</span>
-<span class='line'>10</span>
-<span class='line'>11</span>
-<span class='line'>12</span>
-<span class='line'>13</span>
-<span class='line'>14</span>
-<span class='line'>15</span>
-</pre></td><td class='code' width='100%'><pre><code class='ruby'><div class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
-</div><div class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
-</div><div class='line'>
-</div><div class='line'><span class="no">REDIRECTS</span> <span class="o">=</span> <span class="p">{</span>
-</div><div class='line'>              <span class="s1">&#39;awesomeful-post-1&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-1&#39;</span><span class="p">,</span>
-</div><div class='line'>              <span class="s1">&#39;awesomeful-post-2&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;new-location-2&#39;</span>
-</div><div class='line'>            <span class="p">}</span><span class="o">.</span><span class="n">freeze</span>
-</div><div class='line'>
-</div><div class='line'><span class="n">get</span> <span class="s1">&#39;/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">path</span><span class="o">|</span>
-</div><div class='line'>  <span class="n">one_year_in_seconds</span> <span class="o">=</span> <span class="mi">31536000</span>
-</div><div class='line'>  <span class="n">headers</span> <span class="s1">&#39;Cache-Control&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;public, max-age=</span><span class="si">#{</span><span class="n">one_year_in_seconds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</div><div class='line'>          <span class="s1">&#39;Expires&#39;</span>       <span class="o">=&gt;</span> <span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">+</span> <span class="n">one_year_in_seconds</span><span class="p">)</span><span class="o">.</span><span class="n">httpdate</span>
-</div><div class='line'>
-</div><div class='line'>  <span class="n">redirect</span> <span class="n">to</span><span class="p">(</span><span class="s2">&quot;http://practiceovertheory.com/</span><span class="si">#{</span><span class="no">REDIRECTS</span><span class="o">[</span><span class="n">path</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">301</span>
-</div><div class='line'><span class="k">end</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>Pretty neat, huh? The syntax highlighting, I mean.</p>
-
-<p>Regarding the above sinatra app, I just have a dictionary[1] mapping the old paths to the new ones, and respond with a <code>HTTP 301 Moved Permanently</code>. The interesting bit is the HTTP caching employed. Heroku&#8217;s (awesome) varnish servers will remember that response for one year. Try it <a href="http://awesomeful.net/posts/45-postgresql-rails-and-why-you-should-care">here</a>.</p>
-
-<p>[1] it&#8217;s a hash!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1279,6 +1381,10 @@ see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/12/recursive-query-is-recursive/">RECURSIVE Query is Recursive</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/07/06/distributed-locking-in-postgres/">Distributed locking in Postgres</a>
       </li>
     
@@ -1292,10 +1398,6 @@ see <code>ssh_config(5)</code> and <code>ssh(1)</code>, and happy pairing!</p>
     
       <li class="post">
         <a href="/blog/2012/02/05/boston-dot-io-recap/">Boston.io Recap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/01/27/ssh-tunnels-for-remote-pairing/">SSH Tunnels for Remote Pairing</a>
       </li>
     
   </ul>

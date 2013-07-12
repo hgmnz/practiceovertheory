@@ -1,0 +1,12 @@
+<div class="highlight"><pre> <span class="k">WITH</span> <span class="k">RECURSIVE</span> <span class="n">all_emails</span> <span class="k">AS</span> <span class="p">(</span>
+  <span class="k">SELECT</span>  <span class="n">old_email</span><span class="p">,</span> <span class="n">new_email</span>
+    <span class="k">FROM</span> <span class="n">audit_trail</span>
+    <span class="k">WHERE</span> <span class="n">old_email</span> <span class="o">=</span> <span class="s1">&#39;harold_gim@yahoo.com&#39;</span>
+  <span class="k">UNION</span>
+  <span class="k">SELECT</span> <span class="k">at</span><span class="p">.</span><span class="n">old_email</span><span class="p">,</span> <span class="k">at</span><span class="p">.</span><span class="n">new_email</span>
+    <span class="k">FROM</span> <span class="n">audit_trail</span> <span class="k">at</span>
+    <span class="k">JOIN</span> <span class="n">all_emails</span> <span class="n">a</span>
+      <span class="k">ON</span> <span class="p">(</span><span class="k">at</span><span class="p">.</span><span class="n">old_email</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">new_email</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">all_emails</span><span class="p">;</span>
+</pre></div>
