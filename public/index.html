@@ -197,11 +197,10 @@ standard is the law around here, so we live with it.</p>
 <li><code>all_emails</code> has two parts, the non-recursive and the recursive terms,
 which are separated by the <code>UNION</code> keyword. It could also be <code>UNION ALL</code>;
 the former removes dupes and the latter doesn&#8217;t. At this stage, the
-non-recursive term is executed and placed on a data structure called the <em>working table</em>.</li>
+non-recursive term is executed and placed on a data structure called the <em>working table</em>.
+The working table now contains one row:</li>
 </ol>
 
-
-<p>The working table now contains one row:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
 <span class='line'>2</span>
@@ -213,15 +212,11 @@ non-recursive term is executed and placed on a data structure called the <em>wor
 
 
 <p>The contents of the working table are appended to the result of the recursive
-query at this point.</p>
-
-<ol>
-<li>Then the recursive term is executed, where the self-reference is
-substituted with the contents of the <em>working table</em>, placing the result
+query at this point.
+3. Then the recursive term is executed, where the self-reference is
+   substituted with the contents of the <em>working table</em>, placing the result
 in another data structure called an <em>intermediate table</em>. Thus, the
-intermediate table looks like so:</li>
-</ol>
-
+intermediate table looks like so:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
 <span class='line'>2</span>
