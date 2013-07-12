@@ -191,35 +191,30 @@ standard is the law around here, so we live with it.</p>
 
 <ol>
 <li><code>SELECT * FROM all_emails;</code> invokes the <code>all_emails</code> CTE.</li>
-<li><code>all_emails</code> has two parts, the non-recursive and the recursive terms,
+<li><p><code>all_emails</code> has two parts, the non-recursive and the recursive terms,
 which are separated by the <code>UNION</code> keyword. It could also be <code>UNION ALL</code>;
 the former removes dupes and the latter doesn&#8217;t. At this stage, the
 non-recursive term is executed and placed on a data structure called the <em>working table</em>.
-The working table now contains one row:
-&#8220;`
+The working table now contains one row:</p>
 
-<pre><code>    old_email         |        new_email
+<pre><code>  old_email         |        new_email
+  --------------------------+--------------------------
+  harold_gim@yahoo.com     | hgimenez@hotmail.com
 </code></pre>
 
-<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;
- harold_gim@yahoo.com     | hgimenez@hotmail.com
-&#8220;`
-The contents of the working table are appended to the result of the recursive
+<p>The contents of the working table are appended to the result of the recursive
 query at this point.</p></li>
-<li>Then the recursive term is executed, where the self-reference is
+<li><p>Then the recursive term is executed, where the self-reference is
 substituted with the contents of the <em>working table</em>, placing the result
 in another data structure called an <em>intermediate table</em>. Thus, the
-intermediate table looks like so:
-&#8220;`
+intermediate table looks like so:</p>
 
 <pre><code>  old_email       |        new_email
-</code></pre>
-
-<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;-+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;
- hgimenez@hotmail.com | harold.gimenez@gmail.com
-&#8220;`</p></li>
-<li>The contents of the working table are now replaced by those of the
-intermediate table, and the intermediate table is emptied.</li>
+  ----------------------+--------------------------
+  hgimenez@hotmail.com | harold.gimenez@gmail.com
+</code></pre></li>
+<li><p>The contents of the working table are now replaced by those of the
+intermediate table, and the intermediate table is emptied.</p></li>
 <li>Because the working table is not empty, steps 2 through 4 are repeated.</li>
 <li>When the working table is empty, return the query results</li>
 </ol>
