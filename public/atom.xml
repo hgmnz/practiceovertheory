@@ -4,7 +4,7 @@
   <title><![CDATA[Practice Over Theory]]></title>
   <link href="http://practiceovertheory.com/atom.xml" rel="self"/>
   <link href="http://practiceovertheory.com/"/>
-  <updated>2013-07-12T08:32:00-07:00</updated>
+  <updated>2013-07-12T08:35:04-07:00</updated>
   <id>http://practiceovertheory.com/</id>
   <author>
     <name><![CDATA[Harold Giménez]]></name>
@@ -119,36 +119,29 @@ standard is the law around here, so we live with it.</p>
 which are separated by the <code>UNION</code> keyword. It could also be <code>UNION ALL</code>;
 the former removes dupes and the latter doesn&#8217;t. At this stage, the
 non-recursive term is executed and placed on a data structure called the <em>working table</em>.
-The working table now contains one row:</li>
-</ol>
+The working table now contains one row:
+&#8220;`
 
+<pre><code>    old_email         |        new_email
+</code></pre>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'>    <span class="n">old_email</span>         <span class="o">|</span>        <span class="n">new_email</span>
-</div><div class='line'><span class="c1">--------------------------+--------------------------</span>
-</div><div class='line'> <span class="n">harold_gim</span><span class="o">@</span><span class="n">yahoo</span><span class="p">.</span><span class="n">com</span>     <span class="o">|</span> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span>
-</div></code></pre></td></tr></table></div></figure>
-
-
-<p>The contents of the working table are appended to the result of the recursive
-query at this point.
-3. Then the recursive term is executed, where the self-reference is
-   substituted with the contents of the <em>working table</em>, placing the result
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;
+ harold_gim@yahoo.com     | hgimenez@hotmail.com
+&#8220;`
+The contents of the working table are appended to the result of the recursive
+query at this point.</p></li>
+<li>Then the recursive term is executed, where the self-reference is
+substituted with the contents of the <em>working table</em>, placing the result
 in another data structure called an <em>intermediate table</em>. Thus, the
-intermediate table looks like so:</p>
+intermediate table looks like so:
+&#8220;`
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table cellpadding="0" cellspacing="0"><tr><td class="gutter"><pre class="line-numbers"><span class='line'>1</span>
-<span class='line'>2</span>
-<span class='line'>3</span>
-</pre></td><td class='code' width='100%'><pre><code class='sql'><div class='line'>  <span class="n">old_email</span>       <span class="o">|</span>        <span class="n">new_email</span>
-</div><div class='line'><span class="c1">----------------------+--------------------------</span>
-</div><div class='line'> <span class="n">hgimenez</span><span class="o">@</span><span class="n">hotmail</span><span class="p">.</span><span class="n">com</span> <span class="o">|</span> <span class="n">harold</span><span class="p">.</span><span class="n">gimenez</span><span class="o">@</span><span class="n">gmail</span><span class="p">.</span><span class="n">com</span>
-</div></code></pre></td></tr></table></div></figure>
+<pre><code>  old_email       |        new_email
+</code></pre>
 
-
-<ol>
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;-+&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8211;
+ hgimenez@hotmail.com | harold.gimenez@gmail.com
+&#8220;`</p></li>
 <li>The contents of the working table are now replaced by those of the
 intermediate table, and the intermediate table is emptied.</li>
 <li>Because the working table is not empty, steps 2 through 4 are repeated.</li>

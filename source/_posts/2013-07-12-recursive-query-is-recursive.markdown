@@ -77,25 +77,25 @@ Breaking apart the above query, here's what happens:
 1. `SELECT * FROM all_emails;` invokes the `all_emails` CTE.
 2. `all_emails` has two parts, the non-recursive and the recursive terms,
    which are separated by the `UNION` keyword. It could also be `UNION ALL`;
-the former removes dupes and the latter doesn't. At this stage, the
-non-recursive term is executed and placed on a data structure called the _working table_.
-The working table now contains one row:
-```
-        old_email         |        new_email
---------------------------+--------------------------
- harold_gim@yahoo.com     | hgimenez@hotmail.com
-```
-The contents of the working table are appended to the result of the recursive
-query at this point.
+   the former removes dupes and the latter doesn't. At this stage, the
+   non-recursive term is executed and placed on a data structure called the _working table_.
+   The working table now contains one row:
+   ```
+           old_email         |        new_email
+   --------------------------+--------------------------
+    harold_gim@yahoo.com     | hgimenez@hotmail.com
+   ```
+   The contents of the working table are appended to the result of the recursive
+   query at this point.
 3. Then the recursive term is executed, where the self-reference is
    substituted with the contents of the _working table_, placing the result
-in another data structure called an _intermediate table_. Thus, the
-intermediate table looks like so:
-```
-      old_email       |        new_email
-----------------------+--------------------------
- hgimenez@hotmail.com | harold.gimenez@gmail.com
-```
+   in another data structure called an _intermediate table_. Thus, the
+   intermediate table looks like so:
+   ```
+         old_email       |        new_email
+   ----------------------+--------------------------
+    hgimenez@hotmail.com | harold.gimenez@gmail.com
+   ```
 4. The contents of the working table are now replaced by those of the
    intermediate table, and the intermediate table is emptied.
 5. Because the working table is not empty, steps 2 through 4 are repeated.
